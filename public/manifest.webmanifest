@@ -1,0 +1,13 @@
+{
+  "name": "ChainPepu – Das Universum aus Ketten",
+  "short_name": "ChainPepu",
+  "description": "Starte eine Kette, lass sie durch das Universum wachsen.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05040f",
+  "theme_color": "#05040f",
+  "lang": "de",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
