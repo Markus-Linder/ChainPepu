@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+:root {
+  --bg: #05040f;
+  --bg-2: #0d0b22;
+  --card: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #ecebff;
+  --muted: #9a97c2;
+  --accent: #7c5cff;
+  --accent-2: #ff5cc8;
+  --star: #ffd26b;
+}
+
+html, body { background: var(--bg); color: var(--text); }
+body {
+  min-height: 100dvh;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(124, 92, 255, 0.25), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(255, 92, 200, 0.18), transparent 60%),
+    var(--bg);
+}
+
+.stars-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: -1; opacity: 0.6;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 30% 70%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 55% 15%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 75% 45%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 90% 80%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 40% 90%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 65% 65%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 20% 50%, #fff 50%, transparent 51%);
+  background-size: 600px 600px;
+}
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; backdrop-filter: blur(6px); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .6rem 1.1rem; border-radius: 999px; font-weight: 600; font-size: .95rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white;
+  transition: transform .12s ease, filter .12s ease; cursor: pointer; border: 0;
+}
+.btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-ghost:hover { background: rgba(255,255,255,.06); }
+.input {
+  width: 100%; padding: .7rem .9rem; border-radius: .75rem; background: rgba(0,0,0,.35);
+  border: 1px solid var(--border); color: var(--text); outline: none;
+}
+.input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,92,255,.25); }
+.muted { color: var(--muted); }
+.glow { box-shadow: 0 0 40px var(--glow, rgba(124,92,255,.35)); }
+.chain-line { stroke-linecap: round; }
+@keyframes pulse { 0%,100% { opacity: .55 } 50% { opacity: 1 } }
+.pulse { animation: pulse 2.4s ease-in-out infinite; }
+@keyframes spin-slow { to { transform: rotate(360deg) } }
+.spin-slow { animation: spin-slow 40s linear infinite; transform-origin: center; }
