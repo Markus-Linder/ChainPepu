@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
-import { ensureDailyChain, getConstellationEdges, getMapEdges, getPayoutSettings, getStats, listChains, listInviteLeaders, listLiveDuels, listProfiles, listTopics } from "@/lib/api";
+import { ensureDailyChain, getConstellationEdges, getMapEdges, getPayoutSettings, getStats, getWeekPool, listChains, listInviteLeaders, listLiveDuels, listProfiles, listTopics, listWeekLeaders, secondsUntilWeekEnd, settleWeek } from "@/lib/api";
 import { Planet } from "@/components/Planet";
 import { DuelCard } from "@/components/Duel";
 import { displayTitle, secondsUntilMidnightUtc, themeForDay, todayKey } from "@/lib/events";
@@ -16,8 +16,9 @@ export default function Home() {
   const { profile, loading: authLoading } = useAuth();
   const { data, loading } = useAsync(async () => {
     await ensureDailyChain().catch(() => {});
-    const [users, chains, topics, edges, stats, settings, duels, orbits, leaders] = await Promise.all([listProfiles(), listChains("hot", 200), listTopics(6), getMapEdges(), getStats(), getPayoutSettings(), listLiveDuels(4).catch(() => []), getConstellationEdges(), listInviteLeaders(5).catch(() => [])]);
-    return { users, chains, topics, edges, stats, settings, duels, orbits, leaders };
+    await settleWeek().catch(() => {});
+    const [users, chains, topics, edges, stats, settings, duels, orbits, leaders, week, pool] = await Promise.all([listProfiles(), listChains("hot", 200), listTopics(6), getMapEdges(), getStats(), getPayoutSettings(), listLiveDuels(4).catch(() => []), getConstellationEdges(), listInviteLeaders(5).catch(() => []), listWeekLeaders(3).catch(() => []), getWeekPool().catch(() => 0)]);
+    return { users, chains, topics, edges, stats, settings, duels, orbits, leaders, week, pool };
   }, []);
 
   const linkCount = new Map<string, number>();
@@ -71,6 +72,31 @@ export default function Home() {
           edges={data.edges}
           orbits={data.orbits}
         />
+      )}
+
+      {data && (
+        <section className="card card-glow grid gap-4 p-5 sm:grid-cols-[auto_1fr] sm:items-center">
+          <div className="text-center sm:pr-6">
+            <p className="kicker" style={{ color: "var(--star)" }}>{t("weekly_title")}</p>
+            <p className="text-4xl font-bold" style={{ color: "var(--star)" }}>★ {data.pool}</p>
+            <p className="muted text-xs">{t("weekly_pool")} · {t("ends_in")} <Countdown seconds={secondsUntilWeekEnd()} /></p>
+          </div>
+          <div>
+            <p className="muted mb-2 text-sm">{t("weekly_text")}</p>
+            {data.week.length === 0 ? <p className="muted text-xs">{t("nothing_here")}</p> : (
+              <ol className="space-y-1 text-sm">
+                {data.week.map((c, i) => (
+                  <li key={c.id} className="flex items-center gap-2">
+                    <span className="muted w-4 text-xs">{i + 1}</span>
+                    <Link to={`/c/${c.id}`} className="min-w-0 flex-1 truncate font-semibold hover:underline">{displayTitle(c, lang)}</Link>
+                    <span className="muted text-xs">{c.origin_display_name}</span>
+                    <span className="font-semibold">{t("duel_points", { n: c.week_points })}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        </section>
       )}
 
       {data && data.leaders.length > 0 && (

@@ -392,6 +392,24 @@ const es: Record<string, string> = {
   branch_title: "Ramificar una nueva cadena",
   branches_title: "Cadenas que se ramificaron aquí",
   notif_invite_milestone: "Hito: {stars} planetas invitados. ¡Estrellas de bonus añadidas!",
+
+  nav_stream: "Flujo",
+  stream_empty: "Aún no hay nada en el flujo. Inicia la primera cadena.",
+  stream_star: "★ 10",
+  stream_sent: "10 estrellas enviadas. ¡Gracias!",
+  level_short: "Nv {n}",
+  streak_days: "{n} día seguido|{n} días seguidos",
+  level_progress: "{n} XP para el siguiente nivel",
+  weekly_title: "Reto semanal",
+  weekly_text: "La cadena con más eslabones y estrellas de esta semana gana el bote. Se llena con la parte de la plataforma, así que cada estrella del universo lo hace crecer.",
+  weekly_pool: "Bote",
+  notif_weekly_won: "Reto semanal ganado con «{title}». {stars} estrellas del bote son tuyas.",
+  push_text: "Recibe un aviso en tu móvil por estrellas, respuestas, duelos y cadenas nuevas.",
+  push_enable: "Activar",
+  push_disable: "Desactivar",
+  push_enabled: "Las notificaciones push están activadas.",
+  push_denied: "Tu navegador bloqueó las notificaciones. Permítelas en los ajustes del sitio.",
+  push_unsupported: "Las notificaciones push aún no están disponibles aquí.",
 };
 
 export default es;

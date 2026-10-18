@@ -392,6 +392,24 @@ const pt: Record<string, string> = {
   branch_title: "Ramificar uma nova corrente",
   branches_title: "Correntes que ramificaram daqui",
   notif_invite_milestone: "Marco: {stars} planetas convidados. Estrelas de bônus adicionadas!",
+
+  nav_stream: "Fluxo",
+  stream_empty: "Ainda não há nada no fluxo. Comece a primeira corrente.",
+  stream_star: "★ 10",
+  stream_sent: "10 estrelas enviadas. Obrigado!",
+  level_short: "Nv {n}",
+  streak_days: "{n} dia seguido|{n} dias seguidos",
+  level_progress: "{n} XP até o próximo nível",
+  weekly_title: "Desafio da semana",
+  weekly_text: "A corrente com mais elos e estrelas nesta semana ganha o prêmio. Ele é abastecido pela parte da plataforma, então cada estrela do universo faz ele crescer.",
+  weekly_pool: "Prêmio acumulado",
+  notif_weekly_won: "Desafio da semana vencido com “{title}”. {stars} estrelas do prêmio são suas.",
+  push_text: "Receba um aviso no celular para estrelas, respostas, duelos e novas correntes.",
+  push_enable: "Ativar",
+  push_disable: "Desativar",
+  push_enabled: "As notificações push estão ativadas.",
+  push_denied: "Seu navegador bloqueou as notificações. Permita nas configurações do site.",
+  push_unsupported: "Notificações push ainda não estão disponíveis aqui.",
 };
 
 export default pt;

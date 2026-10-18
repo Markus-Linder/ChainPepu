@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { getCreatorStats, getPayoutSettings, getProfileByUsername, listChainsByOrigin, listChainsJoined, listDuelsForUser, listLinksByUser, listPayouts } from "@/lib/api";
 import { DuelCard } from "@/components/Duel";
 import { displayTitle } from "@/lib/events";
+import { xpForLevel } from "@/lib/planet";
 import { useT } from "@/lib/i18n";
 import { useAsync, Loading } from "@/lib/useAsync";
 import { Planet } from "@/components/Planet";
@@ -46,10 +47,20 @@ export default function PlanetPage() {
   return (
     <div className="space-y-8">
       <section className="card card-glow flex flex-col items-center gap-6 p-8 sm:flex-row sm:items-start">
-        <Planet seed={user.planet_seed} skin={user.planet_skin} size={160} title={user.display_name} />
+        <Planet seed={user.planet_seed} skin={user.planet_skin} level={user.level} size={160} title={user.display_name} />
         <div className="flex-1 text-center sm:text-left">
           <h1 className="text-3xl font-bold">{user.display_name}</h1>
           <p className="muted">@{user.username} · {t("skin")} {t(`skin_${user.planet_skin}`)}</p>
+          <div className="mx-auto mt-3 max-w-sm sm:mx-0">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold">{t("level_short", { n: user.level ?? 1 })}</span>
+              {user.streak_days > 0 && <span style={{ color: "var(--star)" }}><Icon name="bolt" size={12} filled /> {t("streak_days", { n: user.streak_days })}</span>}
+              <span className="muted">{t("level_progress", { n: Math.max(0, xpForLevel((user.level ?? 1) + 1) - (user.xp ?? 0)) })}</span>
+            </div>
+            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+              <div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.round(((user.xp ?? 0) - xpForLevel(user.level ?? 1)) / Math.max(1, xpForLevel((user.level ?? 1) + 1) - xpForLevel(user.level ?? 1)) * 100))}%`, background: "linear-gradient(90deg, var(--accent), var(--accent-2))" }} />
+            </div>
+          </div>
           <div className="mt-4 grid grid-cols-3 gap-4 text-center sm:grid-cols-5">
             <Stat n={creator.follower_count} label={t("stat_followers")} />
             <Stat n={started.length} label={t("stat_chains_started")} />

@@ -28,7 +28,7 @@ export function LinkItem({ link, isOrigin, replies = [], onChanged }: { link: Li
     <li className="relative pl-14">
       <span className="absolute left-5 top-7 h-[calc(100%+1rem)] w-0.5 bg-white/10" aria-hidden />
       <Link to={`/p/${p.username}`} className="absolute left-0 top-0">
-        <Planet seed={p.planet_seed} skin={p.planet_skin} size={42} title={p.display_name} />
+        <Planet seed={p.planet_seed} skin={p.planet_skin} level={p.level} size={42} title={p.display_name} />
       </Link>
       <div className={`card p-4 ${hidden ? "opacity-70" : ""}`} style={{ borderLeft: `4px solid ${link.color}` }}>
         <div className="mb-1 flex flex-wrap items-center gap-2 text-xs">

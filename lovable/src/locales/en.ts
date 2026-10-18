@@ -412,6 +412,25 @@ const en: Record<string, string> = {
   branch_title: "Branch off a new chain",
   branches_title: "Chains that branched off here",
   notif_invite_milestone: "Milestone: {stars} planets invited. Bonus stars added!",
+
+  // Sog: stream, planet growth, weekly challenge, push
+  nav_stream: "Stream",
+  stream_empty: "Nothing in the stream yet. Start the first chain.",
+  stream_star: "★ 10",
+  stream_sent: "10 stars sent. Thank you!",
+  level_short: "Lv {n}",
+  streak_days: "{n} day streak|{n} days streak",
+  level_progress: "{n} XP to the next level",
+  weekly_title: "Weekly challenge",
+  weekly_text: "The chain with the most links and stars this week wins the prize pool. It is filled from the platform share, so every star in the universe grows it.",
+  weekly_pool: "Prize pool",
+  notif_weekly_won: "Weekly challenge won with “{title}”. {stars} stars from the pool are yours.",
+  push_text: "Get a message on your phone for stars, replies, duels and new chains.",
+  push_enable: "Turn on",
+  push_disable: "Turn off",
+  push_enabled: "Push notifications are on.",
+  push_denied: "Your browser blocked notifications. Allow them in the site settings.",
+  push_unsupported: "Push notifications are not available here yet.",
 };
 
 export default en;

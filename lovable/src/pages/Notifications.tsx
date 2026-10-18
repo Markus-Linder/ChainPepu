@@ -6,6 +6,30 @@ import { useT } from "@/lib/i18n";
 import { useAsync, Loading } from "@/lib/useAsync";
 import { Icon, type IconName } from "@/components/Icons";
 import type { Notification } from "@/lib/types";
+import { useState } from "react";
+import { disablePush, enablePush, isPushEnabled, pushSupported } from "@/lib/push";
+
+function PushToggle({ userId }: { userId: string }) {
+  const { t } = useT();
+  const [on, setOn] = useState<boolean | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  useEffect(() => { isPushEnabled().then(setOn); }, []);
+  if (!pushSupported()) return <p className="muted text-xs">{t("push_unsupported")}</p>;
+  const toggle = async () => {
+    setMsg(null);
+    if (on) { await disablePush(); setOn(false); return; }
+    const r = await enablePush(userId);
+    if (r === "ok") { setOn(true); setMsg(t("push_enabled")); } else if (r === "denied") setMsg(t("push_denied"));
+  };
+  return (
+    <div className="card flex flex-wrap items-center gap-3 p-3 text-sm">
+      <Icon name="bell" size={18} />
+      <span className="flex-1">{on ? t("push_enabled") : t("push_text")}</span>
+      <button className={`btn text-xs ${on ? "btn-ghost" : ""}`} onClick={toggle} disabled={on === null}>{on ? t("push_disable") : t("push_enable")}</button>
+      {msg && <span className="muted w-full text-xs">{msg}</span>}
+    </div>
+  );
+}
 
 const ICON: Record<string, IconName> = { neue_kette: "chain", spende: "star", neuer_follower: "users", glied: "spark", moderation: "shield", antwort: "reply", duell: "swords" };
 const KEY: Record<string, string> = {
@@ -13,6 +37,7 @@ const KEY: Record<string, string> = {
   reported: "notif_reported", blocked: "notif_blocked", auto_blocked: "notif_auto_blocked", approved: "notif_approved",
   duel_challenge: "notif_duel_challenge", duel_accepted: "notif_duel_accepted", duel_declined: "notif_duel_declined",
   duel_won: "notif_duel_won", duel_lost: "notif_duel_lost", duel_draw: "notif_duel_draw", invite_milestone: "notif_invite_milestone",
+  weekly_won: "notif_weekly_won",
 };
 
 export default function Notifications() {
@@ -30,6 +55,7 @@ export default function Notifications() {
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <h1 className="text-2xl font-bold">{t("notif_title")}</h1>
+      <PushToggle userId={profile.id} />
       {loading ? <Loading /> : data && data.length === 0 ? <p className="muted">{t("notif_empty")}</p> : (
         <ul className="space-y-2">
           {data?.map((n) => (

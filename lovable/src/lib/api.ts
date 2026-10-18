@@ -3,7 +3,7 @@
  * Schreiben läuft über Datenbank-Funktionen (RPC), die selbst prüfen.
  */
 import { supabase } from "@/integrations/supabase/client";
-import type { ChainStats, CreatorStats, Donation, Duel, DuelEvent, DuelView, Invite, InviteLeader, LinkRow, MapEdge, Notification, Payout, Profile, Reply, ReportedLink, Verdict } from "./types";
+import type { ChainStats, CreatorStats, Donation, Duel, DuelEvent, DuelView, Invite, InviteLeader, LinkRow, MapEdge, Notification, Payout, Profile, Reply, ReportedLink, Verdict, WeekLeader, WeeklyChallenge } from "./types";
 import { themeForDay, todayKey } from "./events";
 
 function fail(error: { message: string } | null): never {
@@ -86,7 +86,7 @@ export async function startChain(input: MediaFields & { title: string; text: str
 }
 
 /* ---------- Glieder ---------- */
-const PROFILE_SELECT = "profiles(username, display_name, planet_seed, planet_skin)";
+const PROFILE_SELECT = "profiles(username, display_name, planet_seed, planet_skin, level)";
 const LINK_SELECT = `*, ${PROFILE_SELECT}`;
 export async function getLinks(chainId: number): Promise<LinkRow[]> {
   const { data, error } = await supabase.from("links").select(LINK_SELECT).eq("chain_id", chainId).order("position");
@@ -105,6 +105,15 @@ export async function addLink(input: MediaFields & { chain_id: number; text: str
   });
   if (error) fail(error);
   return data as number;
+}
+/** The stream: newest visible links across the universe, one screen each. */
+export async function listStream(before: string | null, limit = 10): Promise<LinkRow[]> {
+  let q = supabase.from("links").select(`${LINK_SELECT}, chains(title, daily_day, origin_user_id, donated_stars, is_topic)`)
+    .eq("status", "sichtbar").order("created_at", { ascending: false }).limit(limit);
+  if (before) q = q.lt("created_at", before);
+  const { data, error } = await q;
+  if (error) fail(error);
+  return data as unknown as LinkRow[];
 }
 export async function getLink(id: number): Promise<LinkRow | null> {
   const { data } = await supabase.from("links").select(`${LINK_SELECT}, chains(title, daily_day)`).eq("id", id).maybeSingle();
@@ -339,6 +348,30 @@ export async function moderateLink(linkId: number, status: "sichtbar" | "gesperr
 export async function acceptRules() {
   const { error } = await supabase.rpc("accept_rules");
   if (error) fail(error);
+}
+
+/* ---------- Wochen-Challenge ---------- */
+export async function listWeekLeaders(limit = 5): Promise<WeekLeader[]> {
+  const { data, error } = await supabase.from("week_leaderboard").select("*").order("week_points", { ascending: false }).limit(limit);
+  if (error) fail(error);
+  return data as WeekLeader[];
+}
+export async function getWeekPool(): Promise<number> {
+  const { data } = await supabase.rpc("week_pool");
+  return Number(data ?? 0);
+}
+export async function settleWeek() {
+  await supabase.rpc("settle_week");
+}
+export async function listWeeklyWinners(limit = 5): Promise<WeeklyChallenge[]> {
+  const { data } = await supabase.from("weekly_challenges").select("*").order("week_start", { ascending: false }).limit(limit);
+  return (data ?? []) as WeeklyChallenge[];
+}
+/** Seconds until the current week (UTC, Monday start) ends. */
+export function secondsUntilWeekEnd(now = new Date()): number {
+  const day = (now.getUTCDay() + 6) % 7; // Monday = 0
+  const end = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - day + 7);
+  return Math.max(0, Math.floor((end - now.getTime()) / 1000));
 }
 
 /* ---------- Ketten-Duell ---------- */

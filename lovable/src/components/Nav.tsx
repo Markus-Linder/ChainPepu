@@ -8,6 +8,7 @@ import { Icon, Logo, type IconName } from "./Icons";
 
 const ITEMS: { to: string; key: string; icon: IconName }[] = [
   { to: "/", key: "nav_universe", icon: "globe" },
+  { to: "/stream", key: "nav_stream", icon: "play" },
   { to: "/today", key: "nav_today", icon: "sun" },
   { to: "/chains", key: "nav_chains", icon: "chain" },
   { to: "/shop", key: "nav_shop", icon: "star" },
@@ -35,8 +36,11 @@ export function Nav() {
                 <span style={{ color: "var(--star)" }}><Icon name="star" size={15} filled /></span> {profile.stars}
               </Link>
               <Link to={`/p/${profile.username}`} className="flex items-center gap-2" title={t("nav_your_planet")}>
-                <Planet seed={profile.planet_seed} skin={profile.planet_skin} size={34} />
-                <span className="hidden text-sm sm:inline">{profile.display_name}</span>
+                <Planet seed={profile.planet_seed} skin={profile.planet_skin} level={profile.level} size={34} />
+                <span className="hidden flex-col leading-tight sm:flex">
+                  <span className="text-sm">{profile.display_name}</span>
+                  <span className="muted text-[10px]">{t("level_short", { n: profile.level ?? 1 })}{profile.streak_days > 1 && <> · <Icon name="bolt" size={10} filled className="text-[#f2c46d]" />{profile.streak_days}</>}</span>
+                </span>
               </Link>
               <button className="btn btn-ghost hidden text-xs sm:inline-flex" onClick={() => supabase.auth.signOut()}>{t("nav_logout")}</button>
             </>

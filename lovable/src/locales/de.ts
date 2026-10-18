@@ -392,6 +392,24 @@ const de: Record<string, string> = {
   branch_title: "Eine neue Kette abzweigen",
   branches_title: "Ketten, die hier abgezweigt sind",
   notif_invite_milestone: "Meilenstein: {stars} Planeten eingeladen. Bonus-Sterne gutgeschrieben!",
+
+  nav_stream: "Strom",
+  stream_empty: "Noch nichts im Strom. Starte die erste Kette.",
+  stream_star: "★ 10",
+  stream_sent: "10 Sterne geschickt. Danke!",
+  level_short: "Lv {n}",
+  streak_days: "{n} Tag in Folge|{n} Tage in Folge",
+  level_progress: "{n} XP bis zum nächsten Level",
+  weekly_title: "Wochen-Challenge",
+  weekly_text: "Die Kette mit den meisten Gliedern und Sternen dieser Woche gewinnt den Preis-Topf. Er füllt sich aus dem Plattform-Anteil, jeder Stern im Universum lässt ihn wachsen.",
+  weekly_pool: "Preis-Topf",
+  notif_weekly_won: "Wochen-Challenge mit „{title}“ gewonnen. {stars} Sterne aus dem Topf sind deine.",
+  push_text: "Bekomme eine Nachricht aufs Handy bei Sternen, Antworten, Duellen und neuen Ketten.",
+  push_enable: "Einschalten",
+  push_disable: "Ausschalten",
+  push_enabled: "Push-Mitteilungen sind an.",
+  push_denied: "Dein Browser blockiert Mitteilungen. Erlaube sie in den Website-Einstellungen.",
+  push_unsupported: "Push-Mitteilungen sind hier noch nicht verfügbar.",
 };
 
 export default de;

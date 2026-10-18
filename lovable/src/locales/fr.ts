@@ -392,6 +392,24 @@ const fr: Record<string, string> = {
   branch_title: "Bifurquer une nouvelle chaîne",
   branches_title: "Chaînes qui ont bifurqué ici",
   notif_invite_milestone: "Palier : {stars} planètes invitées. Étoiles bonus ajoutées !",
+
+  nav_stream: "Flux",
+  stream_empty: "Rien dans le flux pour l'instant. Lance la première chaîne.",
+  stream_star: "★ 10",
+  stream_sent: "10 étoiles envoyées. Merci !",
+  level_short: "Niv {n}",
+  streak_days: "{n} jour d'affilée|{n} jours d'affilée",
+  level_progress: "{n} XP avant le niveau suivant",
+  weekly_title: "Défi de la semaine",
+  weekly_text: "La chaîne avec le plus de maillons et d'étoiles cette semaine remporte la cagnotte. Elle est alimentée par la part de la plateforme : chaque étoile de l'univers la fait grossir.",
+  weekly_pool: "Cagnotte",
+  notif_weekly_won: "Défi de la semaine remporté avec « {title} ». {stars} étoiles de la cagnotte sont à toi.",
+  push_text: "Reçois un message sur ton téléphone pour les étoiles, réponses, duels et nouvelles chaînes.",
+  push_enable: "Activer",
+  push_disable: "Désactiver",
+  push_enabled: "Les notifications push sont activées.",
+  push_denied: "Ton navigateur bloque les notifications. Autorise-les dans les réglages du site.",
+  push_unsupported: "Les notifications push ne sont pas encore disponibles ici.",
 };
 
 export default fr;

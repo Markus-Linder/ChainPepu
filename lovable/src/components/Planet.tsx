@@ -1,11 +1,11 @@
 import { planetLook, skinColors } from "@/lib/planet";
 
-/** Ein Planet als SVG. Größe in Pixeln. */
-export function Planet({ seed, skin = "standard", size = 96, title }: { seed: number; skin?: string; size?: number; title?: string }) {
-  const look = planetLook(seed, skin);
+/** A planet as SVG. Size in pixels. Level makes it bigger and adds rings, moons and glow. */
+export function Planet({ seed, skin = "standard", level = 1, size = 96, title }: { seed: number; skin?: string; level?: number; size?: number; title?: string }) {
+  const look = planetLook(seed, skin, level);
   const { a, b } = skinColors(look);
   const r = 40 * look.size;
-  const id = `g${seed}-${skin}`;
+  const id = `g${seed}-${skin}-${look.level}`;
   return (
     <svg width={size} height={size} viewBox="0 0 120 120" role="img" aria-label={title ?? "Planet"} style={{ filter: `drop-shadow(0 0 ${size / 6}px ${look.glow})` }}>
       <defs>

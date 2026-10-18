@@ -8,6 +8,10 @@ export type Profile = {
   earned_stars: number;
   is_moderator: boolean;
   duel_wins: number;
+  xp: number;
+  level: number;
+  streak_days: number;
+  last_active_day: string | null;
   invited_by: string | null;
   accepted_rules_at: string | null;
   created_at: string;
@@ -54,9 +58,12 @@ export type LinkRow = {
   moderation_note: string | null;
   report_count: number;
   created_at: string;
-  profiles: Pick<Profile, "username" | "display_name" | "planet_seed" | "planet_skin">;
-  chains?: { title: string; daily_day?: string | null };
+  profiles: Pick<Profile, "username" | "display_name" | "planet_seed" | "planet_skin"> & { level?: number };
+  chains?: { title: string; daily_day?: string | null; origin_user_id?: string | null; origin_display_name?: string | null; donated_stars?: number; is_topic?: boolean };
 };
+
+export type WeekLeader = ChainStats & { week_points: number };
+export type WeeklyChallenge = { week_start: string; pool_stars: number; winner_chain: number | null; winner_user: string | null; settled_at: string };
 
 export type Reply = {
   id: number;
@@ -67,7 +74,7 @@ export type Reply = {
   status: ContentStatus;
   moderation_note: string | null;
   created_at: string;
-  profiles: Pick<Profile, "username" | "display_name" | "planet_seed" | "planet_skin">;
+  profiles: Pick<Profile, "username" | "display_name" | "planet_seed" | "planet_skin"> & { level?: number };
 };
 
 export type Invite = {
