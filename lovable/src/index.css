@@ -2,31 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-
+/* ---------- Brand ----------
+   Obsidian background, violet → magenta energy, champagne gold for stars, ice for information.
+   Display font: Space Grotesk. Body: Inter. */
 :root {
-  --bg: #05040f;
-  --bg-2: #0d0b22;
-  --card: rgba(255, 255, 255, 0.04);
-  --border: rgba(255, 255, 255, 0.1);
-  --text: #ecebff;
-  --muted: #9a97c2;
-  --accent: #7c5cff;
-  --accent-2: #ff5cc8;
-  --star: #ffd26b;
+  --bg: #06050d;
+  --bg-2: #0c0a1d;
+  --card: rgba(255, 255, 255, 0.035);
+  --border: rgba(255, 255, 255, 0.09);
+  --text: #f1efff;
+  --muted: #9b97c4;
+  --accent: #7b61ff;
+  --accent-2: #ff3d9a;
+  --star: #f2c46d;
+  --ice: #8fd3ff;
+  --radius: 1.25rem;
 }
 
 html, body { background: var(--bg); color: var(--text); }
 body {
   min-height: 100dvh;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-feature-settings: "ss01", "cv11";
   background:
-    radial-gradient(1200px 600px at 20% -10%, rgba(124, 92, 255, 0.25), transparent 60%),
-    radial-gradient(900px 500px at 90% 10%, rgba(255, 92, 200, 0.18), transparent 60%),
+    radial-gradient(1200px 600px at 15% -10%, rgba(123, 97, 255, 0.22), transparent 60%),
+    radial-gradient(900px 500px at 95% 5%, rgba(255, 61, 154, 0.14), transparent 60%),
     var(--bg);
 }
+h1, h2, h3, .font-display { font-family: "Space Grotesk", "Inter", system-ui, sans-serif; letter-spacing: -0.02em; }
 
 .stars-bg {
-  position: fixed; inset: 0; pointer-events: none; z-index: -1; opacity: 0.6;
+  position: fixed; inset: 0; pointer-events: none; z-index: -1; opacity: 0.55;
   background-image:
     radial-gradient(1px 1px at 10% 20%, #fff 50%, transparent 51%),
     radial-gradient(1px 1px at 30% 70%, #fff 50%, transparent 51%),
@@ -36,29 +42,55 @@ body {
     radial-gradient(1.5px 1.5px at 40% 90%, #fff 50%, transparent 51%),
     radial-gradient(1px 1px at 65% 65%, #fff 50%, transparent 51%),
     radial-gradient(1px 1px at 20% 50%, #fff 50%, transparent 51%);
-  background-size: 600px 600px;
+  background-size: 700px 700px;
 }
 
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; backdrop-filter: blur(6px); }
+@layer components {
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); backdrop-filter: blur(8px); }
+.card-glow { position: relative; }
+.card-glow::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(135deg, rgba(123,97,255,.6), rgba(255,61,154,.35), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+}
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
-  padding: .6rem 1.1rem; border-radius: 999px; font-weight: 600; font-size: .95rem;
+  padding: .65rem 1.2rem; border-radius: 999px; font-weight: 600; font-size: .95rem;
   background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white;
-  transition: transform .12s ease, filter .12s ease; cursor: pointer; border: 0;
+  box-shadow: 0 8px 30px rgba(123,97,255,.25), inset 0 1px 0 rgba(255,255,255,.18);
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease; cursor: pointer; border: 0;
 }
-.btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.btn:hover { transform: translateY(-1px); filter: brightness(1.08); box-shadow: 0 10px 36px rgba(255,61,154,.3), inset 0 1px 0 rgba(255,255,255,.18); }
 .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
-.btn-ghost:hover { background: rgba(255,255,255,.06); }
+.btn-ghost { background: rgba(255,255,255,.04); border: 1px solid var(--border); color: var(--text); box-shadow: none; }
+.btn-ghost:hover { background: rgba(255,255,255,.08); box-shadow: none; }
+.btn-gold { background: linear-gradient(135deg, #f2c46d, #d99a3a); color: #1a1205; box-shadow: 0 8px 30px rgba(242,196,109,.25); }
 .input {
-  width: 100%; padding: .7rem .9rem; border-radius: .75rem; background: rgba(0,0,0,.35);
+  width: 100%; padding: .75rem .95rem; border-radius: .9rem; background: rgba(0,0,0,.35);
   border: 1px solid var(--border); color: var(--text); outline: none;
 }
-.input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,92,255,.25); }
+.input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(123,97,255,.25); }
 .muted { color: var(--muted); }
-.glow { box-shadow: 0 0 40px var(--glow, rgba(124,92,255,.35)); }
+.kicker { font-size: .7rem; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+.text-gradient { background-image: linear-gradient(90deg, #a08cff, #ff3d9a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.glow { box-shadow: 0 0 40px var(--glow, rgba(123,97,255,.35)); }
+.map-frame { border: 1px solid var(--border); background: radial-gradient(800px 500px at 50% 50%, rgba(123,97,255,.08), rgba(0,0,0,.5)); }
+.hero {
+  position: relative; overflow: hidden; border-radius: 2rem; border: 1px solid var(--border);
+  background:
+    radial-gradient(60% 80% at 20% 10%, rgba(123,97,255,.35), transparent 60%),
+    radial-gradient(50% 60% at 85% 20%, rgba(255,61,154,.25), transparent 60%),
+    radial-gradient(40% 40% at 60% 100%, rgba(242,196,109,.12), transparent 60%),
+    #0a0818;
+}
+.hero-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; mix-blend-mode: screen; pointer-events: none; }
+}
 .chain-line { stroke-linecap: round; }
 @keyframes pulse { 0%,100% { opacity: .55 } 50% { opacity: 1 } }
 .pulse { animation: pulse 2.4s ease-in-out infinite; }
 @keyframes spin-slow { to { transform: rotate(360deg) } }
 .spin-slow { animation: spin-slow 40s linear infinite; transform-origin: center; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+.rise { animation: rise .5s ease both; }
+.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }

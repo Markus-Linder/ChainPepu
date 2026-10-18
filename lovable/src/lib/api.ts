@@ -3,11 +3,11 @@
  * Schreiben läuft über Datenbank-Funktionen (RPC), die selbst prüfen.
  */
 import { supabase } from "@/integrations/supabase/client";
-import type { ChainStats, CreatorStats, Donation, Invite, LinkRow, MapEdge, Notification, Payout, Profile, ReportedLink } from "./types";
+import type { ChainStats, CreatorStats, Donation, Invite, LinkRow, MapEdge, Notification, Payout, Profile, Reply, ReportedLink, Verdict } from "./types";
 import { themeForDay, todayKey } from "./events";
 
 function fail(error: { message: string } | null): never {
-  throw new Error(error?.message || "Unbekannter Fehler");
+  throw new Error(error?.message || "err_unknown");
 }
 
 /* ---------- Profile ---------- */
@@ -32,8 +32,16 @@ export async function listChains(order: "hot" | "new" = "hot", limit = 60): Prom
   const { data, error } = await q;
   if (error) fail(error);
   const rows = data as ChainStats[];
-  if (order === "hot") rows.sort((a, b) => b.link_count + b.boost * 3 - (a.link_count + a.boost * 3));
+  if (order === "hot") rows.sort((a, b) => heat(b) - heat(a));
   return rows;
+}
+export const heat = (c: ChainStats) => c.link_count + c.boost * 3 + c.donated_stars / 10 + c.reply_count / 2;
+
+export async function listTopics(limit = 12): Promise<ChainStats[]> {
+  const { data, error } = await supabase.from("chain_stats").select("*").eq("is_topic", true)
+    .gt("ends_at", new Date().toISOString()).order("ends_at").limit(limit);
+  if (error) fail(error);
+  return data as ChainStats[];
 }
 export async function getChain(id: number): Promise<ChainStats | null> {
   const { data } = await supabase.from("chain_stats").select("*").eq("id", id).maybeSingle();
@@ -52,43 +60,117 @@ export async function listChainsJoined(userId: string): Promise<ChainStats[]> {
   if (error) fail(error);
   return (data as ChainStats[]).filter((c) => c.origin_user_id !== userId);
 }
-export async function startChain(input: { title: string; text: string; image_url: string | null; color: string }): Promise<number> {
-  return startChainWithMedia({ ...input, video_url: null });
-}
 export async function boostChain(chainId: number) {
   const { error } = await supabase.rpc("boost_chain", { p_chain_id: chainId });
   if (error) fail(error);
 }
+/** Die Tages-Kette wird mit dem englischen Thema gespeichert; angezeigt wird sie in der Sprache des Nutzers. */
 export async function ensureDailyChain(): Promise<number> {
-  const { data, error } = await supabase.rpc("ensure_daily_chain", { p_title: themeForDay(todayKey()) });
+  const { data, error } = await supabase.rpc("ensure_daily_chain", { p_title: themeForDay(todayKey(), "en") });
   if (error) fail(error);
   return data as number;
 }
 
+export type MediaFields = { image_url: string | null; video_url: string | null; video_frames: string[] | null };
+
+export async function startChain(input: MediaFields & { title: string; text: string; color: string; description?: string; is_topic?: boolean; days?: number }): Promise<{ chainId: number; linkId: number }> {
+  const { data, error } = await supabase.rpc("start_chain", {
+    p_title: input.title, p_text: input.text, p_image_url: input.image_url ?? "", p_color: input.color,
+    p_video_url: input.video_url ?? "", p_video_frames: input.video_frames, p_description: input.description ?? "",
+    p_is_topic: Boolean(input.is_topic), p_days: input.days ?? 3,
+  });
+  if (error) fail(error);
+  const chainId = data as number;
+  const { data: first } = await supabase.from("links").select("id").eq("chain_id", chainId).eq("position", 1).maybeSingle();
+  return { chainId, linkId: (first as { id: number } | null)?.id ?? 0 };
+}
+
 /* ---------- Glieder ---------- */
-const LINK_SELECT = "*, profiles(username, display_name, planet_seed, planet_skin)";
+const PROFILE_SELECT = "profiles(username, display_name, planet_seed, planet_skin)";
+const LINK_SELECT = `*, ${PROFILE_SELECT}`;
 export async function getLinks(chainId: number): Promise<LinkRow[]> {
   const { data, error } = await supabase.from("links").select(LINK_SELECT).eq("chain_id", chainId).order("position");
   if (error) fail(error);
   return data as unknown as LinkRow[];
 }
 export async function listLinksByUser(userId: string, limit = 10): Promise<LinkRow[]> {
-  const { data, error } = await supabase.from("links").select(`${LINK_SELECT}, chains(title)`).eq("user_id", userId).order("created_at", { ascending: false }).limit(limit);
+  const { data, error } = await supabase.from("links").select(`${LINK_SELECT}, chains(title, daily_day)`).eq("user_id", userId).order("created_at", { ascending: false }).limit(limit);
   if (error) fail(error);
   return data as unknown as LinkRow[];
 }
-export async function addLink(input: { chain_id: number; text: string; image_url: string | null; color: string }): Promise<number> {
-  return addLinkWithMedia({ ...input, video_url: null });
+export async function addLink(input: MediaFields & { chain_id: number; text: string; color: string }): Promise<number> {
+  const { data, error } = await supabase.rpc("add_link", {
+    p_chain_id: input.chain_id, p_text: input.text, p_image_url: input.image_url ?? "", p_color: input.color,
+    p_video_url: input.video_url ?? "", p_video_frames: input.video_frames,
+  });
+  if (error) fail(error);
+  return data as number;
 }
 
-/* ---------- Bilder ---------- */
+/* ---------- Antworten ---------- */
+export async function listReplies(chainId: number): Promise<Reply[]> {
+  const { data, error } = await supabase.from("replies").select(`*, ${PROFILE_SELECT}`).eq("chain_id", chainId).order("created_at");
+  if (error) fail(error);
+  return data as unknown as Reply[];
+}
+export async function addReply(linkId: number, text: string): Promise<number> {
+  const { data, error } = await supabase.rpc("add_reply", { p_link_id: linkId, p_text: text });
+  if (error) fail(error);
+  return data as number;
+}
+export async function moderateReply(replyId: number, status: "sichtbar" | "gesperrt") {
+  const { error } = await supabase.rpc("moderate_reply", { p_reply_id: replyId, p_status: status });
+  if (error) fail(error);
+}
+export async function listPendingReplies(): Promise<(Reply & { chains?: { title: string } })[]> {
+  const { data, error } = await supabase.from("replies").select(`*, ${PROFILE_SELECT}, chains(title)`)
+    .in("status", ["pruefung", "gesperrt"]).order("created_at", { ascending: false }).limit(100);
+  if (error) fail(error);
+  return data as unknown as (Reply & { chains?: { title: string } })[];
+}
+
+/* ---------- Prüfung ---------- */
+export async function getLinkVerdict(id: number): Promise<Verdict> {
+  const { data } = await supabase.from("links").select("status, moderation_note").eq("id", id).maybeSingle();
+  return { status: (data?.status as Verdict["status"]) ?? "pruefung", note: data?.moderation_note ?? null };
+}
+export async function getReplyVerdict(id: number): Promise<Verdict> {
+  const { data } = await supabase.from("replies").select("status, moderation_note").eq("id", id).maybeSingle();
+  return { status: (data?.status as Verdict["status"]) ?? "pruefung", note: data?.moderation_note ?? null };
+}
+export async function requestModeration(body: { link_id: number } | { reply_id: number }) {
+  const { error } = await supabase.functions.invoke("moderate-content", { body });
+  if (error) fail(error);
+}
+
+/* ---------- Medien ---------- */
+function mediaPath(userId: string, ext: string, folder = "") {
+  return `${userId}/${folder}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+}
 export async function uploadImage(userId: string, file: File): Promise<string> {
-  if (file.size > 8 * 1024 * 1024) throw new Error("Das Bild darf höchstens 8 MB groß sein.");
   const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-  const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const path = mediaPath(userId, ext);
   const { error } = await supabase.storage.from("bilder").upload(path, file, { contentType: file.type, upsert: false });
   if (error) fail(error);
   return supabase.storage.from("bilder").getPublicUrl(path).data.publicUrl;
+}
+export async function uploadVideo(userId: string, file: File): Promise<string> {
+  const ext = (file.name.split(".").pop() || "mp4").toLowerCase().replace(/[^a-z0-9]/g, "") || "mp4";
+  const path = mediaPath(userId, ext);
+  const { error } = await supabase.storage.from("videos").upload(path, file, { contentType: file.type, upsert: false });
+  if (error) fail(error);
+  return supabase.storage.from("videos").getPublicUrl(path).data.publicUrl;
+}
+/** Standbilder eines Videos (für die Prüfung) in den Bilder-Speicher laden. */
+export async function uploadFrames(userId: string, frames: Blob[]): Promise<string[]> {
+  const urls: string[] = [];
+  for (const f of frames) {
+    const path = mediaPath(userId, "jpg", "frames/");
+    const { error } = await supabase.storage.from("bilder").upload(path, f, { contentType: "image/jpeg", upsert: false });
+    if (error) fail(error);
+    urls.push(supabase.storage.from("bilder").getPublicUrl(path).data.publicUrl);
+  }
+  return urls;
 }
 
 /* ---------- Einladungen ---------- */
@@ -124,59 +206,25 @@ export async function demoAddStars(pack: string) {
 export async function createCheckout(pack: string): Promise<string> {
   const { data, error } = await supabase.functions.invoke("create-checkout", { body: { pack, origin: window.location.origin } });
   if (error) fail(error);
-  if (!data?.url) throw new Error("Keine Zahlungsseite erhalten.");
+  if (!data?.url) throw new Error("err_unknown");
   return data.url as string;
 }
 
-/* ---------- Karte ---------- */
+/* ---------- Karte und Zahlen ---------- */
 export async function getMapEdges(): Promise<MapEdge[]> {
   const { data, error } = await supabase.from("map_edges").select("*");
   if (error) fail(error);
   return data as MapEdge[];
 }
 export async function getStats() {
-  const [u, c, l] = await Promise.all([
+  const [u, c, l, d] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("chains").select("*", { count: "exact", head: true }),
-    supabase.from("links").select("*", { count: "exact", head: true }),
+    supabase.from("links").select("*", { count: "exact", head: true }).eq("status", "sichtbar"),
+    supabase.from("donations").select("stars"),
   ]);
-  return { users: u.count ?? 0, chains: c.count ?? 0, links: l.count ?? 0 };
-}
-
-/* ======================================================================
- * Teil 2: Videos, Folgen, Mitteilungen, Spenden, Auszahlung, Moderation
- * ====================================================================== */
-
-export async function uploadVideo(userId: string, file: File): Promise<string> {
-  if (file.size > 100 * 1024 * 1024) throw new Error("Das Video darf höchstens 100 MB groß sein.");
-  const ext = (file.name.split(".").pop() || "mp4").toLowerCase().replace(/[^a-z0-9]/g, "") || "mp4";
-  const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { error } = await supabase.storage.from("videos").upload(path, file, { contentType: file.type, upsert: false });
-  if (error) fail(error);
-  return supabase.storage.from("videos").getPublicUrl(path).data.publicUrl;
-}
-
-/** Lädt ein Bild oder ein Video und gibt die passenden Felder für ein Glied zurück. */
-export async function uploadMedia(userId: string, file: File | null): Promise<{ image_url: string | null; video_url: string | null }> {
-  if (!file) return { image_url: null, video_url: null };
-  if (file.type.startsWith("video/")) return { image_url: null, video_url: await uploadVideo(userId, file) };
-  return { image_url: await uploadImage(userId, file), video_url: null };
-}
-
-export async function startChainWithMedia(input: { title: string; text: string; image_url: string | null; video_url: string | null; color: string }): Promise<number> {
-  const { data, error } = await supabase.rpc("start_chain", {
-    p_title: input.title, p_text: input.text, p_image_url: input.image_url ?? "", p_color: input.color, p_video_url: input.video_url ?? "",
-  });
-  if (error) fail(error);
-  return data as number;
-}
-
-export async function addLinkWithMedia(input: { chain_id: number; text: string; image_url: string | null; video_url: string | null; color: string }): Promise<number> {
-  const { data, error } = await supabase.rpc("add_link", {
-    p_chain_id: input.chain_id, p_text: input.text, p_image_url: input.image_url ?? "", p_color: input.color, p_video_url: input.video_url ?? "",
-  });
-  if (error) fail(error);
-  return data as number;
+  const stars = ((d.data ?? []) as { stars: number }[]).reduce((s, r) => s + r.stars, 0);
+  return { users: u.count ?? 0, chains: c.count ?? 0, links: l.count ?? 0, stars };
 }
 
 /* ---------- Folgen ---------- */
@@ -239,7 +287,8 @@ export async function listPayouts(): Promise<Payout[]> {
   if (error) fail(error);
   return data as Payout[];
 }
-export async function getPayoutSettings(): Promise<{ min: number; cents: number; share: number }> {
+export type PayoutSettings = { min: number; cents: number; share: number };
+export async function getPayoutSettings(): Promise<PayoutSettings> {
   const { data } = await supabase.from("app_settings").select("key, value").in("key", ["payout_min_stars", "star_cents", "creator_share_percent"]);
   const m = Object.fromEntries((data ?? []).map((r: { key: string; value: string }) => [r.key, Number(r.value)]));
   return { min: m.payout_min_stars ?? 1000, cents: m.star_cents ?? 1, share: m.creator_share_percent ?? 80 };
@@ -252,7 +301,7 @@ export async function reportLink(linkId: number, reason: string) {
 }
 export async function listReportedLinks(): Promise<ReportedLink[]> {
   const { data, error } = await supabase.from("links").select(`${LINK_SELECT}, chains(title), reports(reason, created_at)`)
-    .in("status", ["gemeldet", "gesperrt"]).order("report_count", { ascending: false }).limit(100);
+    .in("status", ["pruefung", "gemeldet", "gesperrt"]).order("created_at", { ascending: false }).limit(100);
   if (error) fail(error);
   return data as unknown as ReportedLink[];
 }

@@ -1,12 +1,12 @@
 {
-  "name": "ChainPepu – Das Universum aus Ketten",
+  "name": "ChainPepu – The universe of chains",
   "short_name": "ChainPepu",
-  "description": "Starte eine Kette, lass sie durch das Universum wachsen.",
+  "description": "Every person is a planet. Every idea is a chain.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#05040f",
-  "theme_color": "#05040f",
-  "lang": "de",
+  "background_color": "#06050d",
+  "theme_color": "#06050d",
+  "lang": "en",
   "icons": [
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]

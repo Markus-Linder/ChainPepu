@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
 
     const params = new URLSearchParams({
       mode: "payment",
-      success_url: `${origin}/shop/erfolg`,
+      success_url: `${origin}/shop/success`,
       cancel_url: `${origin}/shop`,
       "line_items[0][quantity]": "1",
       "line_items[0][price_data][currency]": "eur",

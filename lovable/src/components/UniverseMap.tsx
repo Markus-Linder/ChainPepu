@@ -1,17 +1,22 @@
-
 import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { planetLook, skinColors } from "@/lib/planet";
-import { glieder } from "@/lib/format";
+import { useT } from "@/lib/i18n";
 
 export type MapPlanet = { id: string; username: string; display_name: string; seed: number; skin: string; links: number };
-export type MapChain = { id: number; title: string; boost: number; link_count: number; daily: boolean };
+export type MapChain = { id: number; title: string; boost: number; link_count: number; donated_stars: number; daily: boolean; topic: boolean; origin: string | null };
 export type MapEdgeView = { chain_id: number; from_user: string; to_user: string };
 
 const W = 1200;
 const H = 800;
+const COLOR = { chain: "#7b61ff", daily: "#f2c46d", topic: "#ff3d9a", hover: "#ffffff" };
 
+/**
+ * The universe: planets on a spiral, chains as strands between the planets that built them.
+ * Stars from fans and boosts are drawn right at the chain, so money is visible where it went.
+ */
 export function UniverseMap({ planets, chains, edges }: { planets: MapPlanet[]; chains: MapChain[]; edges: MapEdgeView[] }) {
+  const { t } = useT();
   const [hover, setHover] = useState<number | null>(null);
   const [view, setView] = useState({ x: 0, y: 0, k: 1 });
   const [drag, setDrag] = useState<{ x: number; y: number; vx: number; vy: number } | null>(null);
@@ -27,13 +32,36 @@ export function UniverseMap({ planets, chains, edges }: { planets: MapPlanet[]; 
 
   const chainById = useMemo(() => new Map(chains.map((c) => [c.id, c])), [chains]);
 
+  // Where to put the badge (stars / boost / topic) of each chain: midpoint of its first strand, else next to the origin planet.
+  const badges = useMemo(() => {
+    const out: { c: MapChain; x: number; y: number }[] = [];
+    const seen = new Set<number>();
+    for (const e of edges) {
+      const c = chainById.get(e.chain_id);
+      const a = pos.get(e.from_user), b = pos.get(e.to_user);
+      if (!c || !a || !b || seen.has(c.id)) continue;
+      seen.add(c.id);
+      out.push({ c, x: (a.x + b.x) / 2 + (a.y - b.y) * 0.2, y: (a.y + b.y) / 2 + (b.x - a.x) * 0.2 });
+    }
+    for (const c of chains) {
+      if (seen.has(c.id) || !c.origin) continue;
+      const o = pos.get(c.origin);
+      if (!o) continue;
+      seen.add(c.id);
+      out.push({ c, x: o.x + 26, y: o.y - 22 });
+    }
+    return out.filter(({ c }) => c.donated_stars > 0 || c.boost > 0 || c.topic);
+  }, [chains, edges, pos, chainById]);
+
   function onWheel(e: React.WheelEvent) {
     const k = Math.min(4, Math.max(0.5, view.k * (e.deltaY < 0 ? 1.1 : 0.9)));
     setView((v) => ({ ...v, k }));
   }
 
+  const hovered = hover !== null ? chainById.get(hover) : null;
+
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl border border-white/10 bg-black/40" style={{ aspectRatio: "3 / 2" }}>
+    <div className="map-frame relative w-full overflow-hidden rounded-3xl" style={{ aspectRatio: "3 / 2" }}>
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="h-full w-full touch-none select-none"
@@ -50,38 +78,36 @@ export function UniverseMap({ planets, chains, edges }: { planets: MapPlanet[]; 
       >
         <defs>
           <radialGradient id="core" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.35)" />
-            <stop offset="100%" stopColor="rgba(124,92,255,0)" />
+            <stop offset="0%" stopColor="rgba(255,255,255,0.28)" />
+            <stop offset="60%" stopColor="rgba(123,97,255,0.12)" />
+            <stop offset="100%" stopColor="rgba(123,97,255,0)" />
           </radialGradient>
+          <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6" /></filter>
         </defs>
         <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`} style={{ transformOrigin: "center" }}>
-          <circle cx={W / 2} cy={H / 2} r={260} fill="url(#core)" />
-          {/* Ketten als Stränge zwischen Planeten */}
+          <circle cx={W / 2} cy={H / 2} r={300} fill="url(#core)" />
+          {/* Strands */}
           {edges.map((e, i) => {
             const a = pos.get(e.from_user);
             const b = pos.get(e.to_user);
             const c = chainById.get(e.chain_id);
             if (!a || !b || !c) return null;
-            const strength = Math.min(1, 0.25 + (c.link_count + c.boost * 3) / 40);
+            const strength = Math.min(1, 0.25 + (c.link_count + c.boost * 3 + c.donated_stars / 15) / 40);
             const highlighted = hover === e.chain_id;
+            const color = c.daily ? COLOR.daily : c.topic ? COLOR.topic : c.donated_stars > 0 ? COLOR.daily : COLOR.chain;
             const mx = (a.x + b.x) / 2 + (a.y - b.y) * 0.2;
             const my = (a.y + b.y) / 2 + (b.x - a.x) * 0.2;
+            const d = `M ${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y}`;
             return (
               <Link key={i} to={`/c/${c.id}`}>
-                <path
-                  d={`M ${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y}`}
-                  fill="none"
-                  className={`chain-line ${c.boost > 0 ? "pulse" : ""}`}
-                  stroke={c.daily ? "#ffd26b" : highlighted ? "#ff5cc8" : "#7c5cff"}
-                  strokeOpacity={highlighted ? 1 : strength}
-                  strokeWidth={highlighted ? 5 : 1.5 + strength * 3}
-                  onPointerEnter={() => setHover(c.id)}
-                  onPointerLeave={() => setHover(null)}
-                />
+                {(c.donated_stars > 0 || c.boost > 0) && <path d={d} fill="none" stroke={color} strokeOpacity={0.35} strokeWidth={8 + strength * 6} filter="url(#soft)" />}
+                <path d={d} fill="none" className={`chain-line ${c.boost > 0 ? "pulse" : ""}`}
+                  stroke={highlighted ? COLOR.hover : color} strokeOpacity={highlighted ? 1 : strength} strokeWidth={highlighted ? 5 : 1.5 + strength * 3}
+                  onPointerEnter={() => setHover(c.id)} onPointerLeave={() => setHover(null)} />
               </Link>
             );
           })}
-          {/* Planeten */}
+          {/* Planets */}
           {[...pos.values()].map(({ x, y, look, p }) => {
             const { a, b } = skinColors(look);
             const r = 6 + look.size * 6 + Math.min(14, p.links * 0.8);
@@ -96,22 +122,41 @@ export function UniverseMap({ planets, chains, edges }: { planets: MapPlanet[]; 
                   </defs>
                   {look.rings && <ellipse cx={x} cy={y} rx={r * 1.8} ry={r * 0.5} fill="none" stroke={a} strokeOpacity="0.6" strokeWidth="2" transform={`rotate(${look.ringTilt} ${x} ${y})`} />}
                   <circle cx={x} cy={y} r={r} fill={`url(#mp${p.id})`} />
-                  <text x={x} y={y + r + 14} textAnchor="middle" fontSize="11" fill="#d9d7ff" opacity="0.85">
-                    {p.display_name}
-                  </text>
+                  <text x={x} y={y + r + 14} textAnchor="middle" fontSize="11" fill="#d9d7ff" opacity="0.85">{p.display_name}</text>
+                </g>
+              </Link>
+            );
+          })}
+          {/* Badges: stars from fans, boosts, topics - right at the chain */}
+          {badges.map(({ c, x, y }) => {
+            const label = [c.donated_stars > 0 ? `★ ${c.donated_stars}` : "", c.boost > 0 ? `⚡${c.boost}` : "", c.topic ? "✦" : ""].filter(Boolean).join("  ");
+            const w = label.length * 7.2 + 16;
+            const color = c.topic ? COLOR.topic : COLOR.daily;
+            return (
+              <Link key={`b${c.id}`} to={`/c/${c.id}`}>
+                <g onPointerEnter={() => setHover(c.id)} onPointerLeave={() => setHover(null)} style={{ filter: `drop-shadow(0 0 10px ${color})` }}>
+                  <rect x={x - w / 2} y={y - 11} width={w} height={22} rx={11} fill="rgba(6,5,13,0.85)" stroke={color} strokeOpacity={0.9} strokeWidth={1.2} />
+                  <text x={x} y={y + 4} textAnchor="middle" fontSize="12" fontWeight="700" fill={color}>{label}</text>
                 </g>
               </Link>
             );
           })}
         </g>
       </svg>
-      <div className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-black/50 px-3 py-1 text-xs text-white/70">
-        Ziehen zum Bewegen · Scrollen zum Zoomen · Klick auf Planet oder Kette
+      <div className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-black/50 px-3 py-1 text-xs text-white/70">{t("map_hint")}</div>
+      <div className="pointer-events-none absolute right-3 top-3 flex flex-col gap-1 rounded-xl bg-black/50 px-3 py-2 text-[11px] text-white/80">
+        <span><i className="mr-2 inline-block h-2 w-5 rounded" style={{ background: COLOR.chain }} />{t("chain")}</span>
+        <span><i className="mr-2 inline-block h-2 w-5 rounded" style={{ background: COLOR.daily }} />{t("daily_event")} / ★</span>
+        <span><i className="mr-2 inline-block h-2 w-5 rounded" style={{ background: COLOR.topic }} />{t("topic_badge")}</span>
       </div>
-      {hover !== null && chainById.get(hover) && (
-        <div className="pointer-events-none absolute top-3 left-3 rounded-xl bg-black/70 px-3 py-2 text-sm">
-          <div className="font-semibold">{chainById.get(hover)!.title}</div>
-          <div className="muted text-xs">{glieder(chainById.get(hover)!.link_count)}</div>
+      {hovered && (
+        <div className="pointer-events-none absolute left-3 top-3 max-w-xs rounded-xl bg-black/75 px-3 py-2 text-sm backdrop-blur">
+          <div className="font-semibold">{hovered.topic ? "✦ " : hovered.daily ? "☀ " : ""}{hovered.title}</div>
+          <div className="muted text-xs">
+            {t("n_links", { n: hovered.link_count })}
+            {hovered.donated_stars > 0 && <> · <span style={{ color: COLOR.daily }}>{t("map_stars", { n: hovered.donated_stars })}</span></>}
+            {hovered.boost > 0 && <> · {t("map_boost", { n: hovered.boost })}</>}
+          </div>
         </div>
       )}
     </div>

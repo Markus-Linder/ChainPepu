@@ -1,16 +1,21 @@
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { getCreatorStats, getPayoutSettings, getProfileByUsername, listChainsByOrigin, listChainsJoined, listLinksByUser, listPayouts } from "@/lib/api";
-import { SKINS } from "@/lib/planet";
+import { displayTitle } from "@/lib/events";
+import { useT } from "@/lib/i18n";
 import { useAsync, Loading } from "@/lib/useAsync";
 import { Planet } from "@/components/Planet";
 import { ChainCard } from "@/components/ChainCard";
-import { EarningsPanel, FollowButton } from "@/components/Forms";
+import { EarningsPanel, FollowButton, money } from "@/components/Forms";
+import { Icon } from "@/components/Icons";
 import NotFound from "./NotFound";
 
 export default function PlanetPage() {
   const username = String(useParams().username);
+  const { t, lang, locale } = useT();
   const { profile: me } = useAuth();
+  const [query, setQuery] = useState("");
   const { data, loading, reload } = useAsync(async () => {
     const user = await getProfileByUsername(username);
     if (!user) return null;
@@ -20,6 +25,16 @@ export default function PlanetPage() {
     ]);
     return { user, started, joined, recent, creator, settings, payouts };
   }, [username, me?.stars, me?.planet_skin, me?.earned_stars]);
+
+  // Archive: every chain this creator ever started, grouped by year, searchable. Nothing is ever lost.
+  const archive = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const list = (data?.started ?? []).filter((c) => !q || displayTitle(c, lang).toLowerCase().includes(q) || (c.description ?? "").toLowerCase().includes(q));
+    const groups = new Map<string, typeof list>();
+    for (const c of list) { const y = new Date(c.created_at).getFullYear().toString(); groups.set(y, [...(groups.get(y) ?? []), c]); }
+    return [...groups.entries()].sort((a, b) => Number(b[0]) - Number(a[0]));
+  }, [data, query, lang]);
+
   if (loading) return <Loading />;
   if (!data) return <NotFound />;
   const { user, started, joined, recent, creator, settings, payouts } = data;
@@ -28,21 +43,21 @@ export default function PlanetPage() {
 
   return (
     <div className="space-y-8">
-      <section className="card flex flex-col items-center gap-6 p-8 sm:flex-row sm:items-start">
+      <section className="card card-glow flex flex-col items-center gap-6 p-8 sm:flex-row sm:items-start">
         <Planet seed={user.planet_seed} skin={user.planet_skin} size={160} title={user.display_name} />
         <div className="flex-1 text-center sm:text-left">
-          <h1 className="text-3xl font-extrabold">{user.display_name}</h1>
-          <p className="muted">@{user.username} · Skin: {SKINS[user.planet_skin]?.name ?? user.planet_skin}</p>
+          <h1 className="text-3xl font-bold">{user.display_name}</h1>
+          <p className="muted">@{user.username} · {t("skin")} {t(`skin_${user.planet_skin}`)}</p>
           <div className="mt-4 grid grid-cols-2 gap-4 text-center sm:grid-cols-4">
-            <Stat n={creator.follower_count} label="Follower" />
-            <Stat n={started.length} label="Ketten gestartet" />
-            <Stat n={totalReach} label="Glieder in eigenen Ketten" />
-            <Stat n={creator.donated_total} label="Sterne erhalten" />
+            <Stat n={creator.follower_count} label={t("stat_followers")} />
+            <Stat n={started.length} label={t("stat_chains_started")} />
+            <Stat n={totalReach} label={t("stat_reach")} />
+            <Stat n={creator.donated_total} label={t("stat_stars_received")} gold />
           </div>
           <div className="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start">
             <FollowButton creatorId={user.id} onChange={reload} />
-            {mine && <Link to="/neu" className="btn">+ Kette starten</Link>}
-            {mine && <Link to="/shop" className="btn btn-ghost">Planet gestalten · ★ {me!.stars}</Link>}
+            {mine && <Link to="/new" className="btn"><Icon name="spark" size={15} />{t("nav_start_chain")}</Link>}
+            {mine && <Link to="/shop" className="btn btn-ghost">{t("design_planet", { n: me!.stars })}</Link>}
           </div>
         </div>
       </section>
@@ -51,10 +66,10 @@ export default function PlanetPage() {
         <section className="grid gap-4 lg:grid-cols-[1fr_1fr]">
           <EarningsPanel min={settings.min} cents={settings.cents} share={settings.share} />
           <div className="card p-4">
-            <h2 className="mb-2 font-semibold">Auszahlungen</h2>
-            {payouts.length === 0 ? <p className="muted text-sm">Noch keine.</p> : (
+            <h2 className="mb-2 font-semibold">{t("payouts")}</h2>
+            {payouts.length === 0 ? <p className="muted text-sm">{t("none_yet")}</p> : (
               <ul className="space-y-1 text-sm">
-                {payouts.map((p) => <li key={p.id} className="flex justify-between"><span>{new Date(p.created_at).toLocaleDateString("de-DE")} · ★ {p.stars}</span><span className="muted">{(p.cents / 100).toFixed(2).replace(".", ",")} € · {p.status}</span></li>)}
+                {payouts.map((p) => <li key={p.id} className="flex justify-between"><span>{new Date(p.created_at).toLocaleDateString(locale)} · ★ {p.stars}</span><span className="muted">{money(p.cents, locale)} · {p.status}</span></li>)}
               </ul>
             )}
           </div>
@@ -62,33 +77,41 @@ export default function PlanetPage() {
       )}
 
       <section>
-        <h2 className="mb-3 text-xl font-bold">Ketten, die hier ihren Ursprung haben</h2>
-        {started.length === 0 ? <p className="muted">Noch keine. {mine && <Link to="/neu" className="underline">Die erste starten?</Link>}</p> : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{started.map((c) => <ChainCard key={c.id} chain={c} />)}</div>
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+          <h2 className="text-xl font-bold">{t("chains_origin_here")} <span className="muted text-sm font-normal">({started.length})</span></h2>
+          {started.length > 6 && <input className="input w-full sm:w-64" placeholder="🔍" value={query} onChange={(e) => setQuery(e.target.value)} />}
+        </div>
+        {started.length === 0 ? <p className="muted">{t("none_yet")} {mine && <Link to="/new" className="underline">{t("start_first_q")}</Link>}</p> : (
+          archive.map(([year, list]) => (
+            <div key={year} className="mb-5">
+              {archive.length > 1 && <p className="kicker mb-2">{year}</p>}
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{list.map((c) => <ChainCard key={c.id} chain={c} />)}</div>
+            </div>
+          ))
         )}
       </section>
       <section>
-        <h2 className="mb-3 text-xl font-bold">Mitgebaute Ketten</h2>
-        {joined.length === 0 ? <p className="muted">Noch keine.</p> : (
+        <h2 className="mb-3 text-xl font-bold">{t("chains_joined")}</h2>
+        {joined.length === 0 ? <p className="muted">{t("none_yet")}</p> : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{joined.map((c) => <ChainCard key={c.id} chain={c} />)}</div>
         )}
       </section>
       <section>
-        <h2 className="mb-3 text-xl font-bold">Letzte Glieder</h2>
+        <h2 className="mb-3 text-xl font-bold">{t("recent_links")}</h2>
         <ul className="space-y-2">
           {recent.map((l) => (
             <li key={l.id} className="card p-3 text-sm" style={{ borderLeft: `4px solid ${l.color}` }}>
-              <Link to={`/c/${l.chain_id}`} className="muted text-xs hover:underline">in „{l.chains?.title}“ · #{l.position}{l.video_url ? " · 🎬" : ""}</Link>
+              <Link to={`/c/${l.chain_id}`} className="muted text-xs hover:underline">{t("in_chain", { title: l.chains ? displayTitle(l.chains, lang) : "" })} · #{l.position}{l.video_url ? " · 🎬" : ""}</Link>
               <p className="mt-1 line-clamp-3">{l.text}</p>
             </li>
           ))}
-          {recent.length === 0 && <p className="muted">Noch still hier.</p>}
+          {recent.length === 0 && <p className="muted">{t("still_quiet")}</p>}
         </ul>
       </section>
     </div>
   );
 }
 
-function Stat({ n, label }: { n: number; label: string }) {
-  return <div><div className="text-2xl font-bold">{n}</div><div className="muted text-xs">{label}</div></div>;
+function Stat({ n, label, gold }: { n: number; label: string; gold?: boolean }) {
+  return <div><div className="text-2xl font-bold" style={gold ? { color: "var(--star)" } : undefined}>{gold ? "★ " : ""}{n}</div><div className="muted text-xs">{label}</div></div>;
 }

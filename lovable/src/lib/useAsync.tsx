@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
+import { useT } from "./i18n";
 
-/** Lädt Daten, liefert Ladezustand und eine reload-Funktion. */
+/** Loads data, returns loading state and a reload function. */
 export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -12,5 +13,6 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]) {
 }
 
 export function Loading() {
-  return <p className="muted py-10 text-center text-sm">Das Universum lädt…</p>;
+  const { t } = useT();
+  return <p className="muted py-10 text-center text-sm">{t("loading")}</p>;
 }

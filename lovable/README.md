@@ -4,58 +4,52 @@ Dieselbe Plattform wie im Hauptordner, aber auf dem Stack, den Lovable benutzt:
 **Vite + React + TypeScript + Tailwind**, Backend über **Supabase** (Postgres, Auth, Storage, Edge Functions).
 
 Damit sind die Skalierungsfragen vom Start weg gelöst: Postgres mit automatischen Backups,
-Bilder im Objektspeicher statt auf dem App-Server, zustandsloses Frontend.
-
-## So bringst du das in Lovable
-
-**1. Projekt in Lovable anlegen**
-Neues Projekt erstellen. Den Text aus `LOVABLE_PROMPT.md` als ersten Prompt einfügen. Lovable baut daraus die Grundstruktur.
-
-**2. Supabase verbinden**
-In Lovable oben rechts auf Supabase klicken und ein Projekt verbinden (neu oder bestehend). Lovable legt dabei
-`src/integrations/supabase/client.ts` und die Umgebungsvariablen selbst an.
-
-**3. Datenbank einrichten**
-Die beiden Dateien aus `supabase/migrations/` nacheinander an Lovable geben mit der Bitte, sie als
-Migration auszuführen. Alternativ: im Supabase-Dashboard unter *SQL Editor* einfügen und ausführen.
-- `20261017000000_chainpepu.sql`: Tabellen, Sichten, Zeilensicherheit (RLS), Grundfunktionen, Bild-Bucket
-- `20261018000000_creator_features.sql`: Videos, Folgen, Mitteilungen, Spenden (80/20), Auszahlungen, Meldungen, Moderation, Wortfilter, Video-Bucket
-
-**4. Code übernehmen**
-Die Dateien aus `src/` in das Lovable-Projekt übernehmen. Am einfachsten über GitHub:
-In Lovable *GitHub verbinden*, dann die Dateien in das von Lovable angelegte Repository pushen.
-Lovable zieht Änderungen aus GitHub automatisch nach.
-Wenn Lovable schon ein `src/integrations/supabase/client.ts` angelegt hat, dessen Version behalten.
-
-**5. E-Mail-Bestätigung (für Tests)**
-Im Supabase-Dashboard unter *Authentication → Providers → Email* die Option *Confirm email* ausschalten,
-damit Nutzer beim Testen sofort drin sind. Für den echten Start wieder einschalten.
-
-**6. Moderation einrichten**
-- Moderatoren ernennen: `update profiles set is_moderator = true where username = 'dein_name';`
-- Wortfilter pflegen: Tabelle `banned_terms` im Supabase-Dashboard.
-- KI-Prüfung (optional, empfohlen): Funktion `supabase/functions/moderate-content` deployen, Secrets
-  `ANTHROPIC_API_KEY` und `MODERATION_WEBHOOK_SECRET` setzen. Dann im Supabase-Dashboard unter
-  *Database → Webhooks* einen Webhook anlegen: Tabelle `links`, Ereignis *Insert*, Ziel die URL der Funktion,
-  HTTP-Header `x-webhook-secret` mit demselben Geheimnis. Jedes neue Glied wird damit automatisch geprüft.
-
-**7. Stripe (optional, später)**
-- In Supabase unter *Edge Functions → Secrets* setzen: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`.
-- Die beiden Funktionen aus `supabase/functions/` deployen (Lovable kann das, oder `supabase functions deploy`).
-- In Stripe einen Webhook auf `https://DEIN-PROJEKT.supabase.co/functions/v1/stripe-webhook` für das Ereignis `checkout.session.completed` anlegen.
-- Demo-Modus ausschalten: `update app_settings set value = 'false' where key = 'demo_mode';`
+Bilder und Videos im Objektspeicher statt auf dem App-Server, zustandsloses Frontend.
 
 ## Was die Plattform kann
 
-- Planeten, Ketten, Glieder mit Text, Bild oder **Video**, Universumskarte, Tages-Ereignis, Einladungen
-- **Ganze Kette ansehen**: Vollbild-Abspielmodus, Videos laufen automatisch, wischen oder Pfeiltasten
-- **Creators folgen** mit Mitteilungen bei neuer Kette, neuem Glied, Spende und neuem Follower
-- **Spenden**: Sterne an den Creator einer Kette. 80 % für den Creator, 20 % für die Plattform
-  (Prozentsatz in `app_settings.creator_share_percent`). Gespendete Sterne stehen auf der Startseite an der Kette.
-- **Auszahlung**: verdiente Sterne ab Mindestbetrag (`payout_min_stars`) zum Kurs `star_cents` anfordern
-  oder selbst als Sterne nutzen. Auszahlungsanfragen landen in `payouts`, die Überweisung macht ihr manuell.
-- **Inhaltsregeln**: Regelseite, Zustimmung bei Registrierung, Wortfilter in der Datenbank, Melden pro Glied,
-  automatisches Verbergen ab 3 Meldungen, Moderationsseite, optionale KI-Prüfung über Claude.
+- **Planeten, Ketten, Glieder** mit Text, Foto oder **Video** (bis 3 Minuten, 100 MB), Universumskarte, Tages-Ereignis, Einladungen
+- **Antworten**: Unter jedem Glied können alle miteinander schreiben (Gespräch in der Kette)
+- **Themen von Creators**: Ein Creator gibt ein Motto mit Beschreibung und Laufzeit (1–14 Tage) vor. Themen leuchten pink auf der Karte und stehen auf der Startseite
+- **Sterne sichtbar im Universum**: Gespendete Sterne und Boosts werden als Plakette direkt an der Kette auf der Karte angezeigt
+- **Spenden 80/20**: Von jeder Spende gehen 80 % an den Creator, 20 % an die Plattform (`app_settings.creator_share_percent`). Hinweis dazu auf der Startseite, im Shop und in den Regeln
+- **Auszahlung** verdienter Sterne ab Mindestbetrag; alle Ketten eines Creators bleiben dauerhaft im Profil abrufbar (Archiv nach Jahren, durchsuchbar)
+- **Prüfung VOR der Veröffentlichung**: Jeder Text, jedes Foto und jedes Video (als Standbilder) wird von Claude geprüft, bevor es sichtbar wird. Dazu Wortfilter, Melden, Prüfschwelle und Moderationsseite
+- **5 Sprachen**: Englisch, Deutsch, Spanisch, Französisch, Portugiesisch. Automatische Erkennung, Umschalter in Navigation und Fußzeile. Tagesthemen und Mitteilungen werden übersetzt
+- **Partner-Seite** `/about` für Investoren: Mechanik, Geschäftsmodell, Sicherheit, Technik, Live-Zahlen (nichts erfunden)
+- **PWA**, eigenes Markendesign (Obsidian, Violett → Magenta, Champagner-Gold, Space Grotesk + Inter, eigenes Icon-Set)
+
+## So bringst du das in Lovable
+
+**1. Projekt in Lovable anlegen** — Text aus `LOVABLE_PROMPT.md` als ersten Prompt einfügen.
+
+**2. Supabase verbinden** — Lovable legt `src/integrations/supabase/client.ts` und die Umgebungsvariablen selbst an.
+
+**3. Datenbank einrichten** — die drei Dateien aus `supabase/migrations/` **nacheinander** ausführen (Lovable darum bitten oder im Supabase-Dashboard unter *SQL Editor*):
+- `20261017000000_chainpepu.sql`: Tabellen, Sichten, RLS, Grundfunktionen, Bild-Bucket
+- `20261018000000_creator_features.sql`: Videos, Folgen, Mitteilungen, Spenden (80/20), Auszahlungen, Meldungen, Moderation, Wortfilter, Video-Bucket
+- `20261019000000_replies_topics_premoderation.sql`: Antworten, Creator-Themen, Prüf-Status `pruefung`, übersetzbare Mitteilungen
+
+**4. Code übernehmen** — die Dateien aus `src/`, `public/` und `index.html` in das Lovable-Projekt übernehmen, am einfachsten über GitHub (Lovable zieht Änderungen automatisch nach). Wenn Lovable schon ein `src/integrations/supabase/client.ts` angelegt hat, dessen Version behalten.
+
+**5. KI-Prüfung deployen (wichtig, sonst bleibt jeder Beitrag in der Warteschlange)**
+- Funktion `supabase/functions/moderate-content` deployen, Secret `ANTHROPIC_API_KEY` setzen.
+- Der Client ruft die Funktion direkt nach dem Absenden auf (mit dem Login des Autors) und wartet bis zu 25 Sekunden auf das Urteil. Zusätzlich empfohlen: im Supabase-Dashboard unter *Database → Webhooks* je einen Webhook für `links` und `replies` (Ereignis *Insert*) auf die Funktion legen, Header `x-webhook-secret` = Secret `MODERATION_WEBHOOK_SECRET`. Dann wird auch geprüft, wenn der Nutzer die Seite sofort schließt.
+- Ohne KI-Prüfung: `update app_settings set value = 'aus' where key = 'premoderation';` — dann ist alles sofort sichtbar (nur Wortfilter), Meldungen und Moderation bleiben.
+
+**6. E-Mail-Bestätigung (für Tests)** — unter *Authentication → Providers → Email* *Confirm email* ausschalten, für den echten Start wieder einschalten.
+
+**7. Moderation einrichten**
+- Moderatoren ernennen: `update profiles set is_moderator = true where username = 'dein_name';`
+- Wortfilter pflegen: Tabelle `banned_terms`.
+- Seite `/moderation` zeigt wartende, gemeldete und gesperrte Glieder und Antworten (mit Begründung der KI und den Video-Standbildern).
+
+**8. Stripe (optional, später)**
+- Secrets `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` setzen, Funktionen `create-checkout` und `stripe-webhook` deployen.
+- Stripe-Webhook auf `https://DEIN-PROJEKT.supabase.co/functions/v1/stripe-webhook` für `checkout.session.completed`.
+- Demo-Modus ausschalten: `update app_settings set value = 'false' where key = 'demo_mode';`
+
+**9. Kontakt für Partner** — `src/lib/site.ts`: `CONTACT_EMAIL` eintragen, dann erscheint sie auf `/about`.
 
 ## Lokal ausprobieren
 
@@ -65,23 +59,23 @@ cp .env.example .env    # Supabase-URL und Anon-Key eintragen
 npm run dev             # http://localhost:8080
 ```
 
+Ohne echtes Supabase-Projekt startet die App mit Platzhaltern und zeigt das Design; Daten laden dann nicht.
+
 ## Aufbau
 
 ```
-supabase/migrations/     Datenbank: Tabellen, RLS, Funktionen, Bild-Bucket
-supabase/functions/      Stripe Checkout und Webhook (Deno Edge Functions)
-src/integrations/        Supabase-Client (Lovable-Konvention)
+supabase/migrations/     Datenbank: Tabellen, RLS, Funktionen, Trigger, Buckets
+supabase/functions/      moderate-content (KI-Prüfung), create-checkout + stripe-webhook (Stripe)
+src/locales/             Sprachen (en, de, es, fr, pt), ein Schlüssel pro Text
+src/lib/i18n.tsx         Spracherkennung, t()-Funktion, Umschalter
 src/lib/api.ts           Alle Datenzugriffe. Lesen direkt, Schreiben über Datenbank-Funktionen
-src/lib/auth.tsx         Anmeldezustand und Profil
+src/lib/moderation.ts    Video-Standbilder im Browser, Warten auf das Prüf-Urteil
+src/lib/events.ts        Tages-Ereignis (Themen in 5 Sprachen), Anzeigetitel
 src/lib/planet.ts        Planeten-Aussehen und Position im Universum
-src/lib/events.ts        Tages-Ereignis
-src/components/          Karte, Planet, Formulare, Navigation
-src/pages/               Alle Seiten
+src/components/Icons.tsx Icon-Set und Logo
+src/components/          Karte, Planet, Formulare, Glied mit Antworten, Navigation
+src/pages/               Alle Seiten (Home, Today, Chains, Chain, PlanetPage, NewChain, Shop, Notifications, Moderation, Rules, About, Small)
+public/brand/            Hero-Bild und Social-Preview (Higgsfield), icon.svg
 ```
 
-## Sicherheitsmodell
-
-Das Frontend darf nur lesen. Jedes Schreiben (Kette starten, Glied anhängen, boosten, Skin kaufen,
-Einladung einlösen) läuft über Postgres-Funktionen, die mit erhöhten Rechten laufen und selbst prüfen,
-wer angemeldet ist und ob genug Sterne da sind. So kann niemand über die Browser-Konsole
-Sterne manipulieren. Bilder landen in einem eigenen Ordner pro Nutzer im Storage-Bucket.
+Alte deutsche Pfade (`/heute`, `/ketten`, `/neu`, `/registrieren`, `/einladung/…`, `/mitteilungen`, `/regeln`) leiten auf die neuen englischen Pfade um.
