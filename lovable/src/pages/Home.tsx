@@ -134,6 +134,7 @@ export default function Home() {
           {data.duels.length === 0 ? <p className="muted text-sm">{t("no_duels")}</p> : (
             <div className="grid gap-3 sm:grid-cols-2">{data.duels.map((d) => <DuelCard key={d.id} duel={d} />)}</div>
           )}
+          <p className="mt-2 text-sm"><Link to="/tournaments" className="underline">{t("tour_title")} →</Link> · <Link to="/leaderboards" className="underline">{t("board_title")} →</Link></p>
         </section>
       )}
 

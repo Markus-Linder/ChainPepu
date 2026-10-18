@@ -3,7 +3,7 @@
  * Schreiben läuft über Datenbank-Funktionen (RPC), die selbst prüfen.
  */
 import { supabase } from "@/integrations/supabase/client";
-import type { ChainStats, CreatorStats, Donation, Duel, DuelEvent, DuelView, Invite, InviteLeader, LinkRow, MapEdge, Notification, Payout, Profile, Reply, ReportedLink, Verdict, WeekLeader, WeeklyChallenge } from "./types";
+import type { AdminStats, ChainStats, CreatorBoard, CreatorStats, Donation, Duel, DuelEvent, DuelView, Invite, InviteLeader, LinkRow, MapEdge, Notification, Payout, PayoutRow, Profile, Reply, ReportedLink, Tournament, TournamentDuel, TournamentEntry, Verdict, WeekLeader, WeeklyChallenge } from "./types";
 import { themeForDay, todayKey } from "./events";
 
 function fail(error: { message: string } | null): never {
@@ -372,6 +372,103 @@ export function secondsUntilWeekEnd(now = new Date()): number {
   const day = (now.getUTCDay() + 6) % 7; // Monday = 0
   const end = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - day + 7);
   return Math.max(0, Math.floor((end - now.getTime()) / 1000));
+}
+
+/* ---------- Ranglisten ---------- */
+export async function listCreatorBoard(order: "stars_received" | "crowns" | "follower_count" | "reach" | "level", limit = 20): Promise<CreatorBoard[]> {
+  const { data, error } = await supabase.from("creator_board").select("*").gt(order, 0).order(order, { ascending: false }).limit(limit);
+  if (error) fail(error);
+  return data as CreatorBoard[];
+}
+export async function listChainBoard(order: "link_count" | "donated_stars" | "crowns" | "reply_count", limit = 20): Promise<ChainStats[]> {
+  const { data, error } = await supabase.from("chain_stats").select("*").gt(order, 0).order(order, { ascending: false }).limit(limit);
+  if (error) fail(error);
+  return data as ChainStats[];
+}
+
+/* ---------- Creator-Dashboard ---------- */
+export async function listMyDonations(userId: string, days = 30): Promise<Donation[]> {
+  const since = new Date(Date.now() - days * 86400000).toISOString();
+  const { data, error } = await supabase.from("donations").select("*, profiles!donations_from_user_fkey(username, display_name)").eq("to_user", userId).gte("created_at", since).order("created_at", { ascending: false }).limit(1000);
+  if (error) fail(error);
+  return data as unknown as Donation[];
+}
+export async function listReachLinks(chainIds: number[], days = 30): Promise<{ chain_id: number; created_at: string; user_id: string }[]> {
+  if (chainIds.length === 0) return [];
+  const since = new Date(Date.now() - days * 86400000).toISOString();
+  const { data } = await supabase.from("links").select("chain_id, created_at, user_id").in("chain_id", chainIds).eq("status", "sichtbar").gte("created_at", since).limit(2000);
+  return (data ?? []) as { chain_id: number; created_at: string; user_id: string }[];
+}
+
+/* ---------- Turniere ---------- */
+export async function listTournaments(limit = 30): Promise<Tournament[]> {
+  const { data, error } = await supabase.from("tournaments").select("*").order("created_at", { ascending: false }).limit(limit);
+  if (error) fail(error);
+  return data as Tournament[];
+}
+export async function getTournament(id: number): Promise<{ t: Tournament; entries: TournamentEntry[]; duels: (TournamentDuel & { duel: DuelView })[] } | null> {
+  const { data: t } = await supabase.from("tournaments").select("*").eq("id", id).maybeSingle();
+  if (!t) return null;
+  const [{ data: entries }, { data: tds }] = await Promise.all([
+    supabase.from("tournament_entries").select("*").eq("tournament_id", id).order("created_at"),
+    supabase.from("tournament_duels").select("*").eq("tournament_id", id).order("round"),
+  ]);
+  const chainIds = (entries ?? []).map((e: TournamentEntry) => e.chain_id);
+  const { data: chains } = chainIds.length ? await supabase.from("chain_stats").select("*").in("id", chainIds) : { data: [] };
+  const byId = new Map((chains as ChainStats[] | null ?? []).map((c) => [c.id, c]));
+  const duelIds = (tds ?? []).map((d: TournamentDuel) => d.duel_id);
+  const { data: duels } = duelIds.length ? await supabase.from("duels").select("*").in("id", duelIds) : { data: [] };
+  const views = await withChains((duels as Duel[] | null) ?? []);
+  const viewById = new Map(views.map((v) => [v.id, v]));
+  return {
+    t: t as Tournament,
+    entries: ((entries ?? []) as TournamentEntry[]).map((e) => ({ ...e, chain: byId.get(e.chain_id) })),
+    duels: ((tds ?? []) as TournamentDuel[]).filter((d) => viewById.has(d.duel_id)).map((d) => ({ ...d, duel: viewById.get(d.duel_id)! })),
+  };
+}
+export async function createTournament(title: string, size: 4 | 8, roundMinutes: number): Promise<number> {
+  const { data, error } = await supabase.rpc("create_tournament", { p_title: title, p_size: size, p_round_minutes: roundMinutes });
+  if (error) fail(error);
+  return data as number;
+}
+export async function joinTournament(id: number, chainId: number) {
+  const { error } = await supabase.rpc("join_tournament", { p_id: id, p_chain: chainId });
+  if (error) fail(error);
+}
+export async function advanceTournament(id: number) {
+  await supabase.rpc("advance_tournament", { p_id: id });
+}
+
+/* ---------- Admin ---------- */
+export async function getAdminStats(): Promise<AdminStats> {
+  const { data, error } = await supabase.rpc("admin_stats");
+  if (error) fail(error);
+  return data as AdminStats;
+}
+export async function listPayoutQueue(): Promise<PayoutRow[]> {
+  const { data, error } = await supabase.from("payout_queue").select("*").order("created_at", { ascending: false }).limit(200);
+  if (error) fail(error);
+  return data as PayoutRow[];
+}
+export async function adminSetPayout(id: number, status: "bezahlt" | "abgelehnt") {
+  const { error } = await supabase.rpc("admin_set_payout", { p_id: id, p_status: status });
+  if (error) fail(error);
+}
+export async function listSettings(): Promise<{ key: string; value: string }[]> {
+  const { data } = await supabase.from("app_settings").select("key, value").order("key");
+  return (data ?? []) as { key: string; value: string }[];
+}
+export async function adminSetSetting(key: string, value: string) {
+  const { error } = await supabase.rpc("admin_set_setting", { p_key: key, p_value: value });
+  if (error) fail(error);
+}
+export async function adminSetRole(userId: string, moderator: boolean, admin: boolean) {
+  const { error } = await supabase.rpc("admin_set_role", { p_user: userId, p_moderator: moderator, p_admin: admin });
+  if (error) fail(error);
+}
+export async function listStaff(): Promise<Profile[]> {
+  const { data } = await supabase.from("profiles").select("*").or("is_moderator.eq.true,is_admin.eq.true").order("username");
+  return (data ?? []) as Profile[];
 }
 
 /* ---------- Ketten-Duell ---------- */

@@ -11,6 +11,7 @@ const ITEMS: { to: string; key: string; icon: IconName }[] = [
   { to: "/stream", key: "nav_stream", icon: "play" },
   { to: "/today", key: "nav_today", icon: "sun" },
   { to: "/chains", key: "nav_chains", icon: "chain" },
+  { to: "/leaderboards", key: "nav_boards", icon: "crown" },
   { to: "/shop", key: "nav_shop", icon: "star" },
 ];
 
@@ -31,7 +32,9 @@ export function Nav() {
             <>
               <Link to="/new" className="btn whitespace-nowrap px-3 text-xs sm:px-5 sm:text-sm"><Icon name="spark" size={15} /><span className="hidden sm:inline">{t("nav_start_chain")}</span><span className="sm:hidden">+</span></Link>
               <NotificationBell />
+              <Link to="/dashboard" className="muted hidden hover:text-white sm:inline" title={t("dash_title")}><Icon name="spark" size={18} /></Link>
               {profile.is_moderator && <Link to="/moderation" className="muted hover:text-white" title={t("nav_moderation")}><Icon name="shield" size={18} /></Link>}
+              {profile.is_admin && <Link to="/admin" className="muted hover:text-white" title={t("admin_title")}><Icon name="lock" size={18} /></Link>}
               <Link to="/shop" className="hidden items-center gap-1 text-sm sm:flex" title={t("nav_your_stars")}>
                 <span style={{ color: "var(--star)" }}><Icon name="star" size={15} filled /></span> {profile.stars}
               </Link>

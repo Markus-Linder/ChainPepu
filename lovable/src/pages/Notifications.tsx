@@ -37,7 +37,8 @@ const KEY: Record<string, string> = {
   reported: "notif_reported", blocked: "notif_blocked", auto_blocked: "notif_auto_blocked", approved: "notif_approved",
   duel_challenge: "notif_duel_challenge", duel_accepted: "notif_duel_accepted", duel_declined: "notif_duel_declined",
   duel_won: "notif_duel_won", duel_lost: "notif_duel_lost", duel_draw: "notif_duel_draw", invite_milestone: "notif_invite_milestone",
-  weekly_won: "notif_weekly_won",
+  weekly_won: "notif_weekly_won", tournament_round: "notif_tournament_round", tournament_won: "notif_tournament_won",
+  payout_paid: "notif_payout_paid", payout_rejected: "notif_payout_rejected",
 };
 
 export default function Notifications() {

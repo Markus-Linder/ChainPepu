@@ -7,6 +7,7 @@ export type Profile = {
   stars: number;
   earned_stars: number;
   is_moderator: boolean;
+  is_admin: boolean;
   duel_wins: number;
   xp: number;
   level: number;
@@ -63,6 +64,15 @@ export type LinkRow = {
 };
 
 export type WeekLeader = ChainStats & { week_points: number };
+
+export type CreatorBoard = { id: string; username: string; display_name: string; planet_seed: number; planet_skin: string; level: number; duel_wins: number; created_at: string; stars_received: number; follower_count: number; crowns: number; chains_started: number; reach: number };
+
+export type Tournament = { id: number; title: string; size: 4 | 8; round_minutes: number; status: "offen" | "laeuft" | "beendet"; round: number; created_by: string; winner_chain: number | null; created_at: string };
+export type TournamentEntry = { tournament_id: number; chain_id: number; user_id: string; eliminated: boolean; chain?: ChainStats };
+export type TournamentDuel = { tournament_id: number; round: number; duel_id: number };
+
+export type AdminStats = Record<string, number> & { new_users_14d: { day: string; n: number }[]; stars_14d: { day: string; n: number }[] };
+export type PayoutRow = Payout & { user_id: string; username: string; display_name: string };
 export type WeeklyChallenge = { week_start: string; pool_stars: number; winner_chain: number | null; winner_user: string | null; settled_at: string };
 
 export type Reply = {

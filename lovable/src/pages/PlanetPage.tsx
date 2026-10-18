@@ -71,6 +71,7 @@ export default function PlanetPage() {
           <div className="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start">
             <FollowButton creatorId={user.id} onChange={reload} />
             {mine && <Link to="/new" className="btn"><Icon name="spark" size={15} />{t("nav_start_chain")}</Link>}
+            {mine && <Link to="/dashboard" className="btn btn-ghost"><Icon name="star" size={15} />{t("dash_title")}</Link>}
             {mine && <Link to="/shop" className="btn btn-ghost">{t("design_planet", { n: me!.stars })}</Link>}
           </div>
         </div>
