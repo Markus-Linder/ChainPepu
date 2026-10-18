@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
-import { ensureDailyChain, getMapEdges, getPayoutSettings, getStats, listChains, listProfiles, listTopics } from "@/lib/api";
+import { ensureDailyChain, getMapEdges, getPayoutSettings, getStats, listChains, listLiveDuels, listProfiles, listTopics } from "@/lib/api";
+import { DuelCard } from "@/components/Duel";
 import { displayTitle, secondsUntilMidnightUtc, themeForDay, todayKey } from "@/lib/events";
 import { useT } from "@/lib/i18n";
 import { useAsync, Loading } from "@/lib/useAsync";
@@ -14,8 +15,8 @@ export default function Home() {
   const { profile, loading: authLoading } = useAuth();
   const { data, loading } = useAsync(async () => {
     await ensureDailyChain().catch(() => {});
-    const [users, chains, topics, edges, stats, settings] = await Promise.all([listProfiles(), listChains("hot", 200), listTopics(6), getMapEdges(), getStats(), getPayoutSettings()]);
-    return { users, chains, topics, edges, stats, settings };
+    const [users, chains, topics, edges, stats, settings, duels] = await Promise.all([listProfiles(), listChains("hot", 200), listTopics(6), getMapEdges(), getStats(), getPayoutSettings(), listLiveDuels(4).catch(() => [])]);
+    return { users, chains, topics, edges, stats, settings, duels };
   }, []);
 
   const linkCount = new Map<string, number>();
@@ -65,9 +66,23 @@ export default function Home() {
       {loading || !data ? <Loading /> : (
         <UniverseMap
           planets={data.users.map((u) => ({ id: u.id, username: u.username, display_name: u.display_name, seed: u.planet_seed, skin: u.planet_skin, links: linkCount.get(u.id) ?? 0 }))}
-          chains={data.chains.map((c) => ({ id: c.id, title: displayTitle(c, lang), boost: c.boost, link_count: c.link_count, donated_stars: c.donated_stars, daily: Boolean(c.daily_day), topic: c.is_topic && Boolean(c.ends_at && new Date(c.ends_at) > new Date()), origin: c.origin_user_id }))}
+          chains={data.chains.map((c) => ({ id: c.id, title: displayTitle(c, lang), boost: c.boost, link_count: c.link_count, donated_stars: c.donated_stars, daily: Boolean(c.daily_day), topic: c.is_topic && Boolean(c.ends_at && new Date(c.ends_at) > new Date()), origin: c.origin_user_id, crowns: c.crowns ?? 0, duel: Boolean(c.active_duel_id) }))}
           edges={data.edges}
         />
+      )}
+
+      {data && (
+        <section>
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <div>
+              <h2 className="flex items-center gap-2 text-xl font-bold"><span className="inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-red-400" /><Icon name="swords" size={20} />{t("duels_title")}</h2>
+              <p className="muted text-sm">{t("duels_text")}</p>
+            </div>
+          </div>
+          {data.duels.length === 0 ? <p className="muted text-sm">{t("no_duels")}</p> : (
+            <div className="grid gap-3 sm:grid-cols-2">{data.duels.map((d) => <DuelCard key={d.id} duel={d} />)}</div>
+          )}
+        </section>
       )}
 
       {data && (

@@ -1,7 +1,7 @@
 /** Brand icon set: thin, geometric, one stroke weight. Used instead of emojis everywhere. */
 import type { SVGProps } from "react";
 
-export type IconName = "planet" | "chain" | "star" | "bolt" | "shield" | "bell" | "comet" | "play" | "reply" | "globe" | "flag" | "sun" | "check" | "lock" | "spark" | "users" | "video" | "image";
+export type IconName = "planet" | "chain" | "star" | "bolt" | "shield" | "bell" | "comet" | "play" | "reply" | "globe" | "flag" | "sun" | "check" | "lock" | "spark" | "users" | "video" | "image" | "crown" | "swords";
 
 const PATHS: Record<IconName, React.ReactNode> = {
   planet: <><circle cx="12" cy="12" r="5.5" /><path d="M3.5 9.5c-1.4 2.7 8.8 9.6 16.2 6.1M20.5 9c1.2-1.8-2.2-3-5.3-2.4" /></>,
@@ -22,6 +22,8 @@ const PATHS: Record<IconName, React.ReactNode> = {
   users: <><circle cx="9" cy="8.5" r="3.5" /><path d="M2.5 20c.5-4 3.3-6 6.5-6s6 2 6.5 6" /><circle cx="17" cy="9.5" r="2.5" /><path d="M16 14.5c2.8 0 5 1.7 5.5 5" /></>,
   video: <><rect x="3" y="6" width="13" height="12" rx="2" /><path d="M16 10l5-2.5v9L16 14" /></>,
   image: <><rect x="3.5" y="5" width="17" height="14" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="M20 16l-5-5-6.5 7" /></>,
+  crown: <><path d="M4 17.5L3 7.5l5 4 4-6.5 4 6.5 5-4-1 10z" /><path d="M4 17.5h16v2.5H4z" /></>,
+  swords: <><path d="M4 4l9.5 9.5M20 4l-9.5 9.5" /><path d="M14.5 13.5L19 18M9.5 13.5L5 18" /><path d="M17 19l2-2M5 17l2 2" /></>,
 };
 
 export function Icon({ name, size = 18, className = "", filled = false, ...rest }: { name: IconName; size?: number; filled?: boolean } & SVGProps<SVGSVGElement>) {

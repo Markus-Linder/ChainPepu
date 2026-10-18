@@ -13,6 +13,7 @@ import Notifications from "@/pages/Notifications";
 import Moderation from "@/pages/Moderation";
 import Rules from "@/pages/Rules";
 import About from "@/pages/About";
+import Arena from "@/pages/Arena";
 import NotFound, { Invite, Login, ShopSuccess, Signup } from "@/pages/Small";
 
 /** Old German paths keep working (links in the wild, QR codes, bookmarks). */
@@ -53,6 +54,7 @@ export default function App() {
             <Route path="/moderation" element={<Moderation />} />
             <Route path="/rules" element={<Rules />} />
             <Route path="/about" element={<About />} />
+            <Route path="/duel/:id" element={<Arena />} />
             <Route path="/heute" element={<Navigate to="/today" replace />} />
             <Route path="/ketten" element={<Navigate to="/chains" replace />} />
             <Route path="/neu" element={<Navigate to="/new" replace />} />

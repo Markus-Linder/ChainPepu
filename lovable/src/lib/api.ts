@@ -3,7 +3,7 @@
  * Schreiben läuft über Datenbank-Funktionen (RPC), die selbst prüfen.
  */
 import { supabase } from "@/integrations/supabase/client";
-import type { ChainStats, CreatorStats, Donation, Invite, LinkRow, MapEdge, Notification, Payout, Profile, Reply, ReportedLink, Verdict } from "./types";
+import type { ChainStats, CreatorStats, Donation, Duel, DuelEvent, DuelView, Invite, LinkRow, MapEdge, Notification, Payout, Profile, Reply, ReportedLink, Verdict } from "./types";
 import { themeForDay, todayKey } from "./events";
 
 function fail(error: { message: string } | null): never {
@@ -312,4 +312,65 @@ export async function moderateLink(linkId: number, status: "sichtbar" | "gesperr
 export async function acceptRules() {
   const { error } = await supabase.rpc("accept_rules");
   if (error) fail(error);
+}
+
+/* ---------- Ketten-Duell ---------- */
+async function withChains(duels: Duel[]): Promise<DuelView[]> {
+  const ids = [...new Set(duels.flatMap((d) => [d.chain_a, d.chain_b]))];
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase.from("chain_stats").select("*").in("id", ids);
+  if (error) fail(error);
+  const byId = new Map((data as ChainStats[]).map((c) => [c.id, c]));
+  return duels.filter((d) => byId.has(d.chain_a) && byId.has(d.chain_b)).map((d) => ({ ...d, a: byId.get(d.chain_a)!, b: byId.get(d.chain_b)! }));
+}
+export async function listLiveDuels(limit = 6): Promise<DuelView[]> {
+  const { data, error } = await supabase.from("duels").select("*").eq("status", "laeuft").order("ends_at").limit(limit);
+  if (error) fail(error);
+  return withChains(data as Duel[]);
+}
+export async function getDuel(id: number): Promise<DuelView | null> {
+  const { data } = await supabase.from("duels").select("*").eq("id", id).maybeSingle();
+  if (!data) return null;
+  return (await withChains([data as Duel]))[0] ?? null;
+}
+export async function listDuelsForChain(chainId: number): Promise<DuelView[]> {
+  const { data, error } = await supabase.from("duels").select("*").or(`chain_a.eq.${chainId},chain_b.eq.${chainId}`).order("created_at", { ascending: false }).limit(20);
+  if (error) fail(error);
+  return withChains(data as Duel[]);
+}
+export async function listDuelsForUser(userId: string): Promise<DuelView[]> {
+  const { data, error } = await supabase.from("duels").select("*").or(`challenger_id.eq.${userId},opponent_id.eq.${userId}`).order("created_at", { ascending: false }).limit(30);
+  if (error) fail(error);
+  return withChains(data as Duel[]);
+}
+export async function listDuelEvents(duelId: number, limit = 40): Promise<DuelEvent[]> {
+  const { data, error } = await supabase.from("duel_events").select("*").eq("duel_id", duelId).order("created_at", { ascending: false }).limit(limit);
+  if (error) fail(error);
+  return data as DuelEvent[];
+}
+export async function createDuel(chainA: number, chainB: number, minutes: number): Promise<number> {
+  const { data, error } = await supabase.rpc("create_duel", { p_chain_a: chainA, p_chain_b: chainB, p_minutes: minutes });
+  if (error) fail(error);
+  return data as number;
+}
+export async function respondDuel(duelId: number, accept: boolean) {
+  const { error } = await supabase.rpc("respond_duel", { p_duel_id: duelId, p_accept: accept });
+  if (error) fail(error);
+}
+export async function finishDuel(duelId: number) {
+  const { error } = await supabase.rpc("finish_duel", { p_duel_id: duelId });
+  if (error) fail(error);
+}
+export async function getDuelSettings(): Promise<{ mult: number; link: number; reply: number }> {
+  const { data } = await supabase.from("app_settings").select("key, value").in("key", ["duel_star_multiplier", "duel_link_points", "duel_reply_points"]);
+  const m = Object.fromEntries((data ?? []).map((r: { key: string; value: string }) => [r.key, Number(r.value)]));
+  return { mult: m.duel_star_multiplier ?? 2, link: m.duel_link_points ?? 5, reply: m.duel_reply_points ?? 2 };
+}
+/** Live updates for one duel (score and ticker). Returns an unsubscribe function. */
+export function subscribeDuel(duelId: number, onChange: () => void): () => void {
+  const channel = supabase.channel(`duel-${duelId}`)
+    .on("postgres_changes", { event: "*", schema: "public", table: "duels", filter: `id=eq.${duelId}` }, onChange)
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "duel_events", filter: `duel_id=eq.${duelId}` }, onChange)
+    .subscribe();
+  return () => { void supabase.removeChannel(channel); };
 }

@@ -15,6 +15,7 @@ Bilder und Videos im Objektspeicher statt auf dem App-Server, zustandsloses Fron
 - **Spenden 80/20**: Von jeder Spende gehen 80 % an den Creator, 20 % an die Plattform (`app_settings.creator_share_percent`). Hinweis dazu auf der Startseite, im Shop und in den Regeln
 - **Auszahlung** verdienter Sterne ab Mindestbetrag; alle Ketten eines Creators bleiben dauerhaft im Profil abrufbar (Archiv nach Jahren, durchsuchbar)
 - **Prüfung VOR der Veröffentlichung**: Jeder Text, jedes Foto und jedes Video (als Standbilder) wird von Claude geprüft, bevor es sichtbar wird. Dazu Wortfilter, Melden, Prüfschwelle und Moderationsseite
+- **Ketten-Duell (unser Live-Match)**: Ein Creator fordert mit einer eigenen Kette eine fremde Kette heraus (1 h bis 24 h). Nimmt der andere an, läuft das Duell live: jedes sichtbare Glied bringt 5 Punkte, jede Antwort 2, jeder gespendete Stern zählt doppelt. Arena-Seite `/duel/:id` mit Tauziehen-Balken, Countdown und Live-Ticker (Supabase Realtime). Die Gewinner-Kette bekommt eine Krone ♛ (auf Karte, Karten und Kettenseite sichtbar), der Creator einen Duell-Sieg im Profil. Gegen Spam zählt pro Planet nur ein Glied pro Minute. Alle Werte in `app_settings` (`duel_*`) einstellbar
 - **5 Sprachen**: Englisch, Deutsch, Spanisch, Französisch, Portugiesisch. Automatische Erkennung, Umschalter in Navigation und Fußzeile. Tagesthemen und Mitteilungen werden übersetzt
 - **Partner-Seite** `/about` für Investoren: Mechanik, Geschäftsmodell, Sicherheit, Technik, Live-Zahlen (nichts erfunden)
 - **PWA**, eigenes Markendesign (Obsidian, Violett → Magenta, Champagner-Gold, Space Grotesk + Inter, eigenes Icon-Set)
@@ -29,6 +30,7 @@ Bilder und Videos im Objektspeicher statt auf dem App-Server, zustandsloses Fron
 - `20261017000000_chainpepu.sql`: Tabellen, Sichten, RLS, Grundfunktionen, Bild-Bucket
 - `20261018000000_creator_features.sql`: Videos, Folgen, Mitteilungen, Spenden (80/20), Auszahlungen, Meldungen, Moderation, Wortfilter, Video-Bucket
 - `20261019000000_replies_topics_premoderation.sql`: Antworten, Creator-Themen, Prüf-Status `pruefung`, übersetzbare Mitteilungen
+- `20261020000000_duels.sql`: Ketten-Duell (Tabellen `duels`, `duel_events`, Punkte-Trigger, Kronen, Realtime-Freigabe)
 
 **4. Code übernehmen** — die Dateien aus `src/`, `public/` und `index.html` in das Lovable-Projekt übernehmen, am einfachsten über GitHub (Lovable zieht Änderungen automatisch nach). Wenn Lovable schon ein `src/integrations/supabase/client.ts` angelegt hat, dessen Version behalten.
 

@@ -14,6 +14,8 @@ export function ChainCard({ chain }: { chain: ChainStats }) {
       style={{ boxShadow: `0 0 ${10 + heat * 40}px rgba(${glow},${0.15 + heat * 0.4})` }}>
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-semibold leading-snug">
+          {chain.crowns > 0 && <span className="mr-1 text-[#f2c46d]" title={t("duel_crowns")}>♛{chain.crowns > 1 ? chain.crowns : ""} </span>}
+          {chain.active_duel_id && <span className="mr-1 text-[#ff5a5a]" title={t("map_duel")}>⚔ </span>}
           {chain.daily_day ? "☀ " : chain.is_topic ? <span style={{ color: "#ff5cc8" }}>✦ </span> : ""}{displayTitle(chain, lang)}
         </h3>
         <div className="flex shrink-0 items-center gap-2 text-xs">

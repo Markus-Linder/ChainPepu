@@ -4,7 +4,7 @@ import { planetLook, skinColors } from "@/lib/planet";
 import { useT } from "@/lib/i18n";
 
 export type MapPlanet = { id: string; username: string; display_name: string; seed: number; skin: string; links: number };
-export type MapChain = { id: number; title: string; boost: number; link_count: number; donated_stars: number; daily: boolean; topic: boolean; origin: string | null };
+export type MapChain = { id: number; title: string; boost: number; link_count: number; donated_stars: number; daily: boolean; topic: boolean; origin: string | null; crowns: number; duel: boolean };
 export type MapEdgeView = { chain_id: number; from_user: string; to_user: string };
 
 const W = 1200;
@@ -50,7 +50,7 @@ export function UniverseMap({ planets, chains, edges }: { planets: MapPlanet[]; 
       seen.add(c.id);
       out.push({ c, x: o.x + 26, y: o.y - 22 });
     }
-    return out.filter(({ c }) => c.donated_stars > 0 || c.boost > 0 || c.topic);
+    return out.filter(({ c }) => c.donated_stars > 0 || c.boost > 0 || c.topic || c.crowns > 0 || c.duel);
   }, [chains, edges, pos, chainById]);
 
   function onWheel(e: React.WheelEvent) {
@@ -129,12 +129,12 @@ export function UniverseMap({ planets, chains, edges }: { planets: MapPlanet[]; 
           })}
           {/* Badges: stars from fans, boosts, topics - right at the chain */}
           {badges.map(({ c, x, y }) => {
-            const label = [c.donated_stars > 0 ? `★ ${c.donated_stars}` : "", c.boost > 0 ? `⚡${c.boost}` : "", c.topic ? "✦" : ""].filter(Boolean).join("  ");
+            const label = [c.crowns > 0 ? `♛${c.crowns > 1 ? c.crowns : ""}` : "", c.duel ? "⚔ LIVE" : "", c.donated_stars > 0 ? `★ ${c.donated_stars}` : "", c.boost > 0 ? `⚡${c.boost}` : "", c.topic ? "✦" : ""].filter(Boolean).join("  ");
             const w = label.length * 7.2 + 16;
-            const color = c.topic ? COLOR.topic : COLOR.daily;
+            const color = c.duel ? "#ff5a5a" : c.crowns > 0 ? COLOR.daily : c.topic ? COLOR.topic : COLOR.daily;
             return (
               <Link key={`b${c.id}`} to={`/c/${c.id}`}>
-                <g onPointerEnter={() => setHover(c.id)} onPointerLeave={() => setHover(null)} style={{ filter: `drop-shadow(0 0 10px ${color})` }}>
+                <g onPointerEnter={() => setHover(c.id)} onPointerLeave={() => setHover(null)} className={c.duel ? "pulse" : undefined} style={{ filter: `drop-shadow(0 0 10px ${color})` }}>
                   <rect x={x - w / 2} y={y - 11} width={w} height={22} rx={11} fill="rgba(6,5,13,0.85)" stroke={color} strokeOpacity={0.9} strokeWidth={1.2} />
                   <text x={x} y={y + 4} textAnchor="middle" fontSize="12" fontWeight="700" fill={color}>{label}</text>
                 </g>
@@ -148,6 +148,7 @@ export function UniverseMap({ planets, chains, edges }: { planets: MapPlanet[]; 
         <span><i className="mr-2 inline-block h-2 w-5 rounded" style={{ background: COLOR.chain }} />{t("chain")}</span>
         <span><i className="mr-2 inline-block h-2 w-5 rounded" style={{ background: COLOR.daily }} />{t("daily_event")} / ★</span>
         <span><i className="mr-2 inline-block h-2 w-5 rounded" style={{ background: COLOR.topic }} />{t("topic_badge")}</span>
+        <span><i className="mr-2 inline-block h-2 w-5 rounded" style={{ background: "#ff5a5a" }} />⚔ {t("duel")} · ♛ {t("duel_crowns")}</span>
       </div>
       {hovered && (
         <div className="pointer-events-none absolute left-3 top-3 max-w-xs rounded-xl bg-black/75 px-3 py-2 text-sm backdrop-blur">
@@ -156,6 +157,8 @@ export function UniverseMap({ planets, chains, edges }: { planets: MapPlanet[]; 
             {t("n_links", { n: hovered.link_count })}
             {hovered.donated_stars > 0 && <> · <span style={{ color: COLOR.daily }}>{t("map_stars", { n: hovered.donated_stars })}</span></>}
             {hovered.boost > 0 && <> · {t("map_boost", { n: hovered.boost })}</>}
+            {hovered.crowns > 0 && <> · ♛ {t("map_crowns", { n: hovered.crowns })}</>}
+            {hovered.duel && <> · <span style={{ color: "#ff5a5a" }}>⚔ {t("map_duel")}</span></>}
           </div>
         </div>
       )}

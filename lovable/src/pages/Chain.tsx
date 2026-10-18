@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
-import { getChain, getLinks, getPayoutSettings, listDonations, listReplies } from "@/lib/api";
+import { getChain, getLinks, getPayoutSettings, listDonations, listDuelsForChain, listReplies } from "@/lib/api";
+import { ChallengeForm, DuelBanner, DuelCard } from "@/components/Duel";
 import { displayTitle, secondsUntil } from "@/lib/events";
 import { useT } from "@/lib/i18n";
 import { BOOST_COST } from "@/lib/shop";
@@ -24,12 +25,14 @@ export default function Chain() {
   const { data, loading, reload } = useAsync(async () => {
     const chain = await getChain(id);
     if (!chain) return null;
-    const [links, replies, donations, settings] = await Promise.all([getLinks(id), listReplies(id), listDonations(id), getPayoutSettings()]);
-    return { chain, links, replies, donations, settings };
+    const [links, replies, donations, settings, duels] = await Promise.all([getLinks(id), listReplies(id), listDonations(id), getPayoutSettings(), listDuelsForChain(id).catch(() => [])]);
+    return { chain, links, replies, donations, settings, duels };
   }, [id]);
   if (loading) return <Loading />;
   if (!data) return <NotFound />;
-  const { chain, links, replies, donations, settings } = data;
+  const { chain, links, replies, donations, settings, duels } = data;
+  const activeDuel = duels.find((d) => d.status === "offen" || d.status === "laeuft");
+  const pastDuels = duels.filter((d) => d.status === "beendet");
   const visible = links.filter((l) => l.status === "sichtbar");
   const title = displayTitle(chain, lang);
   const ended = Boolean(chain.ends_at && new Date(chain.ends_at) < new Date());
@@ -43,7 +46,7 @@ export default function Chain() {
           <p className="kicker">
             {chain.daily_day ? t("daily_event_on", { date: chain.daily_day }) : chain.is_topic ? <span style={{ color: "#ff3d9a" }}>✦ {t("topic_badge")}</span> : t("chain")}
           </p>
-          <h1 className="mt-1 text-2xl font-bold sm:text-3xl">{title}</h1>
+          <h1 className="mt-1 text-2xl font-bold sm:text-3xl">{chain.crowns > 0 && <span className="mr-2 text-[#f2c46d]" title={t("duel_crowns")}><Icon name="crown" size={24} />{chain.crowns > 1 ? ` ${chain.crowns}` : ""}</span>}{title}</h1>
           {chain.is_topic && chain.description && <p className="mt-2 text-base">{chain.description}</p>}
           <p className="muted mt-2 text-sm">
             {t("n_links", { n: chain.link_count })} · {t("n_planets", { n: chain.user_count })}
@@ -58,6 +61,7 @@ export default function Chain() {
           </div>
           {notice && <div className="mt-3"><Notice error={blockedMine ? notice : null} ok={blockedMine ? null : notice} /></div>}
         </div>
+        {activeDuel && <DuelBanner duel={activeDuel} chainId={chain.id} />}
         <ol className="space-y-4">
           {links.map((l) => <LinkItem key={l.id} link={l} isOrigin={l.user_id === chain.origin_user_id && l.position === 1} replies={replies.filter((r) => r.link_id === l.id)} onChanged={reload} />)}
         </ol>
@@ -85,6 +89,13 @@ export default function Chain() {
                 ))}
               </ul>
             )}
+          </div>
+        )}
+        {!activeDuel && !chain.daily_day && <ChallengeForm target={chain} />}
+        {pastDuels.length > 0 && (
+          <div className="space-y-2">
+            <h2 className="flex items-center gap-2 text-sm font-semibold"><Icon name="swords" size={14} />{t("duel_history")}</h2>
+            {pastDuels.slice(0, 3).map((d) => <DuelCard key={d.id} duel={d} />)}
           </div>
         )}
         <div className="card p-4">

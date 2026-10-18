@@ -7,6 +7,7 @@ export type Profile = {
   stars: number;
   earned_stars: number;
   is_moderator: boolean;
+  duel_wins: number;
   invited_by: string | null;
   accepted_rules_at: string | null;
   created_at: string;
@@ -29,6 +30,8 @@ export type ChainStats = {
   origin_username: string | null;
   origin_display_name: string | null;
   last_activity: string;
+  crowns: number;
+  active_duel_id: number | null;
 };
 
 export type ContentStatus = "sichtbar" | "gemeldet" | "gesperrt" | "pruefung";
@@ -74,11 +77,11 @@ export type Invite = {
 
 export type MapEdge = { chain_id: number; from_user: string; to_user: string };
 
-export type NotificationParams = { key?: string; actor?: string; title?: string; stars?: number; share?: number; reason?: string };
+export type NotificationParams = { key?: string; actor?: string; title?: string; stars?: number; share?: number; reason?: string; duel?: number };
 
 export type Notification = {
   id: number;
-  type: "neue_kette" | "spende" | "neuer_follower" | "glied" | "moderation" | "antwort";
+  type: "neue_kette" | "spende" | "neuer_follower" | "glied" | "moderation" | "antwort" | "duell";
   actor_id: string | null;
   chain_id: number | null;
   message: string;
@@ -104,3 +107,35 @@ export type Payout = { id: number; stars: number; cents: number; status: string;
 export type ReportedLink = LinkRow & { reports: { reason: string; created_at: string }[] };
 
 export type Verdict = { status: ContentStatus; note: string | null };
+
+export type DuelStatus = "offen" | "laeuft" | "beendet" | "abgelehnt";
+
+export type Duel = {
+  id: number;
+  chain_a: number;
+  chain_b: number;
+  challenger_id: string;
+  opponent_id: string;
+  status: DuelStatus;
+  duration_minutes: number;
+  starts_at: string | null;
+  ends_at: string | null;
+  score_a: number;
+  score_b: number;
+  winner_chain: number | null;
+  created_at: string;
+};
+
+export type DuelEvent = {
+  id: number;
+  duel_id: number;
+  side: "a" | "b";
+  kind: "glied" | "antwort" | "stern";
+  points: number;
+  actor_id: string | null;
+  actor_name: string | null;
+  created_at: string;
+};
+
+/** A duel together with both chains, ready for display. */
+export type DuelView = Duel & { a: ChainStats; b: ChainStats };

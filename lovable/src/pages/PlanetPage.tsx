@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
-import { getCreatorStats, getPayoutSettings, getProfileByUsername, listChainsByOrigin, listChainsJoined, listLinksByUser, listPayouts } from "@/lib/api";
+import { getCreatorStats, getPayoutSettings, getProfileByUsername, listChainsByOrigin, listChainsJoined, listDuelsForUser, listLinksByUser, listPayouts } from "@/lib/api";
+import { DuelCard } from "@/components/Duel";
 import { displayTitle } from "@/lib/events";
 import { useT } from "@/lib/i18n";
 import { useAsync, Loading } from "@/lib/useAsync";
@@ -20,10 +21,10 @@ export default function PlanetPage() {
     const user = await getProfileByUsername(username);
     if (!user) return null;
     const mine = me?.id === user.id;
-    const [started, joined, recent, creator, settings, payouts] = await Promise.all([
-      listChainsByOrigin(user.id), listChainsJoined(user.id), listLinksByUser(user.id, 10), getCreatorStats(user.id), getPayoutSettings(), mine ? listPayouts() : Promise.resolve([]),
+    const [started, joined, recent, creator, settings, payouts, duels] = await Promise.all([
+      listChainsByOrigin(user.id), listChainsJoined(user.id), listLinksByUser(user.id, 10), getCreatorStats(user.id), getPayoutSettings(), mine ? listPayouts() : Promise.resolve([]), listDuelsForUser(user.id).catch(() => []),
     ]);
-    return { user, started, joined, recent, creator, settings, payouts };
+    return { user, started, joined, recent, creator, settings, payouts, duels };
   }, [username, me?.stars, me?.planet_skin, me?.earned_stars]);
 
   // Archive: every chain this creator ever started, grouped by year, searchable. Nothing is ever lost.
@@ -37,9 +38,10 @@ export default function PlanetPage() {
 
   if (loading) return <Loading />;
   if (!data) return <NotFound />;
-  const { user, started, joined, recent, creator, settings, payouts } = data;
+  const { user, started, joined, recent, creator, settings, payouts, duels } = data;
   const mine = me?.id === user.id;
   const totalReach = started.reduce((s, c) => s + c.link_count, 0);
+  const crowns = started.reduce((s, c) => s + (c.crowns ?? 0), 0);
 
   return (
     <div className="space-y-8">
@@ -48,11 +50,12 @@ export default function PlanetPage() {
         <div className="flex-1 text-center sm:text-left">
           <h1 className="text-3xl font-bold">{user.display_name}</h1>
           <p className="muted">@{user.username} · {t("skin")} {t(`skin_${user.planet_skin}`)}</p>
-          <div className="mt-4 grid grid-cols-2 gap-4 text-center sm:grid-cols-4">
+          <div className="mt-4 grid grid-cols-3 gap-4 text-center sm:grid-cols-5">
             <Stat n={creator.follower_count} label={t("stat_followers")} />
             <Stat n={started.length} label={t("stat_chains_started")} />
             <Stat n={totalReach} label={t("stat_reach")} />
             <Stat n={creator.donated_total} label={t("stat_stars_received")} gold />
+            <Stat n={user.duel_wins ?? crowns} label={t("duel_wins")} gold prefix={<Icon name="crown" size={18} />} />
           </div>
           <div className="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start">
             <FollowButton creatorId={user.id} onChange={reload} />
@@ -90,6 +93,12 @@ export default function PlanetPage() {
           ))
         )}
       </section>
+      {duels.length > 0 && (
+        <section>
+          <h2 className="mb-3 flex items-center gap-2 text-xl font-bold"><Icon name="swords" size={20} />{t("duel_history")}</h2>
+          <div className="grid gap-3 sm:grid-cols-2">{duels.map((d) => <DuelCard key={d.id} duel={d} />)}</div>
+        </section>
+      )}
       <section>
         <h2 className="mb-3 text-xl font-bold">{t("chains_joined")}</h2>
         {joined.length === 0 ? <p className="muted">{t("none_yet")}</p> : (
@@ -112,6 +121,6 @@ export default function PlanetPage() {
   );
 }
 
-function Stat({ n, label, gold }: { n: number; label: string; gold?: boolean }) {
-  return <div><div className="text-2xl font-bold" style={gold ? { color: "var(--star)" } : undefined}>{gold ? "★ " : ""}{n}</div><div className="muted text-xs">{label}</div></div>;
+function Stat({ n, label, gold, prefix }: { n: number; label: string; gold?: boolean; prefix?: React.ReactNode }) {
+  return <div><div className="text-2xl font-bold" style={gold ? { color: "var(--star)" } : undefined}>{prefix ?? (gold ? "★ " : "")}{n}</div><div className="muted text-xs">{label}</div></div>;
 }

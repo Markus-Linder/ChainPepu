@@ -7,8 +7,13 @@ import { useAsync, Loading } from "@/lib/useAsync";
 import { Icon, type IconName } from "@/components/Icons";
 import type { Notification } from "@/lib/types";
 
-const ICON: Record<string, IconName> = { neue_kette: "chain", spende: "star", neuer_follower: "users", glied: "spark", moderation: "shield", antwort: "reply" };
-const KEY: Record<string, string> = { new_chain: "notif_new_chain", link: "notif_link", donation: "notif_donation", follower: "notif_follower", reply: "notif_reply", reported: "notif_reported", blocked: "notif_blocked", auto_blocked: "notif_auto_blocked", approved: "notif_approved" };
+const ICON: Record<string, IconName> = { neue_kette: "chain", spende: "star", neuer_follower: "users", glied: "spark", moderation: "shield", antwort: "reply", duell: "swords" };
+const KEY: Record<string, string> = {
+  new_chain: "notif_new_chain", link: "notif_link", donation: "notif_donation", follower: "notif_follower", reply: "notif_reply",
+  reported: "notif_reported", blocked: "notif_blocked", auto_blocked: "notif_auto_blocked", approved: "notif_approved",
+  duel_challenge: "notif_duel_challenge", duel_accepted: "notif_duel_accepted", duel_declined: "notif_duel_declined",
+  duel_won: "notif_duel_won", duel_lost: "notif_duel_lost", duel_draw: "notif_duel_draw",
+};
 
 export default function Notifications() {
   const { t, locale } = useT();
@@ -32,7 +37,10 @@ export default function Notifications() {
               <span className="mt-0.5" style={n.type === "spende" ? { color: "var(--star)" } : undefined}><Icon name={ICON[n.type] ?? "spark"} size={18} filled={n.type === "spende"} /></span>
               <div className="flex-1">
                 <p>{text(n)}</p>
-                <p className="muted mt-1 text-xs">{new Date(n.created_at).toLocaleString(locale)}{n.chain_id && <> · <Link to={`/c/${n.chain_id}`} className="underline">{t("to_chain")}</Link></>}</p>
+                <p className="muted mt-1 text-xs">
+                  {new Date(n.created_at).toLocaleString(locale)}
+                  {n.params?.duel ? <> · <Link to={`/duel/${n.params.duel}`} className="underline">{t("to_duel")}</Link></> : n.chain_id && <> · <Link to={`/c/${n.chain_id}`} className="underline">{t("to_chain")}</Link></>}
+                </p>
               </div>
             </li>
           ))}
