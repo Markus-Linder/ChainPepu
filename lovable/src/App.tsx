@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Link, Navigate, Route, Routes, useParams } from "react-router-dom";
-import { AuthProvider } from "@/lib/auth";
+import { AuthProvider, useAuth } from "@/lib/auth";
 import { LangProvider, LangSwitcher, useT } from "@/lib/i18n";
 import { Nav } from "@/components/Nav";
+import { UsernameForm } from "@/components/Forms";
+import { Logo } from "@/components/Icons";
 import Home from "@/pages/Home";
 import Today from "@/pages/Today";
 import Chains from "@/pages/Chains";
@@ -18,6 +21,24 @@ import NotFound, { Invite, Login, ShopSuccess, Signup } from "@/pages/Small";
 
 /** Old German paths keep working (links in the wild, QR codes, bookmarks). */
 function InviteRedirect() { return <Navigate to={`/invite/${useParams().token}`} replace />; }
+
+/** After a Google/Apple login the planet still has a generated name: ask once for username and display name. */
+function UsernameGate() {
+  const { t } = useT();
+  const { profile } = useAuth();
+  const [done, setDone] = useState(false);
+  if (!profile || done || !profile.username.startsWith("planet_")) return null;
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4 backdrop-blur">
+      <div className="card card-glow w-full max-w-sm p-6">
+        <Logo />
+        <h2 className="mt-4 text-xl font-bold">{t("welcome_title")}</h2>
+        <p className="muted mb-4 text-sm">{t("welcome_text")}</p>
+        <UsernameForm onDone={() => setDone(true)} />
+      </div>
+    </div>
+  );
+}
 
 function Footer() {
   const { t } = useT();
@@ -37,6 +58,7 @@ export default function App() {
       <AuthProvider>
         <div className="stars-bg" />
         <Nav />
+        <UsernameGate />
         <main className="mx-auto max-w-6xl px-4 py-6">
           <Routes>
             <Route path="/" element={<Home />} />

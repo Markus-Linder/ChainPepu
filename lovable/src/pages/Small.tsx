@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { getInvite } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 import { useAsync, Loading } from "@/lib/useAsync";
-import { LoginForm, RegisterForm } from "@/components/Forms";
+import { LoginForm, OAuthButtons, RegisterForm } from "@/components/Forms";
 
 export function Login() {
   const { t } = useT();
@@ -13,7 +13,7 @@ export function Login() {
   return (
     <div className="mx-auto max-w-sm space-y-4">
       <h1 className="text-2xl font-bold">{t("login_title")}</h1>
-      <div className="card p-5"><LoginForm next={next} /></div>
+      <div className="card space-y-4 p-5"><OAuthButtons next={next} /><LoginForm next={next} /></div>
       <p className="muted text-center text-sm">{t("no_planet_yet")} <Link to={`/signup${next ? `?next=${encodeURIComponent(next)}` : ""}`} className="underline">{t("create_now")}</Link></p>
     </div>
   );
@@ -28,7 +28,7 @@ export function Signup() {
     <div className="mx-auto max-w-sm space-y-4">
       <h1 className="text-2xl font-bold">{t("signup_title")}</h1>
       <p className="muted text-sm">{t("signup_text")}</p>
-      <div className="card p-5"><RegisterForm next={next} invite={invite} /></div>
+      <div className="card space-y-4 p-5"><OAuthButtons next={next} /><RegisterForm next={next} invite={invite} /></div>
       <p className="muted text-center text-sm">{t("already")} <Link to={`/login${next ? `?next=${encodeURIComponent(next)}` : ""}`} className="underline">{t("login")}</Link></p>
     </div>
   );

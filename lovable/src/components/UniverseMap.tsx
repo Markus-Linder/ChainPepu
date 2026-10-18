@@ -15,7 +15,9 @@ const COLOR = { chain: "#7b61ff", daily: "#f2c46d", topic: "#ff3d9a", hover: "#f
  * The universe: planets on a spiral, chains as strands between the planets that built them.
  * Stars from fans and boosts are drawn right at the chain, so money is visible where it went.
  */
-export function UniverseMap({ planets, chains, edges }: { planets: MapPlanet[]; chains: MapChain[]; edges: MapEdgeView[] }) {
+export type MapOrbit = { from_user: string; to_user: string };
+
+export function UniverseMap({ planets, chains, edges, orbits = [] }: { planets: MapPlanet[]; chains: MapChain[]; edges: MapEdgeView[]; orbits?: MapOrbit[] }) {
   const { t } = useT();
   const [hover, setHover] = useState<number | null>(null);
   const [view, setView] = useState({ x: 0, y: 0, k: 1 });
@@ -86,6 +88,12 @@ export function UniverseMap({ planets, chains, edges }: { planets: MapPlanet[]; 
         </defs>
         <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`} style={{ transformOrigin: "center" }}>
           <circle cx={W / 2} cy={H / 2} r={300} fill="url(#core)" />
+          {/* Constellations: who invited whom (thin dotted lines) */}
+          {orbits.map((o, i) => {
+            const a = pos.get(o.from_user), b = pos.get(o.to_user);
+            if (!a || !b) return null;
+            return <line key={`o${i}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#8fd3ff" strokeOpacity={0.35} strokeWidth={1} strokeDasharray="3 6" />;
+          })}
           {/* Strands */}
           {edges.map((e, i) => {
             const a = pos.get(e.from_user);
@@ -149,6 +157,7 @@ export function UniverseMap({ planets, chains, edges }: { planets: MapPlanet[]; 
         <span><i className="mr-2 inline-block h-2 w-5 rounded" style={{ background: COLOR.daily }} />{t("daily_event")} / ★</span>
         <span><i className="mr-2 inline-block h-2 w-5 rounded" style={{ background: COLOR.topic }} />{t("topic_badge")}</span>
         <span><i className="mr-2 inline-block h-2 w-5 rounded" style={{ background: "#ff5a5a" }} />⚔ {t("duel")} · ♛ {t("duel_crowns")}</span>
+        <span><i className="mr-2 inline-block h-0.5 w-5 border-t border-dashed" style={{ borderColor: "#8fd3ff" }} />{t("constellation_title")}</span>
       </div>
       {hovered && (
         <div className="pointer-events-none absolute left-3 top-3 max-w-xs rounded-xl bg-black/75 px-3 py-2 text-sm backdrop-blur">

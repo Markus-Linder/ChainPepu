@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { Planet } from "./Planet";
 import { ReplyForm, ReportButton } from "./Forms";
+import { EmbedPlayer } from "./EmbedPlayer";
 
 export function StatusBadge({ status }: { status: LinkRow["status"] }) {
   const { t } = useT();
@@ -41,6 +42,7 @@ export function LinkItem({ link, isOrigin, replies = [], onChanged }: { link: Li
         {link.status === "gesperrt" && link.moderation_note && <p className="mt-1 text-xs text-red-200">{link.moderation_note.replace(/^[^:]*: /, "")}</p>}
         {link.video_url && <video src={link.video_url} controls playsInline preload="metadata" className="mt-3 max-h-[28rem] w-full rounded-lg bg-black" />}
         {link.image_url && <img src={link.image_url} alt="" className="mt-3 max-h-96 rounded-lg object-cover" loading="lazy" />}
+        {link.embed_url && <EmbedPlayer url={link.embed_url} />}
 
         {!hidden && (
           <div className="mt-3 space-y-2 border-t border-white/10 pt-2">
@@ -61,7 +63,10 @@ export function LinkItem({ link, isOrigin, replies = [], onChanged }: { link: Li
               {profile ? (
                 open ? null : <button type="button" className="muted text-xs hover:text-white" onClick={() => setOpen(true)}>💬 {t("reply")}</button>
               ) : <span className="muted text-xs">{t("login_to_reply")}</span>}
-              {profile && profile.id !== link.user_id && <ReportButton linkId={link.id} />}
+              <span className="flex items-center gap-3">
+                {profile && <Link to={`/new?from=${link.id}`} className="muted text-xs hover:text-white" title={t("branch_hint")}>⑂ {t("branch")}</Link>}
+                {profile && profile.id !== link.user_id && <ReportButton linkId={link.id} />}
+              </span>
             </div>
             {open && <ReplyForm linkId={link.id} onDone={() => { onChanged?.(); }} onCancel={() => setOpen(false)} />}
           </div>

@@ -3,7 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { rememberInvite, useAuth } from "@/lib/auth";
 import { messageOf, useT } from "@/lib/i18n";
-import { addLink, addReply, boostChain, buySkin, convertEarnings, createCheckout, createInvite, demoAddStars, donateStars, followCreator, isFollowing, reportLink, requestPayout, startChain, unfollowCreator, uploadFrames, uploadImage, uploadVideo, type MediaFields } from "@/lib/api";
+import { addLink, addReply, boostChain, buySkin, convertEarnings, createCheckout, createInvite, demoAddStars, donateStars, followCreator, getLink, isFollowing, reportLink, requestPayout, setUsername, startChain, unfollowCreator, uploadFrames, uploadImage, uploadVideo, type MediaFields } from "@/lib/api";
+import { EMBED_PATTERN, parseEmbed } from "@/lib/embed";
+import { useAsync } from "@/lib/useAsync";
+import { Icon } from "./Icons";
 import { awaitVerdict, MAX_IMAGE_BYTES, MAX_VIDEO_BYTES, MAX_VIDEO_SECONDS, probeVideo } from "@/lib/moderation";
 import type { Verdict } from "@/lib/types";
 
@@ -76,6 +79,61 @@ function MediaPicker({ media, onChange }: { media: Media; onChange: (m: Media) =
       {media && !isVideo && <img src={URL.createObjectURL(media.file)} alt="" className="max-h-48 rounded-lg" />}
       <Notice error={error} />
     </div>
+  );
+}
+
+/** Paste a TikTok / YouTube / Instagram link: the video is embedded, nothing needs to be re-uploaded. */
+function EmbedField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t } = useT();
+  const bad = value.trim() !== "" && !parseEmbed(value.trim());
+  return (
+    <div>
+      <input className="input text-sm" placeholder={t("embed_ph")} value={value} onChange={(e) => onChange(e.target.value)} />
+      {bad && <p className="mt-1 text-xs text-red-200">{t("err_embed_url")}</p>}
+    </div>
+  );
+}
+function embedOrNull(v: string): string | null {
+  const s = v.trim();
+  return s && EMBED_PATTERN.test(s) && parseEmbed(s) ? s : null;
+}
+
+/** Google / Apple sign-in buttons. */
+export function OAuthButtons({ next }: { next?: string }) {
+  const { t } = useT();
+  const go = (provider: "google" | "apple") => supabase.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.origin + (next || "/") } });
+  return (
+    <div className="space-y-2">
+      <button type="button" className="btn btn-ghost w-full text-sm" onClick={() => go("google")}>
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.9 1.5l2.6-2.5C16.9 3.1 14.7 2 12 2 6.5 2 2 6.5 2 12s4.5 10 10 10c5.8 0 9.6-4.1 9.6-9.8 0-.7-.1-1.2-.2-1.7H12z"/></svg>
+        {t("login_google")}
+      </button>
+      <button type="button" className="btn btn-ghost w-full text-sm" onClick={() => go("apple")}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.3 1.2 9.7.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8 2.1-1.2 2.9-2.4c.9-1.4 1.3-2.7 1.3-2.8-.1 0-2.5-1-2.5-3.8zM14 5.4c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.2-.6 2.8-1.4z"/></svg>
+        {t("login_apple")}
+      </button>
+      <p className="muted text-center text-xs">{t("or_email")}</p>
+    </div>
+  );
+}
+
+/** After a Google/Apple login the planet has a random name: pick username and display name once. */
+export function UsernameForm({ onDone }: { onDone: () => void }) {
+  const { t } = useT();
+  const { profile, refresh } = useAuth();
+  const [f, setF] = useState({ username: "", display_name: profile?.display_name && profile.display_name !== "Planet" ? profile.display_name : "" });
+  const s = useSubmit(async () => {
+    if (!/^[a-z0-9_]{3,20}$/.test(f.username)) throw new Error("err_username");
+    await setUsername(f.username, f.display_name.trim() || f.username);
+    await refresh(); onDone();
+  });
+  return (
+    <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); s.run(undefined); }}>
+      <input className="input" placeholder={t("display_name_ph")} maxLength={40} value={f.display_name} onChange={(e) => setF({ ...f, display_name: e.target.value })} />
+      <input className="input" placeholder={t("username_ph")} required autoFocus value={f.username} onChange={(e) => setF({ ...f, username: e.target.value.toLowerCase() })} />
+      <Notice error={s.error} />
+      <button className="btn w-full" disabled={s.pending}>{s.pending ? t("moment") : t("welcome_save")}</button>
+    </form>
   );
 }
 
@@ -154,24 +212,34 @@ export function LoginForm({ next }: { next?: string }) {
 
 const TOPIC_DAYS = [1, 3, 7, 14];
 
-export function StartChainForm({ topic: topicDefault = false }: { topic?: boolean }) {
+export function StartChainForm({ topic: topicDefault = false, fromLink = null }: { topic?: boolean; fromLink?: number | null }) {
   const nav = useNavigate();
   const { t } = useT();
   const { session } = useAuth();
-  const [title, setTitle] = useState(""); const [text, setText] = useState("");
+  const [title, setTitle] = useState(""); const [text, setText] = useState(""); const [embed, setEmbed] = useState("");
   const [color, setColor] = useState(COLORS[0]); const [media, setMedia] = useState<Media>(null);
   const [topic, setTopic] = useState(topicDefault); const [description, setDescription] = useState(""); const [days, setDays] = useState(3);
+  const origin = useAsync(() => (fromLink ? getLink(fromLink) : Promise.resolve(null)), [fromLink]);
   const s = useSubmit(async (_: undefined, phase) => {
     if (!session) throw new Error("err_login_first");
+    if (embed.trim() && !embedOrNull(embed)) throw new Error("err_embed_url");
     phase(t("uploading"));
     const files = await uploadMedia(session.user.id, media);
-    const { chainId, linkId } = await startChain({ title: title.trim(), text: text.trim(), ...files, color, description: topic ? description.trim() : "", is_topic: topic, days });
+    const { chainId, linkId } = await startChain({ title: title.trim(), text: text.trim(), ...files, embed_url: embedOrNull(embed), color, description: topic ? description.trim() : "", is_topic: topic, days, from_link: fromLink });
     let notice: string | null = null;
     try { notice = linkId ? await verdictMessage("link", linkId, t, phase) : null; } catch (e) { notice = (e as Error).message; }
     nav(`/c/${chainId}`, { state: { notice } });
   });
   return (
     <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); s.run(undefined); }}>
+      {fromLink && origin.data && (
+        <div className="card p-3 text-sm" style={{ borderLeft: `4px solid ${origin.data.color}` }}>
+          <p className="kicker mb-1">⑂ {t("branch_from")}</p>
+          <p className="muted text-xs">{origin.data.profiles.display_name} · <Link to={`/c/${origin.data.chain_id}`} className="underline">{origin.data.chains ? (origin.data.chains.daily_day ? t("daily_event") : origin.data.chains.title) : ""}</Link></p>
+          <p className="mt-1 line-clamp-2">{origin.data.text}</p>
+          <p className="muted mt-1 text-[11px]">{t("branch_hint")}</p>
+        </div>
+      )}
       <input className="input text-lg font-semibold" placeholder={t("chain_title_ph")} maxLength={80} minLength={2} required value={title} onChange={(e) => setTitle(e.target.value)} />
       <label className="card flex cursor-pointer items-start gap-3 p-3 text-sm" style={{ borderColor: topic ? "#ff5cc8" : undefined }}>
         <input type="checkbox" className="mt-1" checked={topic} onChange={(e) => setTopic(e.target.checked)} />
@@ -190,6 +258,7 @@ export function StartChainForm({ topic: topicDefault = false }: { topic?: boolea
       )}
       <textarea className="input min-h-28" placeholder={t("first_link_ph")} maxLength={500} required value={text} onChange={(e) => setText(e.target.value)} />
       <MediaPicker media={media} onChange={setMedia} />
+      <EmbedField value={embed} onChange={setEmbed} />
       <ColorPicker value={color} onChange={setColor} />
       <Notice error={s.error} info={s.info} />
       <button className="btn w-full" disabled={s.pending}>{s.pending ? t("chain_sending") : topic ? t("start_topic") : t("send_chain")}</button>
@@ -200,19 +269,21 @@ export function StartChainForm({ topic: topicDefault = false }: { topic?: boolea
 export function AppendLinkForm({ chainId, onDone }: { chainId: number; onDone: () => void }) {
   const { t } = useT();
   const { session, refresh } = useAuth();
-  const [text, setText] = useState(""); const [color, setColor] = useState(COLORS[0]); const [media, setMedia] = useState<Media>(null);
+  const [text, setText] = useState(""); const [color, setColor] = useState(COLORS[0]); const [media, setMedia] = useState<Media>(null); const [embed, setEmbed] = useState("");
   const s = useSubmit(async (_: undefined, phase) => {
     if (!session) throw new Error("err_login_first");
+    if (embed.trim() && !embedOrNull(embed)) throw new Error("err_embed_url");
     phase(t("uploading"));
     const files = await uploadMedia(session.user.id, media);
-    const id = await addLink({ chain_id: chainId, text: text.trim(), ...files, color });
-    setText(""); setMedia(null);
+    const id = await addLink({ chain_id: chainId, text: text.trim(), ...files, embed_url: embedOrNull(embed), color });
+    setText(""); setMedia(null); setEmbed("");
     try { return await verdictMessage("link", id, t, phase); } finally { await refresh(); onDone(); }
   });
   return (
     <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); s.run(undefined); }}>
       <textarea className="input min-h-24" placeholder={t("your_link_ph")} maxLength={500} required value={text} onChange={(e) => setText(e.target.value)} />
       <MediaPicker media={media} onChange={setMedia} />
+      <EmbedField value={embed} onChange={setEmbed} />
       <ColorPicker value={color} onChange={setColor} />
       <Notice error={s.error} ok={s.ok} info={s.info} />
       <button className="btn w-full" disabled={s.pending}>{s.pending ? t("attaching") : t("attach_link")}</button>

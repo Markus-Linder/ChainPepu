@@ -3,6 +3,9 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { getChain, getLinks, getPayoutSettings, listDonations, listDuelsForChain, listReplies } from "@/lib/api";
 import { ChallengeForm, DuelBanner, DuelCard } from "@/components/Duel";
+import { ShareClip } from "@/components/ShareClip";
+import { ChainCard } from "@/components/ChainCard";
+import { listBranches } from "@/lib/api";
 import { displayTitle, secondsUntil } from "@/lib/events";
 import { useT } from "@/lib/i18n";
 import { BOOST_COST } from "@/lib/shop";
@@ -25,12 +28,12 @@ export default function Chain() {
   const { data, loading, reload } = useAsync(async () => {
     const chain = await getChain(id);
     if (!chain) return null;
-    const [links, replies, donations, settings, duels] = await Promise.all([getLinks(id), listReplies(id), listDonations(id), getPayoutSettings(), listDuelsForChain(id).catch(() => [])]);
-    return { chain, links, replies, donations, settings, duels };
+    const [links, replies, donations, settings, duels, branches] = await Promise.all([getLinks(id), listReplies(id), listDonations(id), getPayoutSettings(), listDuelsForChain(id).catch(() => []), listBranches(id).catch(() => [])]);
+    return { chain, links, replies, donations, settings, duels, branches };
   }, [id]);
   if (loading) return <Loading />;
   if (!data) return <NotFound />;
-  const { chain, links, replies, donations, settings, duels } = data;
+  const { chain, links, replies, donations, settings, duels, branches } = data;
   const activeDuel = duels.find((d) => d.status === "offen" || d.status === "laeuft");
   const pastDuels = duels.filter((d) => d.status === "beendet");
   const visible = links.filter((l) => l.status === "sichtbar");
@@ -65,6 +68,12 @@ export default function Chain() {
         <ol className="space-y-4">
           {links.map((l) => <LinkItem key={l.id} link={l} isOrigin={l.user_id === chain.origin_user_id && l.position === 1} replies={replies.filter((r) => r.link_id === l.id)} onChanged={reload} />)}
         </ol>
+        {branches.length > 0 && (
+          <section className="mt-6">
+            <h2 className="mb-2 text-sm font-semibold">⑂ {t("branches_title")}</h2>
+            <div className="grid gap-3 sm:grid-cols-2">{branches.map((b) => <ChainCard key={b.id} chain={b} />)}</div>
+          </section>
+        )}
         {!ended && (
           <div className="card mt-6 p-4">
             <h2 className="mb-3 font-semibold">{t("add_your_link")}</h2>
@@ -78,6 +87,7 @@ export default function Chain() {
         )}
       </div>
       <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+        <ShareClip chain={chain} title={title} firstLink={visible[0]} />
         {chain.origin_user_id && chain.origin_display_name && (
           <div className="card card-glow p-4">
             <h2 className="mb-2 flex items-center gap-2 font-semibold"><span style={{ color: "var(--star)" }}><Icon name="star" size={16} filled /></span>{t("support_name", { name: chain.origin_display_name })}</h2>

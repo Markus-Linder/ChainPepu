@@ -3,7 +3,7 @@
  * Schreiben läuft über Datenbank-Funktionen (RPC), die selbst prüfen.
  */
 import { supabase } from "@/integrations/supabase/client";
-import type { ChainStats, CreatorStats, Donation, Duel, DuelEvent, DuelView, Invite, LinkRow, MapEdge, Notification, Payout, Profile, Reply, ReportedLink, Verdict } from "./types";
+import type { ChainStats, CreatorStats, Donation, Duel, DuelEvent, DuelView, Invite, InviteLeader, LinkRow, MapEdge, Notification, Payout, Profile, Reply, ReportedLink, Verdict } from "./types";
 import { themeForDay, todayKey } from "./events";
 
 function fail(error: { message: string } | null): never {
@@ -71,13 +71,13 @@ export async function ensureDailyChain(): Promise<number> {
   return data as number;
 }
 
-export type MediaFields = { image_url: string | null; video_url: string | null; video_frames: string[] | null };
+export type MediaFields = { image_url: string | null; video_url: string | null; video_frames: string[] | null; embed_url?: string | null };
 
-export async function startChain(input: MediaFields & { title: string; text: string; color: string; description?: string; is_topic?: boolean; days?: number }): Promise<{ chainId: number; linkId: number }> {
+export async function startChain(input: MediaFields & { title: string; text: string; color: string; description?: string; is_topic?: boolean; days?: number; from_link?: number | null }): Promise<{ chainId: number; linkId: number }> {
   const { data, error } = await supabase.rpc("start_chain", {
     p_title: input.title, p_text: input.text, p_image_url: input.image_url ?? "", p_color: input.color,
     p_video_url: input.video_url ?? "", p_video_frames: input.video_frames, p_description: input.description ?? "",
-    p_is_topic: Boolean(input.is_topic), p_days: input.days ?? 3,
+    p_is_topic: Boolean(input.is_topic), p_days: input.days ?? 3, p_embed_url: input.embed_url ?? "", p_from_link: input.from_link ?? null,
   });
   if (error) fail(error);
   const chainId = data as number;
@@ -101,10 +101,37 @@ export async function listLinksByUser(userId: string, limit = 10): Promise<LinkR
 export async function addLink(input: MediaFields & { chain_id: number; text: string; color: string }): Promise<number> {
   const { data, error } = await supabase.rpc("add_link", {
     p_chain_id: input.chain_id, p_text: input.text, p_image_url: input.image_url ?? "", p_color: input.color,
-    p_video_url: input.video_url ?? "", p_video_frames: input.video_frames,
+    p_video_url: input.video_url ?? "", p_video_frames: input.video_frames, p_embed_url: input.embed_url ?? "",
   });
   if (error) fail(error);
   return data as number;
+}
+export async function getLink(id: number): Promise<LinkRow | null> {
+  const { data } = await supabase.from("links").select(`${LINK_SELECT}, chains(title, daily_day)`).eq("id", id).maybeSingle();
+  return (data as unknown as LinkRow) ?? null;
+}
+export async function listBranches(chainId: number): Promise<ChainStats[]> {
+  const { data: ids } = await supabase.from("links").select("id").eq("chain_id", chainId);
+  const linkIds = (ids ?? []).map((r: { id: number }) => r.id);
+  if (linkIds.length === 0) return [];
+  const { data, error } = await supabase.from("chain_stats").select("*").in("branched_from_link", linkIds).order("created_at", { ascending: false });
+  if (error) fail(error);
+  return data as ChainStats[];
+}
+
+/* ---------- Nutzername, Konstellation ---------- */
+export async function setUsername(username: string, displayName: string) {
+  const { error } = await supabase.rpc("set_username", { p_username: username, p_display_name: displayName });
+  if (error) fail(error);
+}
+export async function listInviteLeaders(limit = 10): Promise<InviteLeader[]> {
+  const { data, error } = await supabase.from("invite_stats").select("*").gt("invited_count", 0).order("invited_count", { ascending: false }).limit(limit);
+  if (error) fail(error);
+  return data as InviteLeader[];
+}
+export async function getConstellationEdges(): Promise<{ from_user: string; to_user: string }[]> {
+  const { data } = await supabase.from("constellation_edges").select("*");
+  return (data ?? []) as { from_user: string; to_user: string }[];
 }
 
 /* ---------- Antworten ---------- */

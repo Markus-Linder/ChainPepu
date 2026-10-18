@@ -12,7 +12,7 @@ const KEY: Record<string, string> = {
   new_chain: "notif_new_chain", link: "notif_link", donation: "notif_donation", follower: "notif_follower", reply: "notif_reply",
   reported: "notif_reported", blocked: "notif_blocked", auto_blocked: "notif_auto_blocked", approved: "notif_approved",
   duel_challenge: "notif_duel_challenge", duel_accepted: "notif_duel_accepted", duel_declined: "notif_duel_declined",
-  duel_won: "notif_duel_won", duel_lost: "notif_duel_lost", duel_draw: "notif_duel_draw",
+  duel_won: "notif_duel_won", duel_lost: "notif_duel_lost", duel_draw: "notif_duel_draw", invite_milestone: "notif_invite_milestone",
 };
 
 export default function Notifications() {

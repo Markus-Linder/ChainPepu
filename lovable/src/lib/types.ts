@@ -32,7 +32,10 @@ export type ChainStats = {
   last_activity: string;
   crowns: number;
   active_duel_id: number | null;
+  branched_from_link: number | null;
 };
+
+export type InviteLeader = { id: string; username: string; display_name: string; planet_seed: number; planet_skin: string; invited_count: number };
 
 export type ContentStatus = "sichtbar" | "gemeldet" | "gesperrt" | "pruefung";
 
@@ -45,6 +48,7 @@ export type LinkRow = {
   image_url: string | null;
   video_url: string | null;
   video_frames: string[] | null;
+  embed_url: string | null;
   color: string;
   status: ContentStatus;
   moderation_note: string | null;

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
-import { ensureDailyChain, getMapEdges, getPayoutSettings, getStats, listChains, listLiveDuels, listProfiles, listTopics } from "@/lib/api";
+import { ensureDailyChain, getConstellationEdges, getMapEdges, getPayoutSettings, getStats, listChains, listInviteLeaders, listLiveDuels, listProfiles, listTopics } from "@/lib/api";
+import { Planet } from "@/components/Planet";
 import { DuelCard } from "@/components/Duel";
 import { displayTitle, secondsUntilMidnightUtc, themeForDay, todayKey } from "@/lib/events";
 import { useT } from "@/lib/i18n";
@@ -15,8 +16,8 @@ export default function Home() {
   const { profile, loading: authLoading } = useAuth();
   const { data, loading } = useAsync(async () => {
     await ensureDailyChain().catch(() => {});
-    const [users, chains, topics, edges, stats, settings, duels] = await Promise.all([listProfiles(), listChains("hot", 200), listTopics(6), getMapEdges(), getStats(), getPayoutSettings(), listLiveDuels(4).catch(() => [])]);
-    return { users, chains, topics, edges, stats, settings, duels };
+    const [users, chains, topics, edges, stats, settings, duels, orbits, leaders] = await Promise.all([listProfiles(), listChains("hot", 200), listTopics(6), getMapEdges(), getStats(), getPayoutSettings(), listLiveDuels(4).catch(() => []), getConstellationEdges(), listInviteLeaders(5).catch(() => [])]);
+    return { users, chains, topics, edges, stats, settings, duels, orbits, leaders };
   }, []);
 
   const linkCount = new Map<string, number>();
@@ -68,7 +69,32 @@ export default function Home() {
           planets={data.users.map((u) => ({ id: u.id, username: u.username, display_name: u.display_name, seed: u.planet_seed, skin: u.planet_skin, links: linkCount.get(u.id) ?? 0 }))}
           chains={data.chains.map((c) => ({ id: c.id, title: displayTitle(c, lang), boost: c.boost, link_count: c.link_count, donated_stars: c.donated_stars, daily: Boolean(c.daily_day), topic: c.is_topic && Boolean(c.ends_at && new Date(c.ends_at) > new Date()), origin: c.origin_user_id, crowns: c.crowns ?? 0, duel: Boolean(c.active_duel_id) }))}
           edges={data.edges}
+          orbits={data.orbits}
         />
+      )}
+
+      {data && data.leaders.length > 0 && (
+        <section className="card p-5">
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <div>
+              <h2 className="flex items-center gap-2 text-xl font-bold"><Icon name="users" size={20} />{t("constellation_title")}</h2>
+              <p className="muted text-sm">{t("constellation_text")}</p>
+            </div>
+          </div>
+          <ol className="grid gap-2 sm:grid-cols-5">
+            {data.leaders.map((l, i) => (
+              <li key={l.id}>
+                <Link to={`/p/${l.username}`} className="flex items-center gap-2 rounded-xl bg-white/5 p-2 text-sm hover:bg-white/10">
+                  <span className="muted w-4 text-xs">{i + 1}</span>
+                  <Planet seed={l.planet_seed} skin={l.planet_skin} size={30} />
+                  <span className="min-w-0 flex-1 truncate">{l.display_name}</span>
+                  <span className="font-semibold" style={{ color: "var(--star)" }}>{l.invited_count}</span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+          <p className="muted mt-3 text-xs">{t("invite_bonus")}</p>
+        </section>
       )}
 
       {data && (
