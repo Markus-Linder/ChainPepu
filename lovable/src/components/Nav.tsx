@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Planet } from "./Planet";
+import { NotificationBell } from "./NotificationBell";
 
 export function Nav() {
   const { profile } = useAuth();
@@ -22,6 +23,8 @@ export function Nav() {
           {profile ? (
             <>
               <Link to="/neu" className="btn whitespace-nowrap text-sm">+ Kette starten</Link>
+              <NotificationBell />
+              {profile.is_moderator && <Link to="/moderation" className="muted text-sm hover:text-white" title="Moderation">🛡</Link>}
               <Link to="/shop" className="hidden items-center gap-1 text-sm sm:flex" title="Deine Sterne">
                 <span style={{ color: "var(--star)" }}>★</span> {profile.stars}
               </Link>

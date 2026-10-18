@@ -16,9 +16,10 @@ In Lovable oben rechts auf Supabase klicken und ein Projekt verbinden (neu oder 
 `src/integrations/supabase/client.ts` und die Umgebungsvariablen selbst an.
 
 **3. Datenbank einrichten**
-Den Inhalt von `supabase/migrations/20261017000000_chainpepu.sql` an Lovable geben mit der Bitte,
-diese Migration auszuführen. Alternativ: im Supabase-Dashboard unter *SQL Editor* einfügen und ausführen.
-Die Datei enthält Tabellen, Sichten, Zeilensicherheit (RLS), alle Funktionen und den Bild-Bucket.
+Die beiden Dateien aus `supabase/migrations/` nacheinander an Lovable geben mit der Bitte, sie als
+Migration auszuführen. Alternativ: im Supabase-Dashboard unter *SQL Editor* einfügen und ausführen.
+- `20261017000000_chainpepu.sql`: Tabellen, Sichten, Zeilensicherheit (RLS), Grundfunktionen, Bild-Bucket
+- `20261018000000_creator_features.sql`: Videos, Folgen, Mitteilungen, Spenden (80/20), Auszahlungen, Meldungen, Moderation, Wortfilter, Video-Bucket
 
 **4. Code übernehmen**
 Die Dateien aus `src/` in das Lovable-Projekt übernehmen. Am einfachsten über GitHub:
@@ -30,11 +31,31 @@ Wenn Lovable schon ein `src/integrations/supabase/client.ts` angelegt hat, desse
 Im Supabase-Dashboard unter *Authentication → Providers → Email* die Option *Confirm email* ausschalten,
 damit Nutzer beim Testen sofort drin sind. Für den echten Start wieder einschalten.
 
-**6. Stripe (optional, später)**
+**6. Moderation einrichten**
+- Moderatoren ernennen: `update profiles set is_moderator = true where username = 'dein_name';`
+- Wortfilter pflegen: Tabelle `banned_terms` im Supabase-Dashboard.
+- KI-Prüfung (optional, empfohlen): Funktion `supabase/functions/moderate-content` deployen, Secrets
+  `ANTHROPIC_API_KEY` und `MODERATION_WEBHOOK_SECRET` setzen. Dann im Supabase-Dashboard unter
+  *Database → Webhooks* einen Webhook anlegen: Tabelle `links`, Ereignis *Insert*, Ziel die URL der Funktion,
+  HTTP-Header `x-webhook-secret` mit demselben Geheimnis. Jedes neue Glied wird damit automatisch geprüft.
+
+**7. Stripe (optional, später)**
 - In Supabase unter *Edge Functions → Secrets* setzen: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`.
 - Die beiden Funktionen aus `supabase/functions/` deployen (Lovable kann das, oder `supabase functions deploy`).
 - In Stripe einen Webhook auf `https://DEIN-PROJEKT.supabase.co/functions/v1/stripe-webhook` für das Ereignis `checkout.session.completed` anlegen.
 - Demo-Modus ausschalten: `update app_settings set value = 'false' where key = 'demo_mode';`
+
+## Was die Plattform kann
+
+- Planeten, Ketten, Glieder mit Text, Bild oder **Video**, Universumskarte, Tages-Ereignis, Einladungen
+- **Ganze Kette ansehen**: Vollbild-Abspielmodus, Videos laufen automatisch, wischen oder Pfeiltasten
+- **Creators folgen** mit Mitteilungen bei neuer Kette, neuem Glied, Spende und neuem Follower
+- **Spenden**: Sterne an den Creator einer Kette. 80 % für den Creator, 20 % für die Plattform
+  (Prozentsatz in `app_settings.creator_share_percent`). Gespendete Sterne stehen auf der Startseite an der Kette.
+- **Auszahlung**: verdiente Sterne ab Mindestbetrag (`payout_min_stars`) zum Kurs `star_cents` anfordern
+  oder selbst als Sterne nutzen. Auszahlungsanfragen landen in `payouts`, die Überweisung macht ihr manuell.
+- **Inhaltsregeln**: Regelseite, Zustimmung bei Registrierung, Wortfilter in der Datenbank, Melden pro Glied,
+  automatisches Verbergen ab 3 Meldungen, Moderationsseite, optionale KI-Prüfung über Claude.
 
 ## Lokal ausprobieren
 

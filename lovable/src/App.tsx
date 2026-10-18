@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Link, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/lib/auth";
 import { Nav } from "@/components/Nav";
 import Home from "@/pages/Home";
@@ -13,6 +13,9 @@ import Login from "@/pages/Login";
 import Registrieren from "@/pages/Registrieren";
 import Einladung from "@/pages/Einladung";
 import NotFound from "@/pages/NotFound";
+import Mitteilungen from "@/pages/Mitteilungen";
+import Moderation from "@/pages/Moderation";
+import Regeln from "@/pages/Regeln";
 
 export default function App() {
   return (
@@ -32,10 +35,13 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/registrieren" element={<Registrieren />} />
           <Route path="/einladung/:token" element={<Einladung />} />
+          <Route path="/mitteilungen" element={<Mitteilungen />} />
+          <Route path="/moderation" element={<Moderation />} />
+          <Route path="/regeln" element={<Regeln />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      <footer className="muted mx-auto max-w-6xl px-4 py-10 text-center text-xs">ChainPepu · Kostenlos für alle · Jeder Mensch ist ein Planet</footer>
+      <footer className="muted mx-auto max-w-6xl px-4 py-10 text-center text-xs">ChainPepu · Kostenlos für alle · Jeder Mensch ist ein Planet · <Link to="/regeln" className="underline">Regeln</Link></footer>
     </AuthProvider>
   );
 }
