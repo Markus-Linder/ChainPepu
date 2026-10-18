@@ -1,7 +1,8 @@
 /** The daily universe event: one chain the whole universe builds together. */
 import type { Lang } from "@/locales";
 
-const THEMES: Record<Lang, string[]> = {
+/** Daily themes. Languages without their own list show the English one. */
+const THEMES: Partial<Record<Lang, string[]>> = {
   en: [
     "Show us the most beautiful place you were today",
     "One sentence that describes your year",
@@ -176,7 +177,7 @@ export function todayKey(date = new Date()): string {
 /** The theme of a given day. Same index in every language, so one chain reads naturally everywhere. */
 export function themeForDay(day: string, lang: Lang = "en"): string {
   const [y, m, d] = day.split("-").map(Number);
-  const list = THEMES[lang] ?? THEMES.en;
+  const list = THEMES[lang] ?? THEMES.en!;
   return list[(y * 372 + m * 31 + d) % list.length];
 }
 

@@ -4,7 +4,7 @@
  * "{n} link|{n} links" ist Einzahl|Mehrzahl.
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { DICTS, type Lang } from "@/locales";
+import { DICTS, RTL, type Lang } from "@/locales";
 
 export const LANGS: { code: Lang; name: string; locale: string }[] = [
   { code: "en", name: "English", locale: "en-US" },
@@ -12,6 +12,11 @@ export const LANGS: { code: Lang; name: string; locale: string }[] = [
   { code: "es", name: "Español", locale: "es-ES" },
   { code: "fr", name: "Français", locale: "fr-FR" },
   { code: "pt", name: "Português", locale: "pt-BR" },
+  { code: "tr", name: "Türkçe", locale: "tr-TR" },
+  { code: "ar", name: "العربية", locale: "ar-EG" },
+  { code: "hi", name: "हिन्दी", locale: "hi-IN" },
+  { code: "id", name: "Bahasa Indonesia", locale: "id-ID" },
+  { code: "ja", name: "日本語", locale: "ja-JP" },
 ];
 
 const STORAGE = "chainpepu_lang";
@@ -55,7 +60,10 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
     setLangState(l);
     try { localStorage.setItem(STORAGE, l); } catch {}
   }, []);
-  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = RTL.includes(lang) ? "rtl" : "ltr";
+  }, [lang]);
   const value = useMemo<Ctx>(() => ({
     lang,
     locale: LANGS.find((x) => x.code === lang)?.locale ?? "en-US",

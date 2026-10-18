@@ -16,7 +16,10 @@ Bilder und Videos im Objektspeicher statt auf dem App-Server, zustandsloses Fron
 - **Auszahlung** verdienter Sterne ab Mindestbetrag; alle Ketten eines Creators bleiben dauerhaft im Profil abrufbar (Archiv nach Jahren, durchsuchbar)
 - **Prüfung VOR der Veröffentlichung**: Jeder Text, jedes Foto und jedes Video (als Standbilder) wird von Claude geprüft, bevor es sichtbar wird. Dazu Wortfilter, Melden, Prüfschwelle und Moderationsseite
 - **Ketten-Duell (unser Live-Match)**: Ein Creator fordert mit einer eigenen Kette eine fremde Kette heraus (1 h bis 24 h). Nimmt der andere an, läuft das Duell live: jedes sichtbare Glied bringt 5 Punkte, jede Antwort 2, jeder gespendete Stern zählt doppelt. Arena-Seite `/duel/:id` mit Tauziehen-Balken, Countdown und Live-Ticker (Supabase Realtime). Die Gewinner-Kette bekommt eine Krone ♛ (auf Karte, Karten und Kettenseite sichtbar), der Creator einen Duell-Sieg im Profil. Gegen Spam zählt pro Planet nur ein Glied pro Minute. Alle Werte in `app_settings` (`duel_*`) einstellbar
-- **5 Sprachen**: Englisch, Deutsch, Spanisch, Französisch, Portugiesisch. Automatische Erkennung, Umschalter in Navigation und Fußzeile. Tagesthemen und Mitteilungen werden übersetzt
+- **Paket A „Magnet“ (Leute von TikTok holen)**: Teilen-Clip (9:16-Story-Bild mit Planet, Zahlen und QR-Code, direkt ins Teilen-Menü des Handys), TikTok-/YouTube-/Instagram-Videos in Glieder einbetten (Link einfügen, lädt erst nach Tipp), Google-/Apple-Login mit anschließender Nutzernamen-Wahl, Konstellationen (wer über wen kam, als gepunktete Linien auf der Karte) mit Einladungs-Rangliste und Meilenstein-Boni (★100/500/1000), Abzweigen: von jedem Glied eine neue Kette starten, Ursprung bleibt verlinkt
+- **Paket B „Sog“ (Bleiben)**: Der Strom `/stream` (vertikaler Wisch-Feed, Videos laufen im Blick automatisch, ★10 / Antworten / Abzweigen / Teilen direkt im Bild), Planeten-Entwicklung (XP für Glieder, Antworten und erhaltene Sterne → Level, Ringe, Monde, stärkeres Leuchten; Tages-Streak), Wochen-Challenge mit Preis-Topf (25 % des Plattform-Anteils der Woche gehen an die beste Kette, Abschluss automatisch), Push-Mitteilungen aufs Handy (Web Push, Edge Function `send-push`)
+- **Paket C „Profi“**: Creator-Dashboard `/dashboard` (Sterne pro Tag, Reichweite, beste Uhrzeiten, Top-Ketten, Top-Fans, Auszahlungen), Ranglisten `/leaderboards` (Woche, Sterne, Kronen, Follower, Level, längste und reichste Ketten), Duell-Turniere `/tournaments` (4 oder 8 Ketten, K.-o.-Runden automatisch, Sieger bekommt 3 Kronen), Admin-Bereich `/admin` (Kennzahlen für Investoren, Auszahlungen bestätigen, Einstellungen live ändern, Moderatoren/Admins verwalten)
+- **10 Sprachen**: Englisch, Deutsch, Spanisch, Französisch, Portugiesisch, Türkisch, Arabisch (rechts-nach-links), Hindi, Indonesisch, Japanisch. Automatische Erkennung, Umschalter in Navigation und Fußzeile. Tagesthemen und Mitteilungen werden übersetzt
 - **Partner-Seite** `/about` für Investoren: Mechanik, Geschäftsmodell, Sicherheit, Technik, Live-Zahlen (nichts erfunden)
 - **PWA**, eigenes Markendesign (Obsidian, Violett → Magenta, Champagner-Gold, Space Grotesk + Inter, eigenes Icon-Set)
 
@@ -31,6 +34,15 @@ Bilder und Videos im Objektspeicher statt auf dem App-Server, zustandsloses Fron
 - `20261018000000_creator_features.sql`: Videos, Folgen, Mitteilungen, Spenden (80/20), Auszahlungen, Meldungen, Moderation, Wortfilter, Video-Bucket
 - `20261019000000_replies_topics_premoderation.sql`: Antworten, Creator-Themen, Prüf-Status `pruefung`, übersetzbare Mitteilungen
 - `20261020000000_duels.sql`: Ketten-Duell (Tabellen `duels`, `duel_events`, Punkte-Trigger, Kronen, Realtime-Freigabe)
+- `20261021000000_magnet.sql`: eingebettete Videos, Abzweigen, Nutzername nach OAuth, Konstellationen, Einladungs-Boni
+- `20261022000000_sog.sql`: XP/Level/Streaks, Wochen-Challenge (`settle_week`, `week_pool`), Push-Abos
+- `20261023000000_profi.sql`: Admin-Rolle und -Funktionen, Ranglisten-Sicht, Turniere
+
+**Nach den Migrationen:** ersten Admin ernennen mit `update profiles set is_admin = true, is_moderator = true where username = 'dein_name';`
+
+**Google/Apple-Login:** im Supabase-Dashboard unter *Authentication → Providers* Google (Client-ID/Secret aus der Google Cloud Console) und optional Apple aktivieren. Die Buttons sind schon in der App.
+
+**Push-Mitteilungen:** `npx web-push generate-vapid-keys` ausführen. Öffentlichen Schlüssel als `VITE_VAPID_PUBLIC_KEY` in die App-Umgebung, privaten + öffentlichen Schlüssel und `VAPID_SUBJECT` (mailto:…) als Secrets der Funktion `send-push`. Dann im Supabase-Dashboard einen Datenbank-Webhook auf `notifications` (Insert) → `send-push` anlegen.
 
 **4. Code übernehmen** — die Dateien aus `src/`, `public/` und `index.html` in das Lovable-Projekt übernehmen, am einfachsten über GitHub (Lovable zieht Änderungen automatisch nach). Wenn Lovable schon ein `src/integrations/supabase/client.ts` angelegt hat, dessen Version behalten.
 
