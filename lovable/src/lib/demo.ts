@@ -109,4 +109,13 @@ export const DEMO_JACKPOT = {
   link_count: 64, user_count: 38,
 };
 
+const GALAXY_OF: Record<number, string> = { 1: "reisen", 2: "wissen", 3: "essen", 4: "musik", 5: "essen", 6: "kunst", 7: "humor", 8: "business", 9: "reisen", 10: "essen", 11: "alltag", 12: "alltag", 13: "reisen", 14: "sport", 15: "alltag" };
+for (const c of DEMO_CHAINS) c.galaxy = GALAXY_OF[c.id] ?? "alltag";
+for (const p of DEMO_PROFILES) { const own = DEMO_CHAINS.find((c) => c.origin_user_id === p.id); p.home_galaxy = own?.galaxy ?? ["alltag", "musik", "sport", "gaming", "kunst", "humor"][Number(p.id.split("-")[1]) % 6]; }
+
+export const DEMO_MEGA = {
+  id: 1, started_at: ago(24 * 40), ends_at: new Date(Date.UTC(new Date().getUTCFullYear(), 11, 31, 23, 59, 59)).toISOString(), pot_stars: 7850, status: "laeuft" as const,
+  participants: null, winner_user: null, drawn_at: null, winner_username: null, winner_display_name: null, participant_count: 312,
+};
+
 export const DEMO_STATS = { users: 18, chains: 14, links: DEMO_LINKS.length, stars: DEMO_CHAINS.reduce((s, c) => s + c.donated_stars, 0) };

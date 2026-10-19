@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
-import { getJackpot, jackpotAlert, settleJackpot, subscribeJackpot } from "@/lib/api";
+import { drawMega, getJackpot, getMega, isMegaParticipant, jackpotAlert, settleJackpot, subscribeJackpot } from "@/lib/api";
+import { useAsync } from "@/lib/useAsync";
 import { useT } from "@/lib/i18n";
 import { renderJackpotClip, shareBlob } from "@/lib/share";
 import type { Jackpot } from "@/lib/types";
@@ -100,6 +101,45 @@ export function ZeitketteCard({ compact = false }: { compact?: boolean }) {
             </div>
           </div>
         )}
+      </div>
+    </section>
+  );
+}
+
+/** Season draw: everyone who added a link to a time chain this season is in the pot. Drawn at the season's end. */
+export function MegaCard() {
+  const { t, locale } = useT();
+  const { profile } = useAuth();
+  const { data: mega, reload } = useAsync(getMega, []);
+  const { data: inDraw } = useAsync(() => (profile ? isMegaParticipant(profile.id) : Promise.resolve(false)), [profile?.id, mega?.id]);
+  useEffect(() => {
+    if (!mega) return;
+    const ms = new Date(mega.ends_at).getTime() - Date.now();
+    if (ms <= 0) { drawMega().then(reload); return; }
+    const timer = setTimeout(() => drawMega().then(reload), Math.min(ms + 2000, 2 ** 31 - 1));
+    return () => clearTimeout(timer);
+  }, [mega, reload]);
+  if (!mega) return null;
+  const days = Math.max(0, Math.ceil((new Date(mega.ends_at).getTime() - Date.now()) / 86400000));
+  const date = new Date(new Date(mega.ends_at).getTime() - 1000).toLocaleDateString(locale, { day: "2-digit", month: "long", year: "numeric", timeZone: "UTC" });
+  return (
+    <section className="card relative overflow-hidden p-6 sm:p-7">
+      <div className="pointer-events-none absolute -left-16 -bottom-24 h-64 w-64 rounded-full" style={{ background: "radial-gradient(circle, rgba(123,97,255,.35), transparent 70%)" }} />
+      <div className="relative grid gap-5 sm:grid-cols-[1fr_auto] sm:items-center">
+        <div>
+          <p className="kicker"><Icon name="spark" size={13} /> {t("mega_title")}</p>
+          <h3 className="mt-1 text-2xl font-bold">{t("mega_headline", { date })}</h3>
+          <p className="muted mt-2 text-sm">{t("mega_text")}</p>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+            <span className="eyebrow"><Icon name="users" size={13} />{t("mega_participants", { n: mega.participant_count })}</span>
+            <span className="eyebrow"><Icon name="sun" size={13} />{t("n_days", { n: days })}</span>
+            {profile && (inDraw ? <span className="eyebrow text-emerald-200"><Icon name="check" size={13} />{t("mega_in")}</span> : <span className="eyebrow">{t("mega_join")}</span>)}
+          </div>
+        </div>
+        <div className="text-center">
+          <p className="kicker">{t("mega_pot")}</p>
+          <p className="font-display text-5xl font-bold" style={{ color: "var(--star)" }}>★ {mega.pot_stars}</p>
+        </div>
       </div>
     </section>
   );

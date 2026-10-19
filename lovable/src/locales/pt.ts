@@ -546,6 +546,13 @@ const pt: Record<string, string> = {
   rules_zeit_4: "O primeiro elo de um planeta criado nas últimas 24 horas reinicia o relógio para 24 horas.",
   rules_zeit_5: "O prêmio cresce 1 estrela por elo contado e 10 % da parte da plataforma gerada durante a rodada.",
   rules_zeit_6: "Os elos passam pela verificação normal. Contas múltiplas levam à exclusão.",
+
+  galaxies: "Galáxias", galaxy_all: "Todas as galáxias", galaxy_pick: "A qual galáxia esta corrente pertence?", galaxy_home: "Galáxia de origem",
+  galaxy_alltag: "Dia a dia", galaxy_musik: "Música", galaxy_essen: "Comida", galaxy_sport: "Esporte", galaxy_reisen: "Viagem", galaxy_kunst: "Arte", galaxy_humor: "Humor", galaxy_gaming: "Games", galaxy_wissen: "Saber", galaxy_business: "Negócios",
+  mega_title: "Sorteio da temporada", mega_headline: "Em {date} um de vocês ganha o grande prêmio",
+  mega_text: "Em cada rodada, o último elo ganha o prêmio da rodada. Além disso, todos que adicionaram pelo menos um elo a uma corrente do tempo nesta temporada entram no grande sorteio. Um nome é sorteado ao acaso. Participar é grátis.",
+  mega_pot: "Prêmio da temporada", mega_participants: "{n} no sorteio", mega_in: "Você está no sorteio", mega_join: "Adicione um elo à corrente do tempo e você está dentro",
+  notif_mega_won: "O sorteio da temporada aconteceu: você ganhou! {stars} estrelas são suas.", notif_mega_drawn: "O sorteio da temporada aconteceu. {actor} ganhou ★ {stars}. A nova temporada começa agora.",
 };
 
 export default pt;

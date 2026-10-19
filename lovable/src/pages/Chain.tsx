@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { getChain, getLinks, getPayoutSettings, listDonations, listDuelsForChain, listReplies } from "@/lib/api";
 import { ChallengeForm, DuelBanner, DuelCard } from "@/components/Duel";
 import { ShareClip } from "@/components/ShareClip";
-import { ZeitketteCard } from "@/components/Zeitkette";
+import { MegaCard, ZeitketteCard } from "@/components/Zeitkette";
 import { ChainCard } from "@/components/ChainCard";
 import { listBranches } from "@/lib/api";
 import { displayTitle, secondsUntil } from "@/lib/events";
@@ -66,7 +66,7 @@ export default function Chain() {
           {notice && <div className="mt-3"><Notice error={blockedMine ? notice : null} ok={blockedMine ? null : notice} /></div>}
         </div>
         {activeDuel && <DuelBanner duel={activeDuel} chainId={chain.id} />}
-        {chain.is_jackpot && <div className="mb-6"><ZeitketteCard compact /></div>}
+        {chain.is_jackpot && <div className="mb-6 grid gap-4"><ZeitketteCard compact /><MegaCard /></div>}
         <ol className="space-y-4">
           {links.map((l) => <LinkItem key={l.id} link={l} isOrigin={l.user_id === chain.origin_user_id && l.position === 1} replies={replies.filter((r) => r.link_id === l.id)} onChanged={reload} />)}
         </ol>

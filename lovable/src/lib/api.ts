@@ -3,9 +3,9 @@
  * Schreiben läuft über Datenbank-Funktionen (RPC), die selbst prüfen.
  */
 import { supabase } from "@/integrations/supabase/client";
-import type { AdminStats, ChainStats, CreatorBoard, CreatorStats, Donation, Duel, DuelEvent, DuelView, Invite, InviteLeader, Jackpot, LinkRow, MapEdge, Notification, Payout, PayoutRow, Profile, Reply, ReportedLink, Tournament, TournamentDuel, TournamentEntry, Verdict, WeekLeader, WeeklyChallenge } from "./types";
+import type { AdminStats, ChainStats, CreatorBoard, CreatorStats, Donation, Duel, DuelEvent, DuelView, Invite, InviteLeader, Jackpot, LinkRow, MapEdge, MegaSeason, Notification, Payout, PayoutRow, Profile, Reply, ReportedLink, Tournament, TournamentDuel, TournamentEntry, Verdict, WeekLeader, WeeklyChallenge } from "./types";
 import { themeForDay, todayKey } from "./events";
-import { DEMO, DEMO_CHAINS, DEMO_DUEL_EVENTS, DEMO_DUELS, DEMO_EDGES, DEMO_JACKPOT, DEMO_LEADERS, DEMO_LINKS, DEMO_ORBITS, DEMO_PROFILES, DEMO_REPLIES, DEMO_STATS, DEMO_WEEK } from "./demo";
+import { DEMO, DEMO_CHAINS, DEMO_DUEL_EVENTS, DEMO_DUELS, DEMO_EDGES, DEMO_JACKPOT, DEMO_LEADERS, DEMO_MEGA, DEMO_LINKS, DEMO_ORBITS, DEMO_PROFILES, DEMO_REPLIES, DEMO_STATS, DEMO_WEEK } from "./demo";
 
 function fail(error: { message: string } | null): never {
   throw new Error(error?.message || "err_unknown");
@@ -30,9 +30,10 @@ export async function listProfiles(): Promise<Profile[]> {
 }
 
 /* ---------- Ketten ---------- */
-export async function listChains(order: "hot" | "new" = "hot", limit = 60): Promise<ChainStats[]> {
-  if (DEMO) return [...DEMO_CHAINS].sort((a, b) => (order === "new" ? b.created_at.localeCompare(a.created_at) : heat(b) - heat(a))).slice(0, limit);
+export async function listChains(order: "hot" | "new" = "hot", limit = 60, galaxy?: string | null): Promise<ChainStats[]> {
+  if (DEMO) return [...DEMO_CHAINS].filter((c) => !galaxy || c.galaxy === galaxy).sort((a, b) => (order === "new" ? b.created_at.localeCompare(a.created_at) : heat(b) - heat(a))).slice(0, limit);
   let q = supabase.from("chain_stats").select("*").limit(limit);
+  if (galaxy) q = q.eq("galaxy", galaxy);
   q = order === "new" ? q.order("created_at", { ascending: false }) : q.order("last_activity", { ascending: false });
   const { data, error } = await q;
   if (error) fail(error);
@@ -84,12 +85,12 @@ export async function ensureDailyChain(): Promise<number> {
 
 export type MediaFields = { image_url: string | null; video_url: string | null; video_frames: string[] | null; embed_url?: string | null };
 
-export async function startChain(input: MediaFields & { title: string; text: string; color: string; description?: string; is_topic?: boolean; days?: number; from_link?: number | null }): Promise<{ chainId: number; linkId: number }> {
+export async function startChain(input: MediaFields & { title: string; text: string; color: string; description?: string; is_topic?: boolean; days?: number; from_link?: number | null; galaxy?: string }): Promise<{ chainId: number; linkId: number }> {
   if (DEMO) throw new Error("demo_readonly");
   const { data, error } = await supabase.rpc("start_chain", {
     p_title: input.title, p_text: input.text, p_image_url: input.image_url ?? "", p_color: input.color,
     p_video_url: input.video_url ?? "", p_video_frames: input.video_frames, p_description: input.description ?? "",
-    p_is_topic: Boolean(input.is_topic), p_days: input.days ?? 3, p_embed_url: input.embed_url ?? "", p_from_link: input.from_link ?? null,
+    p_is_topic: Boolean(input.is_topic), p_days: input.days ?? 3, p_embed_url: input.embed_url ?? "", p_from_link: input.from_link ?? null, p_galaxy: input.galaxy ?? "alltag",
   });
   if (error) fail(error);
   const chainId = data as number;
@@ -546,6 +547,32 @@ export async function listStaff(): Promise<Profile[]> {
   if (DEMO) return [];
   const { data } = await supabase.from("profiles").select("*").or("is_moderator.eq.true,is_admin.eq.true").order("username");
   return (data ?? []) as Profile[];
+}
+
+/* ---------- Galaxien ---------- */
+export async function setHomeGalaxy(slug: string) {
+  if (DEMO) throw new Error("demo_readonly");
+  const { error } = await supabase.rpc("set_home_galaxy", { p_slug: slug });
+  if (error) fail(error);
+}
+
+/* ---------- Mega-Verlosung ---------- */
+export async function getMega(): Promise<MegaSeason | null> {
+  if (DEMO) return DEMO_MEGA;
+  await supabase.rpc("ensure_mega");
+  const { data } = await supabase.from("mega_view").select("*").eq("status", "laeuft").order("id", { ascending: false }).limit(1).maybeSingle();
+  return (data as MegaSeason) ?? null;
+}
+export async function listMegaHistory(limit = 3): Promise<MegaSeason[]> {
+  if (DEMO) return [];
+  const { data } = await supabase.from("mega_view").select("*").eq("status", "beendet").order("id", { ascending: false }).limit(limit);
+  return (data ?? []) as MegaSeason[];
+}
+export async function drawMega() { if (DEMO) return; await supabase.rpc("draw_mega"); }
+export async function isMegaParticipant(userId: string): Promise<boolean> {
+  if (DEMO) return true;
+  const { data } = await supabase.rpc("is_mega_participant", { p_user: userId });
+  return Boolean(data);
 }
 
 /* ---------- Zeitkette ---------- */

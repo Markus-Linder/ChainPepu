@@ -546,6 +546,13 @@ const fr: Record<string, string> = {
   rules_zeit_4: "Le premier maillon d'une planète créée dans les dernières 24 heures remet l'horloge à 24 heures.",
   rules_zeit_5: "La cagnotte augmente de 1 étoile par maillon compté et de 10 % de la part de la plateforme générée pendant la manche.",
   rules_zeit_6: "Les maillons passent la vérification habituelle. Les comptes multiples mènent à l'exclusion.",
+
+  galaxies: "Galaxies", galaxy_all: "Toutes les galaxies", galaxy_pick: "À quelle galaxie appartient cette chaîne ?", galaxy_home: "Galaxie d'origine",
+  galaxy_alltag: "Quotidien", galaxy_musik: "Musique", galaxy_essen: "Cuisine", galaxy_sport: "Sport", galaxy_reisen: "Voyage", galaxy_kunst: "Art", galaxy_humor: "Humour", galaxy_gaming: "Gaming", galaxy_wissen: "Savoir", galaxy_business: "Business",
+  mega_title: "Tirage de saison", mega_headline: "Le {date}, l'un de vous remporte la grande cagnotte",
+  mega_text: "À chaque manche, le dernier maillon remporte la cagnotte de la manche. En plus, tous ceux qui ont ajouté au moins un maillon à une chaîne du temps cette saison participent au grand tirage. Un nom est tiré au hasard. Participer est gratuit.",
+  mega_pot: "Cagnotte de saison", mega_participants: "{n} dans le tirage", mega_in: "Tu es dans le tirage", mega_join: "Ajoute un maillon à la chaîne du temps et tu participes",
+  notif_mega_won: "Le tirage de saison a eu lieu : tu as gagné ! {stars} étoiles sont à toi.", notif_mega_drawn: "Le tirage de saison a eu lieu. {actor} a gagné ★ {stars}. La nouvelle saison commence maintenant.",
 };
 
 export default fr;

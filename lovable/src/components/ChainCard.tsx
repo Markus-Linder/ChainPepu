@@ -4,15 +4,16 @@ import { useT } from "@/lib/i18n";
 import { displayTitle, secondsUntil } from "@/lib/events";
 import { Countdown } from "./Countdown";
 import { Icon } from "./Icons";
+import { galaxyHue } from "@/lib/galaxies";
 
-/** Deterministic hue per chain so every card has its own atmosphere. */
-function hueOf(id: number) { return (id * 47) % 360; }
+/** Card atmosphere: the galaxy's hue, shifted a little per chain so cards in one galaxy still differ. */
+function hueOf(chain: ChainStats) { return (galaxyHue(chain.galaxy) + (chain.id * 13) % 40 - 20 + 360) % 360; }
 
 export function ChainCard({ chain }: { chain: ChainStats }) {
   const { t, lang } = useT();
   const heat = Math.min(1, (chain.link_count + chain.boost * 3 + chain.donated_stars / 20) / 30);
   const ended = Boolean(chain.ends_at && new Date(chain.ends_at) < new Date());
-  const hue = chain.is_topic ? 325 : chain.daily_day ? 42 : hueOf(chain.id);
+  const hue = chain.is_topic ? 325 : chain.daily_day ? 42 : hueOf(chain);
   return (
     <Link to={`/c/${chain.id}`} className="card lift block overflow-hidden"
       style={{ boxShadow: `0 0 ${10 + heat * 40}px hsla(${hue},80%,60%,${0.1 + heat * 0.3})` }}>
@@ -38,7 +39,10 @@ export function ChainCard({ chain }: { chain: ChainStats }) {
           <span><Icon name="planet" size={12} className="mr-1" />{chain.user_count}</span>
           {chain.reply_count > 0 && <span><Icon name="reply" size={12} className="mr-1" />{chain.reply_count}</span>}
           {chain.donated_stars > 0 && <span style={{ color: "var(--star)" }}><Icon name="star" size={12} className="mr-1" filled />{chain.donated_stars}</span>}
-          <span className="ml-auto truncate">{chain.origin_display_name ? chain.origin_display_name : ""}</span>
+          <span className="ml-auto flex items-center gap-2 truncate">
+            {chain.galaxy && !chain.daily_day && !chain.is_jackpot && <span className="rounded-full border border-white/10 px-1.5 py-px text-[10px]"><span className="mr-1 inline-block h-1.5 w-1.5 rounded-full" style={{ background: `hsl(${galaxyHue(chain.galaxy)} 85% 65%)` }} />{t(`galaxy_${chain.galaxy}`)}</span>}
+            {chain.origin_display_name ? chain.origin_display_name : ""}
+          </span>
         </div>
         {chain.is_topic && chain.ends_at && <p className="mt-2 text-xs" style={{ color: "#ff5fb0" }}>{ended ? t("topic_ended") : <>{t("ends_in")} <Countdown seconds={secondsUntil(chain.ends_at)} /></>}</p>}
       </div>

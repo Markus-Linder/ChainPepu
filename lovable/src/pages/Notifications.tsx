@@ -40,6 +40,7 @@ const KEY: Record<string, string> = {
   weekly_won: "notif_weekly_won", tournament_round: "notif_tournament_round", tournament_won: "notif_tournament_won",
   payout_paid: "notif_payout_paid", payout_rejected: "notif_payout_rejected",
   jackpot_overtaken: "notif_jackpot_overtaken", jackpot_won: "notif_jackpot_won", jackpot_alert: "notif_jackpot_alert",
+  mega_won: "notif_mega_won", mega_drawn: "notif_mega_drawn",
 };
 
 export default function Notifications() {

@@ -13,6 +13,7 @@ export type Profile = {
   level: number;
   streak_days: number;
   last_active_day: string | null;
+  home_galaxy?: string | null;
   invited_by: string | null;
   accepted_rules_at: string | null;
   created_at: string;
@@ -39,6 +40,13 @@ export type ChainStats = {
   active_duel_id: number | null;
   branched_from_link: number | null;
   is_jackpot?: boolean;
+  galaxy?: string;
+};
+
+export type GalaxySlug = "alltag" | "musik" | "essen" | "sport" | "reisen" | "kunst" | "humor" | "gaming" | "wissen" | "business";
+export type MegaSeason = {
+  id: number; started_at: string; ends_at: string; pot_stars: number; status: "laeuft" | "beendet"; participants: number | null;
+  winner_user: string | null; drawn_at: string | null; winner_username: string | null; winner_display_name: string | null; participant_count: number;
 };
 
 export type InviteLeader = { id: string; username: string; display_name: string; planet_seed: number; planet_skin: string; invited_count: number };

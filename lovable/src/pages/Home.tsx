@@ -12,7 +12,7 @@ import { DuelCard, DuelBar } from "@/components/Duel";
 import { Planet } from "@/components/Planet";
 import { Reveal } from "@/components/Reveal";
 import { Icon } from "@/components/Icons";
-import { ZeitketteCard } from "@/components/Zeitkette";
+import { MegaCard, ZeitketteCard } from "@/components/Zeitkette";
 
 export default function Home() {
   const { t, lang } = useT();
@@ -79,7 +79,7 @@ export default function Home() {
       ) : null}
 
       {/* ---------- Time chain ---------- */}
-      <Reveal><ZeitketteCard /></Reveal>
+      <Reveal><div className="grid gap-5"><ZeitketteCard /><MegaCard /></div></Reveal>
 
       {/* ---------- Live universe ---------- */}
       <section>
@@ -104,8 +104,8 @@ export default function Home() {
         </div>
         {loading || !data ? <Loading /> : (
           <UniverseMap
-            planets={data.users.map((u) => ({ id: u.id, username: u.username, display_name: u.display_name, seed: u.planet_seed, skin: u.planet_skin, links: linkCount.get(u.id) ?? 0 }))}
-            chains={data.chains.map((c) => ({ id: c.id, title: displayTitle(c, lang), boost: c.boost, link_count: c.link_count, donated_stars: c.donated_stars, daily: Boolean(c.daily_day), topic: c.is_topic && Boolean(c.ends_at && new Date(c.ends_at) > new Date()), origin: c.origin_user_id, crowns: c.crowns ?? 0, duel: Boolean(c.active_duel_id) }))}
+            planets={data.users.map((u) => ({ id: u.id, username: u.username, display_name: u.display_name, seed: u.planet_seed, skin: u.planet_skin, level: u.level, galaxy: u.home_galaxy, links: linkCount.get(u.id) ?? 0 }))}
+            chains={data.chains.map((c) => ({ id: c.id, title: displayTitle(c, lang), boost: c.boost, link_count: c.link_count, donated_stars: c.donated_stars, daily: Boolean(c.daily_day), topic: c.is_topic && Boolean(c.ends_at && new Date(c.ends_at) > new Date()), origin: c.origin_user_id, crowns: c.crowns ?? 0, duel: Boolean(c.active_duel_id), galaxy: c.galaxy }))}
             edges={data.edges}
             orbits={data.orbits}
           />

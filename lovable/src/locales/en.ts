@@ -570,6 +570,31 @@ const en: Record<string, string> = {
   rules_zeit_4: "The first link of a planet created in the last 24 hours resets the clock to 24 hours.",
   rules_zeit_5: "The pot grows by 1 star per counted link and by 10 % of the platform share earned during the round.",
   rules_zeit_6: "Links go through the normal safety check. Multiple accounts lead to exclusion.",
+
+  // Galaxies & season draw
+  galaxies: "Galaxies",
+  galaxy_all: "All galaxies",
+  galaxy_pick: "Which galaxy does this chain belong to?",
+  galaxy_home: "Home galaxy",
+  galaxy_alltag: "Everyday",
+  galaxy_musik: "Music",
+  galaxy_essen: "Food",
+  galaxy_sport: "Sport",
+  galaxy_reisen: "Travel",
+  galaxy_kunst: "Art",
+  galaxy_humor: "Comedy",
+  galaxy_gaming: "Gaming",
+  galaxy_wissen: "Knowledge",
+  galaxy_business: "Business",
+  mega_title: "Season draw",
+  mega_headline: "On {date} one of you wins the big pot",
+  mega_text: "Every round, the last link wins the round pot. On top, everyone who added at least one link to a time chain this season is in the big draw. One name is drawn at random. Joining is free.",
+  mega_pot: "Season pot",
+  mega_participants: "{n} in the draw",
+  mega_in: "You're in the draw",
+  mega_join: "Add one link to the time chain and you're in",
+  notif_mega_won: "The season draw is done: you won! {stars} stars are yours.",
+  notif_mega_drawn: "The season draw is done. {actor} won ★ {stars}. The new season starts now.",
 };
 
 export default en;

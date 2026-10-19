@@ -5,6 +5,7 @@ import { rememberInvite, useAuth } from "@/lib/auth";
 import { messageOf, useT } from "@/lib/i18n";
 import { addLink, addReply, boostChain, buySkin, convertEarnings, createCheckout, createInvite, demoAddStars, donateStars, followCreator, getLink, isFollowing, reportLink, requestPayout, setUsername, startChain, unfollowCreator, uploadFrames, uploadImage, uploadVideo, type MediaFields } from "@/lib/api";
 import { EMBED_PATTERN, parseEmbed } from "@/lib/embed";
+import { GALAXIES } from "@/lib/galaxies";
 import { useAsync } from "@/lib/useAsync";
 import { Icon } from "./Icons";
 import { awaitVerdict, MAX_IMAGE_BYTES, MAX_VIDEO_BYTES, MAX_VIDEO_SECONDS, probeVideo } from "@/lib/moderation";
@@ -219,13 +220,14 @@ export function StartChainForm({ topic: topicDefault = false, fromLink = null }:
   const [title, setTitle] = useState(""); const [text, setText] = useState(""); const [embed, setEmbed] = useState("");
   const [color, setColor] = useState(COLORS[0]); const [media, setMedia] = useState<Media>(null);
   const [topic, setTopic] = useState(topicDefault); const [description, setDescription] = useState(""); const [days, setDays] = useState(3);
+  const [galaxy, setGalaxy] = useState<string>("alltag");
   const origin = useAsync(() => (fromLink ? getLink(fromLink) : Promise.resolve(null)), [fromLink]);
   const s = useSubmit(async (_: undefined, phase) => {
     if (!session) throw new Error("err_login_first");
     if (embed.trim() && !embedOrNull(embed)) throw new Error("err_embed_url");
     phase(t("uploading"));
     const files = await uploadMedia(session.user.id, media);
-    const { chainId, linkId } = await startChain({ title: title.trim(), text: text.trim(), ...files, embed_url: embedOrNull(embed), color, description: topic ? description.trim() : "", is_topic: topic, days, from_link: fromLink });
+    const { chainId, linkId } = await startChain({ title: title.trim(), text: text.trim(), ...files, embed_url: embedOrNull(embed), color, description: topic ? description.trim() : "", is_topic: topic, days, from_link: fromLink, galaxy });
     let notice: string | null = null;
     try { notice = linkId ? await verdictMessage("link", linkId, t, phase) : null; } catch (e) { notice = (e as Error).message; }
     nav(`/c/${chainId}`, { state: { notice } });
@@ -241,6 +243,16 @@ export function StartChainForm({ topic: topicDefault = false, fromLink = null }:
         </div>
       )}
       <input className="input text-lg font-semibold" placeholder={t("chain_title_ph")} maxLength={80} minLength={2} required value={title} onChange={(e) => setTitle(e.target.value)} />
+      <div>
+        <p className="muted mb-1.5 text-xs">{t("galaxy_pick")}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {GALAXIES.map((g) => (
+            <button key={g.slug} type="button" onClick={() => setGalaxy(g.slug)} className={`rounded-full border px-2.5 py-1 text-xs transition ${galaxy === g.slug ? "border-white/70 bg-white/15 text-white" : "muted border-white/10 hover:text-white"}`}>
+              <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full" style={{ background: `hsl(${g.hue} 85% 65%)` }} />{t(`galaxy_${g.slug}`)}
+            </button>
+          ))}
+        </div>
+      </div>
       <label className="card flex cursor-pointer items-start gap-3 p-3 text-sm" style={{ borderColor: topic ? "#ff5cc8" : undefined }}>
         <input type="checkbox" className="mt-1" checked={topic} onChange={(e) => setTopic(e.target.checked)} />
         <span><span className="font-semibold">✦ {t("topic_toggle")}</span><br /><span className="muted text-xs">{t("topic_hint")}</span></span>

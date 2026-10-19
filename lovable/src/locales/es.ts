@@ -546,6 +546,13 @@ const es: Record<string, string> = {
   rules_zeit_4: "El primer eslabón de un planeta creado en las últimas 24 horas reinicia el reloj a 24 horas.",
   rules_zeit_5: "El bote crece 1 estrella por eslabón contado y un 10 % de la parte de la plataforma generada durante la ronda.",
   rules_zeit_6: "Los eslabones pasan la revisión normal. Las cuentas múltiples llevan a la exclusión.",
+
+  galaxies: "Galaxias", galaxy_all: "Todas las galaxias", galaxy_pick: "¿A qué galaxia pertenece esta cadena?", galaxy_home: "Galaxia de origen",
+  galaxy_alltag: "Día a día", galaxy_musik: "Música", galaxy_essen: "Comida", galaxy_sport: "Deporte", galaxy_reisen: "Viajes", galaxy_kunst: "Arte", galaxy_humor: "Humor", galaxy_gaming: "Gaming", galaxy_wissen: "Saber", galaxy_business: "Negocios",
+  mega_title: "Sorteo de temporada", mega_headline: "El {date} uno de vosotros gana el gran bote",
+  mega_text: "En cada ronda, el último eslabón gana el bote de la ronda. Además, todos los que añadieron al menos un eslabón a una cadena del tiempo esta temporada entran en el gran sorteo. Se saca un nombre al azar. Participar es gratis.",
+  mega_pot: "Bote de temporada", mega_participants: "{n} en el sorteo", mega_in: "Estás en el sorteo", mega_join: "Añade un eslabón a la cadena del tiempo y estás dentro",
+  notif_mega_won: "El sorteo de temporada ya se hizo: ¡ganaste! {stars} estrellas son tuyas.", notif_mega_drawn: "El sorteo de temporada ya se hizo. {actor} ganó ★ {stars}. La nueva temporada empieza ahora.",
 };
 
 export default es;
