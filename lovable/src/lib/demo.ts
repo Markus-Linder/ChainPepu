@@ -99,4 +99,14 @@ export const DEMO_DUEL_EVENTS: DuelEvent[] = Array.from({ length: 14 }, (_, i) =
 
 export const DEMO_LEADERS: InviteLeader[] = [1, 2, 3, 7, 12].map((i, k) => ({ id: by(i).id, username: by(i).username, display_name: by(i).display_name, planet_seed: by(i).planet_seed, planet_skin: by(i).planet_skin, invited_count: [23, 17, 11, 9, 6][k] }));
 export const DEMO_WEEK: WeekLeader[] = [DEMO_CHAINS[0], DEMO_CHAINS[8], DEMO_CHAINS[1]].map((c, i) => ({ ...c, week_points: [860, 715, 640][i] }));
+export const DEMO_JACKPOT_CHAIN: ChainStats = C(15, "Zeitkette #3", 1, 64, 38, 0, { origin_user_id: null, origin_username: null, origin_display_name: null, is_jackpot: true });
+DEMO_CHAINS.push(DEMO_JACKPOT_CHAIN);
+for (let i = 1; i <= 10; i++) DEMO_LINKS.push(L(1500 + i, 15, ((i * 7) % DEMO_PROFILES.length) + 1, i, ["Letztes Glied, bis gleich jemand kommt.", "Ich bleib hier sitzen.", "Hallo Topf.", "Noch 2 Stunden, haltet durch.", "Neu hier, Uhr auf Anfang!", "Wer traut sich?", "Mein erstes Glied überhaupt.", "Zeitkette, ich liebe dich.", "Nachtschicht.", "Jetzt oder nie."][i - 1]));
+export const DEMO_JACKPOT = {
+  id: 3, round: 3, chain_id: 15, pot_stars: 1240, started_at: ago(20), ends_at: ahead(1.9), status: "laeuft" as const,
+  last_link_id: 1510, last_user_id: by(7).id, winner_user: null, winner_stars: null, alerted: false, settled_at: null,
+  last_username: by(7).username, last_display_name: by(7).display_name, last_seed: by(7).planet_seed, last_skin: by(7).planet_skin, last_level: by(7).level,
+  link_count: 64, user_count: 38,
+};
+
 export const DEMO_STATS = { users: 18, chains: 14, links: DEMO_LINKS.length, stars: DEMO_CHAINS.reduce((s, c) => s + c.donated_stars, 0) };

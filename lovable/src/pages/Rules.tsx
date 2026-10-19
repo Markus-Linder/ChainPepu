@@ -20,6 +20,10 @@ export default function Rules() {
         <ul className="list-disc space-y-1 pl-5">{[1, 2, 3, 4, 5].map((i) => <li key={i}>{t(`rules_how_${i}`)}</li>)}</ul>
       </section>
       <section className="card space-y-3 p-5 text-sm">
+        <h2 className="flex items-center gap-2 font-semibold"><span style={{ color: "var(--star)" }}>⏱</span>{t("rules_zeit_title")}</h2>
+        <ul className="list-disc space-y-1 pl-5">{[1, 2, 3, 4, 5, 6].map((i) => <li key={i}>{t(`rules_zeit_${i}`)}</li>)}</ul>
+      </section>
+      <section className="card space-y-3 p-5 text-sm">
         <h2 className="flex items-center gap-2 font-semibold"><span style={{ color: "var(--star)" }}><Icon name="star" size={16} filled /></span>{t("rules_stars_title")}</h2>
         <ul className="list-disc space-y-1 pl-5">
           <li>{t("rules_stars_1")}</li>

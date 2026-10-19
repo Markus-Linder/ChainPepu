@@ -111,6 +111,45 @@ export async function renderChainClip(input: ClipInput): Promise<Blob> {
   return new Promise((resolve) => canvas.toBlob((b) => resolve(b!), "image/png"));
 }
 
+/** Time chain clip: countdown and pot, big, with QR. */
+export async function renderJackpotClip(input: { pot: number; remaining: number; round: number; lastName: string; url: string; labels: { title: string; pot: string; last: string; cta: string; ends: string } }): Promise<Blob> {
+  const canvas = document.createElement("canvas");
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#06050d"; ctx.fillRect(0, 0, W, H);
+  const n1 = ctx.createRadialGradient(540, 700, 0, 540, 700, 900); n1.addColorStop(0, "rgba(242,196,109,.35)"); n1.addColorStop(1, "rgba(242,196,109,0)");
+  ctx.fillStyle = n1; ctx.fillRect(0, 0, W, H);
+  const n2 = ctx.createRadialGradient(150, 1600, 0, 150, 1600, 800); n2.addColorStop(0, "rgba(255,61,154,.3)"); n2.addColorStop(1, "rgba(255,61,154,0)");
+  ctx.fillStyle = n2; ctx.fillRect(0, 0, W, H);
+  let s = input.round * 104729 + 7;
+  const rnd = () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; };
+  for (let i = 0; i < 220; i++) { ctx.fillStyle = `rgba(255,255,255,${0.25 + rnd() * 0.7})`; ctx.beginPath(); ctx.arc(rnd() * W, rnd() * H, rnd() * 2.2 + 0.4, 0, Math.PI * 2); ctx.fill(); }
+  ctx.strokeStyle = "#a08cff"; ctx.lineWidth = 9; ctx.beginPath(); ctx.arc(96, 120, 30, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = "#ff3d9a"; ctx.beginPath(); ctx.arc(136, 120, 30, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = "#f2c46d"; ctx.beginPath(); ctx.arc(116, 120, 12, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#f1efff"; ctx.font = "bold 54px 'Space Grotesk', Inter, sans-serif"; ctx.textBaseline = "middle"; ctx.fillText("ChainPepu", 190, 120);
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#9b97c4"; ctx.font = "600 40px Inter, sans-serif"; ctx.fillText(`${input.labels.title.toUpperCase()}  ·  #${input.round}`, W / 2, 420);
+  // Ring + countdown
+  ctx.lineWidth = 26; ctx.strokeStyle = "rgba(255,255,255,.08)"; ctx.beginPath(); ctx.arc(W / 2, 760, 250, 0, Math.PI * 2); ctx.stroke();
+  const frac = Math.min(1, input.remaining / (24 * 3600));
+  ctx.strokeStyle = input.remaining < 900 ? "#ff5a5a" : "#f2c46d"; ctx.lineCap = "round"; ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 30;
+  ctx.beginPath(); ctx.arc(W / 2, 760, 250, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * frac); ctx.stroke(); ctx.shadowBlur = 0;
+  const h = Math.floor(input.remaining / 3600), m = Math.floor((input.remaining % 3600) / 60);
+  ctx.fillStyle = "#ffffff"; ctx.font = "bold 150px 'Space Grotesk', Inter, sans-serif"; ctx.fillText(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`, W / 2, 745);
+  ctx.fillStyle = "#9b97c4"; ctx.font = "500 36px Inter, sans-serif"; ctx.fillText(input.labels.ends, W / 2, 850);
+  // Pot
+  ctx.fillStyle = "#f2c46d"; ctx.font = "bold 120px 'Space Grotesk', Inter, sans-serif"; ctx.fillText(`★ ${input.pot}`, W / 2, 1150);
+  ctx.fillStyle = "#9b97c4"; ctx.font = "500 40px Inter, sans-serif"; ctx.fillText(input.labels.pot, W / 2, 1235);
+  if (input.lastName) { ctx.fillStyle = "#f1efff"; ctx.font = "600 44px Inter, sans-serif"; ctx.fillText(`${input.labels.last}: ${input.lastName}`, W / 2, 1340); }
+  const qr = document.createElement("canvas");
+  await QRCode.toCanvas(qr, input.url, { width: 300, margin: 1, color: { dark: "#06050d", light: "#ffffff" } });
+  ctx.fillStyle = "#ffffff"; roundRect(ctx, 390, 1440, 300, 300, 28); ctx.fill();
+  ctx.drawImage(qr, 390, 1440, 300, 300);
+  ctx.fillStyle = "#ffffff"; ctx.font = "600 44px Inter, sans-serif"; wrap(ctx, input.labels.cta, 900, 2).forEach((l, i) => ctx.fillText(l, W / 2, 1810 + i * 54));
+  return new Promise((resolve) => canvas.toBlob((b) => resolve(b!), "image/png"));
+}
+
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
 }

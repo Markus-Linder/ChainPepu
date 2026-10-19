@@ -31,7 +31,7 @@ function PushToggle({ userId }: { userId: string }) {
   );
 }
 
-const ICON: Record<string, IconName> = { neue_kette: "chain", spende: "star", neuer_follower: "users", glied: "spark", moderation: "shield", antwort: "reply", duell: "swords" };
+const ICON: Record<string, IconName> = { neue_kette: "chain", spende: "star", neuer_follower: "users", glied: "spark", moderation: "shield", antwort: "reply", duell: "swords", zeitkette: "bolt" };
 const KEY: Record<string, string> = {
   new_chain: "notif_new_chain", link: "notif_link", donation: "notif_donation", follower: "notif_follower", reply: "notif_reply",
   reported: "notif_reported", blocked: "notif_blocked", auto_blocked: "notif_auto_blocked", approved: "notif_approved",
@@ -39,6 +39,7 @@ const KEY: Record<string, string> = {
   duel_won: "notif_duel_won", duel_lost: "notif_duel_lost", duel_draw: "notif_duel_draw", invite_milestone: "notif_invite_milestone",
   weekly_won: "notif_weekly_won", tournament_round: "notif_tournament_round", tournament_won: "notif_tournament_won",
   payout_paid: "notif_payout_paid", payout_rejected: "notif_payout_rejected",
+  jackpot_overtaken: "notif_jackpot_overtaken", jackpot_won: "notif_jackpot_won", jackpot_alert: "notif_jackpot_alert",
 };
 
 export default function Notifications() {

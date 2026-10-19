@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { getChain, getLinks, getPayoutSettings, listDonations, listDuelsForChain, listReplies } from "@/lib/api";
 import { ChallengeForm, DuelBanner, DuelCard } from "@/components/Duel";
 import { ShareClip } from "@/components/ShareClip";
+import { ZeitketteCard } from "@/components/Zeitkette";
 import { ChainCard } from "@/components/ChainCard";
 import { listBranches } from "@/lib/api";
 import { displayTitle, secondsUntil } from "@/lib/events";
@@ -47,7 +48,7 @@ export default function Chain() {
       <div>
         <div className="mb-6">
           <p className="kicker">
-            {chain.daily_day ? t("daily_event_on", { date: chain.daily_day }) : chain.is_topic ? <span style={{ color: "#ff3d9a" }}>✦ {t("topic_badge")}</span> : t("chain")}
+            {chain.daily_day ? t("daily_event_on", { date: chain.daily_day }) : chain.is_jackpot ? <span style={{ color: "var(--star)" }}>⏱ {t("zeit_title")}</span> : chain.is_topic ? <span style={{ color: "#ff3d9a" }}>✦ {t("topic_badge")}</span> : t("chain")}
           </p>
           <h1 className="mt-1 text-2xl font-bold sm:text-3xl">{chain.crowns > 0 && <span className="mr-2 text-[#f2c46d]" title={t("duel_crowns")}><Icon name="crown" size={24} />{chain.crowns > 1 ? ` ${chain.crowns}` : ""}</span>}{title}</h1>
           {chain.is_topic && chain.description && <p className="mt-2 text-base">{chain.description}</p>}
@@ -65,6 +66,7 @@ export default function Chain() {
           {notice && <div className="mt-3"><Notice error={blockedMine ? notice : null} ok={blockedMine ? null : notice} /></div>}
         </div>
         {activeDuel && <DuelBanner duel={activeDuel} chainId={chain.id} />}
+        {chain.is_jackpot && <div className="mb-6"><ZeitketteCard compact /></div>}
         <ol className="space-y-4">
           {links.map((l) => <LinkItem key={l.id} link={l} isOrigin={l.user_id === chain.origin_user_id && l.position === 1} replies={replies.filter((r) => r.link_id === l.id)} onChanged={reload} />)}
         </ol>
@@ -101,7 +103,7 @@ export default function Chain() {
             )}
           </div>
         )}
-        {!activeDuel && !chain.daily_day && <ChallengeForm target={chain} />}
+        {!activeDuel && !chain.daily_day && !chain.is_jackpot && <ChallengeForm target={chain} />}
         {pastDuels.length > 0 && (
           <div className="space-y-2">
             <h2 className="flex items-center gap-2 text-sm font-semibold"><Icon name="swords" size={14} />{t("duel_history")}</h2>

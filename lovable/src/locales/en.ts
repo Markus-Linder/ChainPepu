@@ -544,6 +544,32 @@ const en: Record<string, string> = {
   footer_product: "Product",
   footer_creators: "Creators",
   footer_company: "Company",
+
+  // Time chain
+  zeit_title: "Time chain",
+  zeit_kicker: "The last link wins",
+  zeit_text: "One chain, one clock, one pot. Whoever holds the last link when the clock runs out takes the pot. Every link adds 10 minutes. A brand-new planet's first link resets the clock to 24 hours. Joining is free.",
+  zeit_pot: "Prize pot",
+  zeit_last: "Last link",
+  zeit_nobody: "Nobody yet. Be the first.",
+  zeit_cta: "Add my link now",
+  zeit_share: "Share the countdown",
+  zeit_rules_short: "Free to join · one link per {n} min counts · a new planet resets the clock to {h} h",
+  zeit_reset_hint: "New here? Your first link resets the clock to {h} hours and puts you in the spotlight.",
+  zeit_round: "Round {n}",
+  zeit_ends: "Clock runs out in",
+  zeit_hurry: "Less than {n} minutes! You can be the last link right now.",
+  share_zeit_cta: "Scan and be the last link",
+  notif_jackpot_overtaken: "{actor} took the last link of the time chain from you.",
+  notif_jackpot_won: "You held the last link of the time chain. {stars} stars from the pot are yours!",
+  notif_jackpot_alert: "Time chain: less than 15 minutes left! The pot is ★ {stars}. You can be the last link now.",
+  rules_zeit_title: "Time chain",
+  rules_zeit_1: "Joining is free. Adding a link never costs stars.",
+  rules_zeit_2: "Whoever holds the last visible link when the clock runs out receives the pot as earned stars.",
+  rules_zeit_3: "Every counted link adds 10 minutes to the clock, up to 24 hours. Per planet one link every 10 minutes counts.",
+  rules_zeit_4: "The first link of a planet created in the last 24 hours resets the clock to 24 hours.",
+  rules_zeit_5: "The pot grows by 1 star per counted link and by 10 % of the platform share earned during the round.",
+  rules_zeit_6: "Links go through the normal safety check. Multiple accounts lead to exclusion.",
 };
 
 export default en;

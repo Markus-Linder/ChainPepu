@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { LangProvider, LangSwitcher, useT } from "@/lib/i18n";
 import { Nav } from "@/components/Nav";
 import { UsernameForm } from "@/components/Forms";
+import { ZeitketteStrip } from "@/components/Zeitkette";
 import { Logo } from "@/components/Icons";
 import Home from "@/pages/Home";
 import Today from "@/pages/Today";
@@ -73,6 +74,7 @@ export default function App() {
         <div className="stars-bg" />
         <div className="noise" />
         <Nav />
+        <ZeitketteStrip />
         <UsernameGate />
         <main className="mx-auto max-w-6xl px-4 py-6">
           <Routes>

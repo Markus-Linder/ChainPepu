@@ -3,9 +3,9 @@
  * Schreiben läuft über Datenbank-Funktionen (RPC), die selbst prüfen.
  */
 import { supabase } from "@/integrations/supabase/client";
-import type { AdminStats, ChainStats, CreatorBoard, CreatorStats, Donation, Duel, DuelEvent, DuelView, Invite, InviteLeader, LinkRow, MapEdge, Notification, Payout, PayoutRow, Profile, Reply, ReportedLink, Tournament, TournamentDuel, TournamentEntry, Verdict, WeekLeader, WeeklyChallenge } from "./types";
+import type { AdminStats, ChainStats, CreatorBoard, CreatorStats, Donation, Duel, DuelEvent, DuelView, Invite, InviteLeader, Jackpot, LinkRow, MapEdge, Notification, Payout, PayoutRow, Profile, Reply, ReportedLink, Tournament, TournamentDuel, TournamentEntry, Verdict, WeekLeader, WeeklyChallenge } from "./types";
 import { themeForDay, todayKey } from "./events";
-import { DEMO, DEMO_CHAINS, DEMO_DUEL_EVENTS, DEMO_DUELS, DEMO_EDGES, DEMO_LEADERS, DEMO_LINKS, DEMO_ORBITS, DEMO_PROFILES, DEMO_REPLIES, DEMO_STATS, DEMO_WEEK } from "./demo";
+import { DEMO, DEMO_CHAINS, DEMO_DUEL_EVENTS, DEMO_DUELS, DEMO_EDGES, DEMO_JACKPOT, DEMO_LEADERS, DEMO_LINKS, DEMO_ORBITS, DEMO_PROFILES, DEMO_REPLIES, DEMO_STATS, DEMO_WEEK } from "./demo";
 
 function fail(error: { message: string } | null): never {
   throw new Error(error?.message || "err_unknown");
@@ -546,6 +546,31 @@ export async function listStaff(): Promise<Profile[]> {
   if (DEMO) return [];
   const { data } = await supabase.from("profiles").select("*").or("is_moderator.eq.true,is_admin.eq.true").order("username");
   return (data ?? []) as Profile[];
+}
+
+/* ---------- Zeitkette ---------- */
+export async function getJackpot(): Promise<Jackpot | null> {
+  if (DEMO) return DEMO_JACKPOT;
+  await supabase.rpc("ensure_jackpot");
+  const { data } = await supabase.from("jackpot_view").select("*").eq("status", "laeuft").order("id", { ascending: false }).limit(1).maybeSingle();
+  return (data as Jackpot) ?? null;
+}
+export async function getJackpotByChain(chainId: number): Promise<Jackpot | null> {
+  if (DEMO) return chainId === DEMO_JACKPOT.chain_id ? DEMO_JACKPOT : null;
+  const { data } = await supabase.from("jackpot_view").select("*").eq("chain_id", chainId).maybeSingle();
+  return (data as Jackpot) ?? null;
+}
+export async function listJackpotHistory(limit = 5): Promise<Jackpot[]> {
+  if (DEMO) return [];
+  const { data } = await supabase.from("jackpot_view").select("*").eq("status", "beendet").order("id", { ascending: false }).limit(limit);
+  return (data ?? []) as Jackpot[];
+}
+export async function settleJackpot() { if (DEMO) return; await supabase.rpc("settle_jackpot"); }
+export async function jackpotAlert() { if (DEMO) return; await supabase.rpc("jackpot_alert"); }
+export function subscribeJackpot(onChange: () => void): () => void {
+  if (DEMO) return () => {};
+  const channel = supabase.channel("jackpot").on("postgres_changes", { event: "*", schema: "public", table: "jackpots" }, onChange).subscribe();
+  return () => { void supabase.removeChannel(channel); };
 }
 
 /* ---------- Ketten-Duell ---------- */

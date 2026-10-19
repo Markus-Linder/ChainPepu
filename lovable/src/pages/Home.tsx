@@ -12,6 +12,7 @@ import { DuelCard, DuelBar } from "@/components/Duel";
 import { Planet } from "@/components/Planet";
 import { Reveal } from "@/components/Reveal";
 import { Icon } from "@/components/Icons";
+import { ZeitketteCard } from "@/components/Zeitkette";
 
 export default function Home() {
   const { t, lang } = useT();
@@ -32,7 +33,7 @@ export default function Home() {
     linkCount.set(e.to_user, (linkCount.get(e.to_user) ?? 0) + 1);
   }
   const share = data?.settings.share ?? 80;
-  const hot = data?.chains.filter((c) => !c.is_topic && !c.daily_day) ?? [];
+  const hot = data?.chains.filter((c) => !c.is_topic && !c.daily_day && !c.is_jackpot) ?? [];
 
   return (
     <div className="space-y-16 sm:space-y-24">
@@ -76,6 +77,9 @@ export default function Home() {
           </div>
         </section>
       ) : null}
+
+      {/* ---------- Time chain ---------- */}
+      <Reveal><ZeitketteCard /></Reveal>
 
       {/* ---------- Live universe ---------- */}
       <section>

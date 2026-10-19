@@ -21,6 +21,7 @@ export function ChainCard({ chain }: { chain: ChainStats }) {
         <div className="absolute left-4 top-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider">
           {chain.daily_day && <span className="rounded-full bg-black/40 px-2 py-0.5" style={{ color: "var(--star)" }}>☀ {t("daily_event")}</span>}
           {chain.is_topic && <span className="rounded-full bg-black/40 px-2 py-0.5" style={{ color: "#ff5fb0" }}>✦ {t("topic_badge")}</span>}
+          {chain.is_jackpot && <span className="rounded-full bg-black/40 px-2 py-0.5" style={{ color: "var(--star)" }}>⏱ {t("zeit_title")}</span>}
           {chain.active_duel_id && <span className="rounded-full bg-black/40 px-2 py-0.5 text-[#ff7a7a]"><span className="live-dot mr-1 h-1.5 w-1.5" />{t("map_duel")}</span>}
         </div>
         <div className="absolute right-3 top-3 flex items-center gap-1.5 text-xs">

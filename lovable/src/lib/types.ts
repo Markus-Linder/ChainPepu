@@ -38,6 +38,7 @@ export type ChainStats = {
   crowns: number;
   active_duel_id: number | null;
   branched_from_link: number | null;
+  is_jackpot?: boolean;
 };
 
 export type InviteLeader = { id: string; username: string; display_name: string; planet_seed: number; planet_skin: string; invited_count: number };
@@ -71,6 +72,13 @@ export type Tournament = { id: number; title: string; size: 4 | 8; round_minutes
 export type TournamentEntry = { tournament_id: number; chain_id: number; user_id: string; eliminated: boolean; chain?: ChainStats };
 export type TournamentDuel = { tournament_id: number; round: number; duel_id: number };
 
+export type Jackpot = {
+  id: number; round: number; chain_id: number; pot_stars: number; started_at: string; ends_at: string; status: "laeuft" | "beendet";
+  last_link_id: number | null; last_user_id: string | null; winner_user: string | null; winner_stars: number | null; alerted: boolean; settled_at: string | null;
+  last_username: string | null; last_display_name: string | null; last_seed: number | null; last_skin: string | null; last_level: number | null;
+  link_count: number; user_count: number;
+};
+
 export type AdminStats = Record<string, number> & { new_users_14d: { day: string; n: number }[]; stars_14d: { day: string; n: number }[] };
 export type PayoutRow = Payout & { user_id: string; username: string; display_name: string };
 export type WeeklyChallenge = { week_start: string; pool_stars: number; winner_chain: number | null; winner_user: string | null; settled_at: string };
@@ -102,7 +110,7 @@ export type NotificationParams = { key?: string; actor?: string; title?: string;
 
 export type Notification = {
   id: number;
-  type: "neue_kette" | "spende" | "neuer_follower" | "glied" | "moderation" | "antwort" | "duell";
+  type: "neue_kette" | "spende" | "neuer_follower" | "glied" | "moderation" | "antwort" | "duell" | "zeitkette";
   actor_id: string | null;
   chain_id: number | null;
   message: string;
