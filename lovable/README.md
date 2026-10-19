@@ -65,6 +65,14 @@ Bilder und Videos im Objektspeicher statt auf dem App-Server, zustandsloses Fron
 
 **9. Kontakt für Partner** — `src/lib/site.ts`: `CONTACT_EMAIL` eintragen, dann erscheint sie auf `/about`.
 
+## Demo-Universum
+
+Ohne echtes Supabase-Projekt (Platzhalter in `.env` oder `VITE_DEMO=1`) zeigt die App ein **Demo-Universum** mit erfundenen Beispiel-Planeten und -Ketten (klar als Demo gekennzeichnet, Banner oben). So lässt sich das Design mit Leben beurteilen. Schreiben ist im Demo-Modus gesperrt. Sobald Supabase verbunden ist, verschwindet die Demo automatisch.
+
+## Design
+
+Markenwelt: Obsidian `#06050d`, Violett `#7b61ff` → Magenta `#ff3d9a`, Champagner-Gold `#f2c46d`, Eisblau `#8fd3ff`. Schrift Space Grotesk + Inter, Filmkorn-Overlay, Glas-Flächen, Scroll-Einblendungen (`Reveal`), Planeten als texturierte SVG-Körper mit Tag/Nacht-Grenze. Bildwelten in `public/brand/` (Higgsfield, nano_banana_pro): `hero.jpg`, `planet.jpg`, `duel.jpg`, `stars.jpg`, `constellation.jpg`, `og.jpg`.
+
 ## Lokal ausprobieren
 
 ```bash

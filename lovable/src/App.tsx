@@ -47,12 +47,21 @@ function UsernameGate() {
 
 function Footer() {
   const { t } = useT();
+  const col = "space-y-2 text-sm";
+  const link = "muted block hover:text-white";
   return (
-    <footer className="muted mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-3 gap-y-2 px-4 py-10 text-center text-xs">
-      <span>ChainPepu · {t("footer")}</span>
-      <Link to="/rules" className="underline">{t("footer_rules")}</Link>
-      <Link to="/about" className="underline">{t("footer_about")}</Link>
-      <LangSwitcher />
+    <footer className="mt-20 border-t border-white/10">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div>
+          <Logo />
+          <p className="muted mt-3 max-w-xs text-sm">{t("hero_text")}</p>
+          <div className="mt-4"><LangSwitcher /></div>
+        </div>
+        <div className={col}><p className="kicker mb-3">{t("footer_product")}</p><Link to="/stream" className={link}>{t("nav_stream")}</Link><Link to="/today" className={link}>{t("nav_today")}</Link><Link to="/chains" className={link}>{t("nav_chains")}</Link><Link to="/leaderboards" className={link}>{t("board_title")}</Link><Link to="/tournaments" className={link}>{t("tour_title")}</Link></div>
+        <div className={col}><p className="kicker mb-3">{t("footer_creators")}</p><Link to="/new" className={link}>{t("nav_start_chain")}</Link><Link to="/new?topic=1" className={link}>{t("new_topic_title")}</Link><Link to="/dashboard" className={link}>{t("dash_title")}</Link><Link to="/shop" className={link}>{t("nav_shop")}</Link></div>
+        <div className={col}><p className="kicker mb-3">{t("footer_company")}</p><Link to="/about" className={link}>{t("footer_about")}</Link><Link to="/rules" className={link}>{t("footer_rules")}</Link></div>
+      </div>
+      <p className="muted border-t border-white/10 px-4 py-5 text-center text-xs">ChainPepu · {t("footer")}</p>
     </footer>
   );
 }
@@ -62,6 +71,7 @@ export default function App() {
     <LangProvider>
       <AuthProvider>
         <div className="stars-bg" />
+        <div className="noise" />
         <Nav />
         <UsernameGate />
         <main className="mx-auto max-w-6xl px-4 py-6">

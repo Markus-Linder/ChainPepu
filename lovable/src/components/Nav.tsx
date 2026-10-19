@@ -1,6 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { DEMO } from "@/lib/demo";
 import { LangSwitcher, useT } from "@/lib/i18n";
 import { Planet } from "./Planet";
 import { NotificationBell } from "./NotificationBell";
@@ -18,13 +19,15 @@ const ITEMS: { to: string; key: string; icon: IconName }[] = [
 export function Nav() {
   const { profile } = useAuth();
   const { t } = useT();
-  const cls = ({ isActive }: { isActive: boolean }) => `flex items-center gap-1.5 text-sm transition ${isActive ? "text-white" : "muted hover:text-white"}`;
+  const cls = ({ isActive }: { isActive: boolean }) =>
+    `relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition ${isActive ? "bg-white/10 text-white" : "muted hover:bg-white/5 hover:text-white"}`;
   return (
-    <header className="sticky top-0 z-20 border-b border-white/10 bg-[rgba(6,5,13,0.72)] backdrop-blur-xl">
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
+    <header className="sticky top-0 z-20 border-b border-white/10 bg-[rgba(6,5,13,0.65)] backdrop-blur-2xl">
+      {DEMO && <div className="bg-gradient-to-r from-[#7b61ff]/30 via-[#ff3d9a]/30 to-[#7b61ff]/30 px-4 py-1 text-center text-[11px] text-white/90">{t("demo_banner")}</div>}
+      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
         <Link to="/" aria-label="ChainPepu"><Logo /></Link>
-        <nav className="ml-3 hidden items-center gap-5 sm:flex">
-          {ITEMS.map((i) => <NavLink key={i.to} to={i.to} end={i.to === "/"} className={cls}><Icon name={i.icon} size={16} />{t(i.key)}</NavLink>)}
+        <nav className="ml-2 hidden items-center gap-1 lg:flex">
+          {ITEMS.map((i) => <NavLink key={i.to} to={i.to} end={i.to === "/"} className={cls}><Icon name={i.icon} size={15} />{t(i.key)}</NavLink>)}
         </nav>
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <LangSwitcher className="hidden sm:block" />
@@ -35,9 +38,6 @@ export function Nav() {
               <Link to="/dashboard" className="muted hidden hover:text-white sm:inline" title={t("dash_title")}><Icon name="spark" size={18} /></Link>
               {profile.is_moderator && <Link to="/moderation" className="muted hover:text-white" title={t("nav_moderation")}><Icon name="shield" size={18} /></Link>}
               {profile.is_admin && <Link to="/admin" className="muted hover:text-white" title={t("admin_title")}><Icon name="lock" size={18} /></Link>}
-              <Link to="/shop" className="hidden items-center gap-1 text-sm sm:flex" title={t("nav_your_stars")}>
-                <span style={{ color: "var(--star)" }}><Icon name="star" size={15} filled /></span> {profile.stars}
-              </Link>
               <Link to={`/p/${profile.username}`} className="flex items-center gap-2" title={t("nav_your_planet")}>
                 <Planet seed={profile.planet_seed} skin={profile.planet_skin} level={profile.level} size={34} />
                 <span className="hidden flex-col leading-tight sm:flex">
@@ -55,13 +55,12 @@ export function Nav() {
           )}
         </div>
       </div>
-      <nav className="flex items-center justify-around border-t border-white/10 py-2 text-[11px] sm:hidden">
+      <nav className="grid grid-cols-6 border-t border-white/10 py-1.5 text-[10px] lg:hidden">
         {ITEMS.map((i) => (
-          <NavLink key={i.to} to={i.to} end={i.to === "/"} className={({ isActive }) => `flex flex-col items-center gap-0.5 ${isActive ? "text-white" : "muted"}`}>
-            <Icon name={i.icon} size={18} />{t(i.key)}
+          <NavLink key={i.to} to={i.to} end={i.to === "/"} className={({ isActive }) => `flex flex-col items-center gap-0.5 truncate px-1 ${isActive ? "text-white" : "muted"}`}>
+            <Icon name={i.icon} size={18} /><span className="truncate">{t(i.key)}</span>
           </NavLink>
         ))}
-        <LangSwitcher />
       </nav>
     </header>
   );

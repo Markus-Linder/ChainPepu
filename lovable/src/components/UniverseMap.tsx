@@ -102,15 +102,16 @@ export function UniverseMap({ planets, chains, edges, orbits = [] }: { planets: 
             if (!a || !b || !c) return null;
             const strength = Math.min(1, 0.25 + (c.link_count + c.boost * 3 + c.donated_stars / 15) / 40);
             const highlighted = hover === e.chain_id;
-            const color = c.daily ? COLOR.daily : c.topic ? COLOR.topic : c.donated_stars > 0 ? COLOR.daily : COLOR.chain;
+            const color = c.daily ? COLOR.daily : c.topic ? COLOR.topic : c.duel ? "#ff5a5a" : COLOR.chain;
             const mx = (a.x + b.x) / 2 + (a.y - b.y) * 0.2;
             const my = (a.y + b.y) / 2 + (b.x - a.x) * 0.2;
             const d = `M ${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y}`;
+            const rich = c.donated_stars >= 200 || c.boost > 0 || c.crowns > 0;
             return (
               <Link key={i} to={`/c/${c.id}`}>
-                {(c.donated_stars > 0 || c.boost > 0) && <path d={d} fill="none" stroke={color} strokeOpacity={0.35} strokeWidth={8 + strength * 6} filter="url(#soft)" />}
+                {rich && <path d={d} fill="none" stroke={c.crowns > 0 ? COLOR.daily : color} strokeOpacity={0.18} strokeWidth={6 + strength * 4} filter="url(#soft)" />}
                 <path d={d} fill="none" className={`chain-line ${c.boost > 0 ? "pulse" : ""}`}
-                  stroke={highlighted ? COLOR.hover : color} strokeOpacity={highlighted ? 1 : strength} strokeWidth={highlighted ? 5 : 1.5 + strength * 3}
+                  stroke={highlighted ? COLOR.hover : color} strokeOpacity={highlighted ? 1 : 0.25 + strength * 0.55} strokeWidth={highlighted ? 4 : 1 + strength * 2.2}
                   onPointerEnter={() => setHover(c.id)} onPointerLeave={() => setHover(null)} />
               </Link>
             );
