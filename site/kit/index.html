@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KiCad Agent Starter Kit (free) – KiStack</title>
+<meta name="description" content="Free: CLAUDE.md for hardware projects, a machine-readable design-constraints template, a 37-item pre-fab review checklist and the JLCPCB BOM workflow for Claude Code, Codex and OpenCode.">
+<meta property="og:title" content="KiCad Agent Starter Kit (free) – KiStack">
+<meta property="og:description" content="Free: CLAUDE.md for hardware projects, a machine-readable design-constraints template, a 37-item pre-fab review checklist and the JLCPCB BOM workflow for Claude Code, Codex and OpenCode.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://kistack.io/kit/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/assets/style.css">
+<script src="/assets/config.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="logo" href="/">Ki<span>Stack</span>.io</a>
+    <nav>
+      <a href="/#install">Install</a>
+      <a href="/#compare">Compare</a>
+      <a href="/kit/">Free Kit</a>
+      <a href="/pro/">Pro Kit</a>
+      <a href="/review/">Review</a>
+    </nav>
+  </header>
+  <div class="hero">
+    <span class="badge">Free, MIT licensed</span>
+    <h1 style="margin-top:10px">KiCad Agent Starter Kit</h1>
+    <p class="lead">Four files that fix the three ways agents fail on real boards: they don't know your design intent, they edit without asking, and they agree with whatever you suggest.</p>
+    <form data-newsletter="starter-kit">
+      <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
+      <button class="btn" type="submit">Email me the kit</button>
+    </form>
+    <p class="fine">One email with the download, then the weekly KiCad agent tooling letter. Unsubscribe any time. Prefer no email? <a href="/downloads/kicad-agent-starter-kit.zip">Direct download</a>.</p>
+  </div>
+
+  <section>
+    <h2>What's in the zip</h2>
+    <div class="grid">
+      <div class="card"><h3>CLAUDE.md</h3><p>Project instructions with hard rules: what the agent must ask before changing (placement, outline, stackup, parts, net classes) and what it may fix alone (silkscreen, values, overlaps). Works as AGENTS.md for Codex and OpenCode.</p></div>
+      <div class="card"><h3>DESIGN-CONSTRAINTS.md</h3><p>YAML design intent agents actually parse: rails and currents, signal groups with impedance, length and skew limits, fixed placements, keep-outs, thermal, EMC rules, BOM policy, open questions.</p></div>
+      <div class="card"><h3>REVIEW-CHECKLIST.md</h3><p>37 pre-fab items across schematic, electrical layout, mechanical/DFM and outputs. The agent reports each as pass, fail, cannot check or needs engineer, with evidence.</p></div>
+      <div class="card"><h3>JLCPCB-BOM-WORKFLOW.md</h3><p>Six-step prompt sequence: export, classify, fill LCSC numbers, basic-vs-extended swaps, stock and lifecycle check, apply approved changes only.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Install</h2>
+    <pre>cd my-board/
+unzip ~/Downloads/kicad-agent-starter-kit.zip
+cp CLAUDE.md AGENTS.md          # Codex CLI and OpenCode read this name
+mkdir -p docs &amp;&amp; mv REVIEW-CHECKLIST.md docs/
+# fill the TODO lines in CLAUDE.md and DESIGN-CONSTRAINTS.md, then:
+claude   # or codex / opencode
+&gt; Read CLAUDE.md and DESIGN-CONSTRAINTS.md, then run docs/REVIEW-CHECKLIST.md against this board. Do not edit anything yet.</pre>
+  </section>
+
+  <section>
+    <h2>Need the fab numbers too?</h2>
+    <p class="sub">The constraints template has a slot for a fab rules file. The <a href="/pro/">Pro Kit</a> ships those for JLCPCB, PCBWay, OSH Park, Aisler and Eurocircuits, cited and dated, plus five pre-filled board-class templates and the review CLI.</p>
+    <a class="btn secondary" style="margin-left:0" href="/pro/">See the Pro Kit</a>
+  </section>
+
+  <footer>
+    <p>KiStack.io is an independent guide to AI agent tooling for KiCad. Not affiliated with the KiCad project, American-Embedded or any skill pack author. KiCad is a trademark of the KiCad project. Fab names belong to their respective owners.</p>
+    <p><a href="/imprint/">Imprint</a> · <a href="/privacy/">Privacy</a> · <a href="/">Home</a></p>
+  </footer>
+</div>
+<script src="/assets/site.js"></script>
+</body>
+</html>

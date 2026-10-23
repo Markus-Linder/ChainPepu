@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kistack-review"
+version = "0.1.0"
+description = "Run KiCad DRC/ERC/BOM checks and turn them into a Markdown report plus an agent-ready prompt."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "kistack" }]
+keywords = ["kicad", "drc", "erc", "pcb", "hardware", "ai-agent"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Environment :: Console",
+  "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+]
+dependencies = []
+
+[project.scripts]
+kistack-review = "kistack_review.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["kistack_review*"]

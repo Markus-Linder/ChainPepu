@@ -4,76 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>KiStack – AI agent skills for KiCad</title>
-<meta name="description" content="The AI agent stack for KiCad: skills, MCP servers and workflows that let Claude Code, Codex and OpenCode review schematics, run DRC/ERC and prep boards for fab. Independent guide and starter kit.">
+<meta name="description" content="The AI agent stack for KiCad: install guides for every KiCad skill pack, an honest comparison, a free starter kit, and fab-accurate design rule profiles for Claude Code, Codex and OpenCode.">
 <meta property="og:title" content="KiStack – AI agent skills for KiCad">
 <meta property="og:description" content="Install guides, an honest comparison of KiCad agent skill packs, and a free KiCad Agent Starter Kit.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kistack.io/">
-<style>
-:root{
-  --bg:#f7f8f6;--surface:#ffffff;--text:#15201a;--muted:#5b6861;--border:#dfe5e0;
-  --accent:#0e7a4f;--accent-text:#ffffff;--code-bg:#111a15;--code-text:#d9f2e4;--warn:#9a5b00;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0e1411;--surface:#151d18;--text:#e6ede8;--muted:#9fb0a6;--border:#263129;
-    --accent:#3ccf8e;--accent-text:#0b1510;--code-bg:#0a0f0c;--code-text:#cdebd9;--warn:#f0b24a;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0e1411;--surface:#151d18;--text:#e6ede8;--muted:#9fb0a6;--border:#263129;
-  --accent:#3ccf8e;--accent-text:#0b1510;--code-bg:#0a0f0c;--code-text:#cdebd9;--warn:#f0b24a;
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.wrap{max-width:960px;margin:0 auto;padding:0 16px}
-header{padding:20px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-.logo{font-weight:700;letter-spacing:.02em;font-size:18px}
-.logo span{color:var(--accent)}
-nav a{color:var(--muted);text-decoration:none;margin-left:16px;font-size:14px}
-nav a:hover{color:var(--text)}
-.hero{padding:48px 0 32px}
-h1{font-size:clamp(30px,5vw,46px);line-height:1.1;margin:0 0 16px;letter-spacing:-.01em}
-.lead{font-size:19px;color:var(--muted);max-width:640px;margin:0 0 24px}
-.btn{display:inline-block;background:var(--accent);color:var(--accent-text);padding:12px 20px;border-radius:8px;font-weight:600;text-decoration:none;border:0;cursor:pointer;font-size:16px}
-.btn.secondary{background:transparent;color:var(--text);border:1px solid var(--border);margin-left:8px}
-section{padding:36px 0;border-top:1px solid var(--border)}
-h2{font-size:26px;margin:0 0 8px;letter-spacing:-.01em}
-.sub{color:var(--muted);margin:0 0 20px}
-pre{background:var(--code-bg);color:var(--code-text);padding:14px 16px;border-radius:8px;overflow-x:auto;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:0}
-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
-.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}
-.card h3{margin:0 0 6px;font-size:17px}
-.card p{margin:0 0 10px;color:var(--muted);font-size:15px}
-.meta{font-size:13px;color:var(--muted)}
-.table{width:100%;border-collapse:collapse;font-size:15px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.table th,.table td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
-.table th{font-weight:600;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.04em}
-.table tr:last-child td{border-bottom:0}
-.scroll{overflow-x:auto}
-ul{padding-left:20px;margin:0}
-li{margin:6px 0}
-.two{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
-.ok h3{color:var(--accent)}
-.no h3{color:var(--warn)}
-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
-input[type=email]{flex:1;min-width:220px;padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:16px}
-.fine{font-size:13px;color:var(--muted);margin-top:8px}
-footer{padding:28px 0 40px;color:var(--muted);font-size:13px;border-top:1px solid var(--border)}
-footer a{color:var(--muted)}
-a{color:var(--accent)}
-</style>
+<link rel="canonical" href="https://kistack.io/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/assets/style.css">
+<script src="/assets/config.js"></script>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="logo">Ki<span>Stack</span>.io</div>
+    <a class="logo" href="/">Ki<span>Stack</span>.io</a>
     <nav>
-      <a href="#install">Install</a>
-      <a href="#compare">Compare</a>
-      <a href="#reality">What works</a>
-      <a href="#kit">Starter Kit</a>
+      <a href="/#install">Install</a>
+      <a href="/#compare">Compare</a>
+      <a href="/kit/">Free Kit</a>
+      <a href="/pro/">Pro Kit</a>
+      <a href="/review/">Review</a>
     </nav>
   </header>
 
@@ -81,7 +31,7 @@ a{color:var(--accent)}
     <h1>The AI agent stack for KiCad.</h1>
     <p class="lead">Skills, MCP servers and workflows that let Claude Code, Codex and OpenCode review schematics, run DRC/ERC, optimize BOMs and prep boards for fab. One page, no hype.</p>
     <a class="btn" href="#install">Get started in 60 seconds</a>
-    <a class="btn secondary" href="#kit">Free Starter Kit</a>
+    <a class="btn secondary" href="/kit/">Free Starter Kit</a>
   </div>
 
   <section id="install">
@@ -156,27 +106,45 @@ a{color:var(--accent)}
     </div>
   </section>
 
-  <section id="kit">
-    <h2>KiCad Agent Starter Kit (free)</h2>
-    <p class="sub">The missing pieces engineers keep asking for. Drop them into your project and every skill pack above gets better.</p>
+  <section id="products">
+    <h2>Make any skill pack better</h2>
+    <p class="sub">The skill packs teach the agent KiCad. These files teach the agent <em>your board</em> and <em>your fab</em>.</p>
     <div class="grid">
-      <div class="card"><h3>CLAUDE.md for hardware projects</h3><p>Project conventions, fab profile, what the agent must ask before changing.</p></div>
-      <div class="card"><h3>Design-constraints template</h3><p>Signal groups, impedances, keep-outs, placement rules in a format agents read.</p></div>
-      <div class="card"><h3>Board review checklist</h3><p>Pre-fab checklist the agent walks through and reports on, item by item.</p></div>
-      <div class="card"><h3>JLCPCB BOM workflow</h3><p>Prompt sequence for basic/extended part optimization and stock verification.</p></div>
+      <div class="card">
+        <span class="badge">Free</span>
+        <h3 style="margin-top:8px">KiCad Agent Starter Kit</h3>
+        <p>CLAUDE.md for hardware projects, a design-constraints template, a 37-item pre-fab checklist and the JLCPCB BOM workflow.</p>
+        <a class="btn" href="/kit/">Get the free kit</a>
+      </div>
+      <div class="card highlight">
+        <span class="badge">Pro</span>
+        <h3 style="margin-top:8px">KiStack Pro Kit</h3>
+        <p>Fab capability profiles for JLCPCB, PCBWay, OSH Park, Aisler and Eurocircuits as JSON and ready-to-load KiCad rule files, five board-class constraint templates, prompt library and the kistack-review CLI.</p>
+        <a class="btn" href="/pro/">See what's inside</a>
+      </div>
+      <div class="card">
+        <span class="badge">Service</span>
+        <h3 style="margin-top:8px">Pre-Fab Review</h3>
+        <p>Send your KiCad project before you order. You get a prioritized report from the tool chain plus a human engineer's read, within 3 business days.</p>
+        <a class="btn" href="/review/">Book a review</a>
+      </div>
     </div>
-    <!-- TODO: replace action with your newsletter provider endpoint (Beehiiv, Buttondown, Resend) -->
-    <form action="#" method="post" onsubmit="alert('Connect this form to your email provider.');return false;">
+  </section>
+
+  <section id="newsletter">
+    <h2>KiCad agent tooling, once a week</h2>
+    <p class="sub">New skills, MCP servers, fab rule changes and what actually worked on real boards. No sponsored placements without a label.</p>
+    <form data-newsletter="weekly">
       <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
-      <button class="btn" type="submit">Send me the kit</button>
+      <button class="btn" type="submit">Subscribe</button>
     </form>
-    <p class="fine">One email with the kit, then occasional updates on KiCad agent tooling. Unsubscribe any time.</p>
   </section>
 
   <footer>
-    <p>KiStack.io is an independent guide to AI agent tooling for KiCad. It is not affiliated with the KiCad project, American-Embedded or any skill pack author. Project names belong to their respective owners.</p>
-    <p><a href="/impressum">Imprint</a> · <a href="/privacy">Privacy</a> · <a href="https://github.com/American-Embedded/KiStack">KiStack on GitHub</a></p>
+    <p>KiStack.io is an independent guide to AI agent tooling for KiCad. It is not affiliated with the KiCad project, American-Embedded or any skill pack author. KiCad is a trademark of the KiCad project. Fab names belong to their respective owners.</p>
+    <p><a href="/imprint/">Imprint</a> · <a href="/privacy/">Privacy</a> · <a href="https://github.com/American-Embedded/KiStack">KiStack on GitHub</a></p>
   </footer>
 </div>
+<script src="/assets/site.js"></script>
 </body>
 </html>

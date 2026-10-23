@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KiStack Pro Kit – fab rule profiles and constraint templates for KiCad agents</title>
+<meta name="description" content="Fab capability profiles for JLCPCB, PCBWay, OSH Park, Aisler and Eurocircuits as JSON and KiCad .kicad_dru rule files, five board-class constraint templates, a prompt library and the kistack-review CLI. One-time purchase.">
+<meta property="og:title" content="KiStack Pro Kit – fab rule profiles and constraint templates for KiCad agents">
+<meta property="og:description" content="Fab capability profiles for JLCPCB, PCBWay, OSH Park, Aisler and Eurocircuits as JSON and KiCad .kicad_dru rule files, five board-class constraint templates, a prompt library and the kistack-review CLI. One-time purchase.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://kistack.io/pro/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/assets/style.css">
+<script src="/assets/config.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="logo" href="/">Ki<span>Stack</span>.io</a>
+    <nav>
+      <a href="/#install">Install</a>
+      <a href="/#compare">Compare</a>
+      <a href="/kit/">Free Kit</a>
+      <a href="/pro/">Pro Kit</a>
+      <a href="/review/">Review</a>
+    </nav>
+  </header>
+  <div class="hero">
+    <span class="badge">Pro Kit</span>
+    <h1 style="margin-top:10px">Your fab's limits, in a format your agent reads.</h1>
+    <p class="lead">Every skill pack teaches the agent KiCad. None of them know that JLCPCB's cheapest process wants a different annular ring than OSH Park's, or that your 4-layer USB board needs a different template than a buck converter. This kit does.</p>
+    <p class="price"><span class="strike">$39</span>$29 <small>one-time, launch price · 12 months of updates</small></p>
+    <a class="btn big" data-link="pro-kit" href="#">Buy the Pro Kit</a>
+    <a class="btn secondary" data-link="pro-kit-team" href="#">Team licence (5 seats) $99</a>
+    <p class="fine">Instant download after payment. VAT and sales tax handled at checkout. 14-day refund if it doesn't save you time, no questions.</p>
+  </div>
+
+  <section>
+    <h2>What's inside</h2>
+    <div class="grid">
+      <div class="card"><h3>Fab profiles (5 fabs)</h3><p>JLCPCB, PCBWay, OSH Park, Aisler, Eurocircuits. Standard 2-layer and 4-layer processes: track/space, via drill and annular ring, hole-to-copper, edge clearance, silkscreen minimums, board thicknesses, named stackups, assembly notes, file requirements. Every number carries its source URL and retrieval date.</p></div>
+      <div class="card"><h3>KiCad rule files</h3><p>One <code>.kicad_dru</code> per fab and process. Copy next to your project and DRC enforces the fab's minimums instead of KiCad's defaults. No more "it passed DRC but the fab rejected it".</p></div>
+      <div class="card"><h3>5 board-class templates</h3><p>Pre-filled DESIGN-CONSTRAINTS.md for 2-layer MCU, 4-layer MCU with USB 2.0 HS and RMII Ethernet, 2.4 GHz RF module, DC-DC power, and precision analog. Layer plans, signal groups with impedances and skew limits, placement rules, keep-outs, EMC rules.</p></div>
+      <div class="card"><h3>kistack-review CLI</h3><p>One command runs DRC, ERC and BOM export, compares your project's rules and net classes against the fab profile, and writes a Markdown report plus an agent prompt that triages findings and asks before touching placement.</p></div>
+      <div class="card"><h3>Prompt library</h3><p>Full review session, placement proposal (agent proposes, you place), net class setup from constraints, Gerber review, and respin diff between revisions.</p></div>
+      <div class="card"><h3>Agent files</h3><p>Extended CLAUDE.md / AGENTS.md with Claude Code, Codex CLI and OpenCode specifics, a session-start script, and a CHANGES.md template the agent appends to.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Who it's for</h2>
+    <div class="two">
+      <div class="card ok"><h3>Yes</h3><ul>
+        <li>You already use Claude Code, Codex or OpenCode on KiCad projects</li>
+        <li>You order from JLCPCB, PCBWay, OSH Park, Aisler or Eurocircuits</li>
+        <li>You want the agent to check boring things reliably and leave judgment to you</li>
+        <li>You have paid for a respin at least once</li>
+      </ul></div>
+      <div class="card no"><h3>No</h3><ul>
+        <li>You expect an agent to lay out a board unattended. Nothing sold here does that, and we say so on the front page.</li>
+        <li>You need HDI, flex, or RF above 6 GHz rules. Not covered yet.</li>
+        <li>You use Altium or Eagle. KiCad only.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="faq">
+    <h2>Questions</h2>
+    <details><summary>How accurate are the fab numbers?</summary><p>They are copied from each fab's official capability page, with the URL and date next to every value. Fabs change capabilities, so each profile carries a retrieved date and the kit ships updates for 12 months. The licence says it, and we mean it: verify against the fab page before you order.</p></details>
+    <details><summary>Does this replace a skill pack?</summary><p>No. Install KiStack, Ki-Stack or kicad-happy for the KiCad know-how. This kit adds what those cannot know: your fab and your board.</p></details>
+    <details><summary>Which KiCad versions?</summary><p>KiCad 8 and 9. The rule files use the custom DRC rule syntax introduced in KiCad 6, and the CLI uses kicad-cli JSON reports from KiCad 8 onward.</p></details>
+    <details><summary>Can I use it for client work?</summary><p>Yes. Single-user licence covers any number of projects. Generated files (constraints, rules, reports) can be shared freely. Only the kit itself stays with you.</p></details>
+    <details><summary>Refunds?</summary><p>14 days, no questions, via the purchase email.</p></details>
+  </section>
+
+  <section>
+    <h2>Buy</h2>
+    <p class="sub">Secure checkout, card or PayPal, instant download.</p>
+    <a class="btn big" data-link="pro-kit" href="#">Pro Kit, $29</a>
+    <a class="btn secondary" data-link="pro-kit-team" href="#">Team licence, $99</a>
+  </section>
+
+  <footer>
+    <p>KiStack.io is an independent guide to AI agent tooling for KiCad. Not affiliated with the KiCad project, American-Embedded or any skill pack author. KiCad is a trademark of the KiCad project. Fab names belong to their respective owners.</p>
+    <p><a href="/imprint/">Imprint</a> · <a href="/privacy/">Privacy</a> · <a href="/">Home</a></p>
+  </footer>
+</div>
+<script src="/assets/site.js"></script>
+</body>
+</html>
