@@ -1,0 +1,51 @@
+# KiCad custom design rules - JLCPCB - Standard FR-4, 1-2 layer, 1 oz outer copper
+# Fab: JLCPCB (jlcpcb)   Process id: standard-2l
+# Source: https://jlcpcb.com/capabilities/pcb-capabilities
+# Retrieved: 2026-10-23   Generated from kit-pro/fab-profiles/jlcpcb.json (schema_version 1)
+# Values are the fab's published MINIMUMS. Add margin. Constraints whose value is null in the JSON are omitted.
+# Usage: Board Setup > Design Rules > Custom Rules (paste), or copy next to your project as <project>.kicad_dru
+(version 1)
+(rule "jlcpcb min track width"
+  (constraint track_width (min 0.1mm)))
+(rule "jlcpcb min copper clearance"
+  (constraint clearance (min 0.1mm)))
+(rule "jlcpcb min via drill/diameter"
+  (condition "A.Type == 'Via'")
+  (constraint hole_size (min 0.15mm))
+  (constraint via_diameter (min 0.25mm)))
+(rule "jlcpcb min PTH drill"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole'")
+  (constraint hole_size (min 0.15mm)))
+(rule "jlcpcb min NPTH drill"
+  (condition "A.Pad_Type == 'NPTH, mechanical'")
+  (constraint hole_size (min 0.5mm)))
+# Larger holes are routed/milled by the fab; check the JSON notes
+(rule "jlcpcb max drilled hole"
+  (constraint hole_size (max 6.3mm)))
+(rule "jlcpcb min via annular ring"
+  (condition "A.Type == 'Via'")
+  (constraint annular_width (min 0.05mm)))
+# PTH annular ring: 2-layer 1 oz absolute minimum 0.18 mm (0.25 mm recommended)
+(rule "jlcpcb min PTH pad annular ring"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole'")
+  (constraint annular_width (min 0.18mm)))
+(rule "jlcpcb min hole to hole"
+  (constraint hole_to_hole (min 0.2mm)))
+(rule "jlcpcb min via hole to copper"
+  (condition "A.Type == 'Via'")
+  (constraint hole_clearance (min 0.2mm)))
+# PTH to track 0.28 mm minimum (0.35 mm recommended)
+(rule "jlcpcb min PTH hole to copper"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole'")
+  (constraint hole_clearance (min 0.28mm)))
+# Routed edge value; V-cut edges need more (see JSON notes)
+(rule "jlcpcb min copper to board edge"
+  (constraint edge_clearance (min 0.2mm)))
+(rule "jlcpcb min silkscreen to pad/copper clearance"
+  (constraint silk_clearance (min 0.15mm)))
+(rule "jlcpcb min silkscreen text"
+  (condition "A.Layer == 'F.Silkscreen' || A.Layer == 'B.Silkscreen'")
+  (constraint text_thickness (min 0.15mm))
+  (constraint text_height (min 1mm)))
+# Solder mask minimum web 0.1mm is not a custom-rule constraint: set it in Board Setup > Board Stackup > Solder Mask/Paste > 'Solder mask minimum web width'.
+# Minimum slot width 0.5mm (plated) has no KiCad constraint; check oval holes manually.

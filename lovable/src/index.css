@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: 160 22% 5%;
+    --surface: 158 16% 8%;
+    --surface2: 156 14% 11%;
+    --fg: 140 15% 93%;
+    --muted: 145 8% 62%;
+    --line: 150 12% 16%;
+    --copper: 30 72% 60%;
+    --copper-deep: 24 60% 42%;
+    --copper-fg: 30 30% 8%;
+    --mint: 154 60% 52%;
+    --warn: 38 90% 62%;
+    --code: 160 25% 4%;
+    --code-fg: 140 40% 88%;
+  }
+  html { scroll-behavior: smooth; }
+  html, body { overflow-x: clip; }
+  body {
+    @apply bg-bg text-fg font-sans antialiased;
+    background-image: radial-gradient(hsl(var(--line) / .9) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+  ::selection { background: hsl(var(--copper) / .35); }
+}
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-copper px-5 py-3 font-semibold text-copper-fg no-underline transition hover:brightness-110 active:scale-[.98]; }
+  .btn-secondary { @apply bg-surface2 text-fg border border-line hover:border-copper/50 hover:bg-surface; }
+  .btn-ghost { @apply bg-transparent text-fg hover:bg-surface2; }
+  .card { @apply rounded-2xl border border-line bg-surface/80 p-6 shadow-card backdrop-blur-sm transition hover:border-copper/40; }
+  .pre { @apply overflow-x-auto rounded-lg border border-line bg-code px-4 py-3 font-mono text-[13px] leading-relaxed text-code-fg; }
+  .badge { @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface2 px-2.5 py-1 font-mono text-[11px] font-medium uppercase tracking-[.12em] text-copper; }
+  .eyebrow { @apply font-mono text-xs uppercase tracking-[.18em] text-copper; }
+  .input { @apply min-w-[220px] flex-1 rounded-lg border border-line bg-surface px-3.5 py-3 text-base text-fg placeholder:text-muted/70 focus:border-copper/60 focus:outline-none focus:ring-2 focus:ring-copper/20; }
+  .section { @apply py-16 md:py-20; }
+  .h2 { @apply mb-3 text-3xl font-bold tracking-tight md:text-4xl; }
+  .sub { @apply mb-8 max-w-2xl text-[17px] leading-relaxed text-muted; }
+  .table { @apply w-full border-collapse text-[15px]; }
+  .table th { @apply border-b border-line bg-surface2 px-4 py-3 text-left font-mono text-[11px] font-medium uppercase tracking-[.12em] text-muted; }
+  .table td { @apply border-b border-line px-4 py-3.5 align-top; }
+  .table tr:last-child td { @apply border-b-0; }
+  .glow-line { background: linear-gradient(90deg, transparent, hsl(var(--copper) / .6), transparent); height: 1px; }
+}

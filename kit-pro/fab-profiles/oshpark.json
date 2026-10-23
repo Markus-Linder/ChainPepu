@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "fab": "oshpark",
+  "name": "OSH Park",
+  "country": "US",
+  "retrieved": "2026-10-23",
+  "sources": [
+    "https://docs.oshpark.com/services/two-layer/",
+    "https://docs.oshpark.com/services/four-layer/",
+    "https://docs.oshpark.com/services/six-layer/",
+    "https://docs.oshpark.com/services/",
+    "https://docs.oshpark.com/design-tools/kicad/",
+    "https://docs.oshpark.com/design-tools/kicad/kicad-design-rules/",
+    "https://docs.oshpark.com/submitting-orders/drill-specs/",
+    "https://docs.oshpark.com/submitting-orders/slots/",
+    "https://docs.oshpark.com/submitting-orders/board-outline/",
+    "https://docs.oshpark.com/troubleshooting/naming-pattern/",
+    "https://docs.oshpark.com/tips+tricks/castellation/",
+    "https://blog.oshpark.com/2020/06/18/ordering-from-osh-stencils/"
+  ],
+  "verify_note": "Capabilities change. Verify on the fab's capability page before ordering.",
+  "processes": [
+    {
+      "id": "two-layer",
+      "label": "Two Layer Prototype, 1 oz, 1.6 mm, ENIG, purple mask ($5/in^2 for 3 copies)",
+      "layers": [2],
+      "copper_weight_oz": [1],
+      "min_track_mm": 0.1524,
+      "min_clearance_mm": 0.1524,
+      "min_via_drill_mm": 0.254,
+      "min_via_diameter_mm": 0.508,
+      "min_annular_ring_mm": 0.127,
+      "min_pth_drill_mm": 0.254,
+      "max_pth_drill_mm": 6.604,
+      "min_npth_drill_mm": 0.254,
+      "min_hole_to_copper_mm": 0.127,
+      "min_hole_to_hole_mm": 0.127,
+      "min_slot_width_mm": 0.508,
+      "min_board_edge_to_copper_mm": 0.381,
+      "min_silkscreen_line_mm": 0.127,
+      "min_silkscreen_text_height_mm": null,
+      "min_soldermask_bridge_mm": 0.1016,
+      "soldermask_expansion_mm": null,
+      "board_thickness_mm": [1.6],
+      "min_board_size_mm": [6.35, 6.35],
+      "max_board_size_mm": [406.4, 558.8],
+      "castellated_holes": true,
+      "impedance_control": null,
+      "surface_finishes": ["ENIG"],
+      "stackups": [],
+      "notes": [
+        "Copper: 'Trace width 6mil (0.1524mm)', 'Trace spacing 6mil (0.1524mm)', 1 oz, two layers, FR4, 63 mil (1.6 mm) nominal. (two-layer)",
+        "Drill: 'Minimum drill size 10mil (0.254mm)'; 'Minimum annular ring 5mil (0.127mm)'; max drilled hole 260 mil (6.604 mm), larger holes are milled; drills under the minimum 'will be increased to the minimum for that service'; plating 1 mil; size/position tolerance +/-2.5 mil max. PTH and NPTH are not given separate minimums. (two-layer, drill-specs)",
+        "Hole to hole: '5 mil (0.127mm) clearance is recommended between holes'; overlapping drills 'Allowed, but not guaranteed'. (two-layer)",
+        "min_via_diameter_mm 0.508 (20 mil), copper-to-hole 5 mil and hole-to-hole 5 mil are the values OSH Park tells you to enter in KiCad Board Setup for the 2-layer service. (kicad-design-rules)",
+        "Board edge: '15mil (0.381) from nominal board edge' (page omits the unit; 15 mil = 0.381 mm). (two-layer)",
+        "Silkscreen: '5 mil (0.127mm) (recommended minimum)', '3 mil (0.0762mm) (short lines, text, graphics)'; no minimum text height is published ('Silkscreen minimum text height' is left to user preference on the KiCad page). (two-layer, kicad-design-rules)",
+        "Soldermask: SMOBC both sides, purple; 'Minimum soldermask web: 4 mil (0.1016mm)'; 'Maximum soldermask alignment: 3mil (0.0762mm)'. No expansion value published. (two-layer)",
+        "Slots: native drill slots 'Slot widths 20mil (0.508mm) or wider', fully inside the board, not crossing other drills or the board edge; plated slots need an annular ring and copper beneath; non-plated slots must not cut copper. Cutouts on the outline must exceed 0.068 in (1.7272 mm) - the standard mill bit; smaller 0.04 in bits are 'not guaranteed'. (slots, board-outline)",
+        "Size: 'Minimum 0.25in (6.35mm) by 0.25in (6.35mm)'; 'Maximum 16in (406.4mm) by 22in (558.8mm)'. (two-layer)",
+        "Castellation: 'Allowed, but not guaranteed'. 'While we don't offer full support for castellations ... they can be fabricated if you don't mind a few minutes of rework'; use round pads for copper and mask, pads 'must also not extend more than 40 mil from the board edge', expect to file off support tabs and excess plating. (two-layer, castellation)",
+        "Impedance: no value or service is published for 2-layer -> null. (two-layer)",
+        "Pricing/turnaround: '$5 per square inch, which includes three copies of your design'; orders in multiples of 3; 'ship within 9-12 calendar days'. Other 2-layer services on docs.oshpark.com/services: Super Swift ($10/in^2, 4-5 business days), 2oz 0.8mm ($5/in^2), After Dark (black substrate, clear mask, $5/in^2), Medium Run ($1/in^2, 100 in^2 min, multiples of 10). (two-layer, services)"
+      ]
+    },
+    {
+      "id": "four-layer",
+      "label": "Four Layer Prototype, 1 oz outer / 0.5 oz inner, FR408HR, 1.6 mm, ENIG ($10/in^2 for 3 copies)",
+      "layers": [4],
+      "copper_weight_oz": [1, 0.5],
+      "min_track_mm": 0.127,
+      "min_clearance_mm": 0.127,
+      "min_via_drill_mm": 0.254,
+      "min_via_diameter_mm": 0.4572,
+      "min_annular_ring_mm": 0.1016,
+      "min_pth_drill_mm": 0.254,
+      "max_pth_drill_mm": 6.604,
+      "min_npth_drill_mm": 0.254,
+      "min_hole_to_copper_mm": 0.127,
+      "min_hole_to_hole_mm": 0.127,
+      "min_slot_width_mm": 0.508,
+      "min_board_edge_to_copper_mm": 0.381,
+      "min_silkscreen_line_mm": 0.127,
+      "min_silkscreen_text_height_mm": null,
+      "min_soldermask_bridge_mm": 0.1016,
+      "soldermask_expansion_mm": null,
+      "board_thickness_mm": [1.6],
+      "min_board_size_mm": [6.35, 6.35],
+      "max_board_size_mm": [406.4, 558.8],
+      "castellated_holes": true,
+      "impedance_control": null,
+      "surface_finishes": ["ENIG"],
+      "stackups": [
+        {
+          "name": "OSH Park 4-layer FR408HR",
+          "thickness_mm": 1.6,
+          "layers": 4,
+          "notes": "Top to bottom: silkscreen 0.6 mil, solder resist 0.6 mil, 1 oz Cu (1.7 mil, clad + plated), prepreg FR408HR 2113 7.87 mil (0.1999 mm), 0.5 oz Cu (0.68 mil), core FR408HR 39 mil (0.9906 mm), 0.5 oz Cu, prepreg FR408HR 2113 7.87 mil, 1 oz Cu, solder resist, silkscreen. Dk 3.61 at 1 GHz for prepreg and core. The page changelog mentions a temporary alternate stackup for some orders; confirm with OSH Park for impedance-critical designs.",
+          "source": "https://docs.oshpark.com/services/four-layer/"
+        }
+      ],
+      "notes": [
+        "Copper: 'Trace width 5mil (0.127mm)', 'Trace spacing 5mil (0.127mm)', '1oz outer', '1/2oz inner'. (four-layer)",
+        "Drill: 'Minimum drill size 10mil (0.254mm)'; 'Annular ring 4mil (0.1016mm)'. (four-layer, drill-specs)",
+        "KiCad Board Setup values from OSH Park for 4-layer: clearance 5 mil, track 5 mil, annular ring 4 mil, via diameter 18 mil (0.4572 mm), through hole 10 mil, copper-to-hole 5 mil, hole-to-hole 5 mil, silk text thickness 5 mil. (kicad-design-rules)",
+        "Impedance: the page refers to an 'Impedance Constraint Table' image but publishes no numeric tolerance or service guarantee -> null. (four-layer)",
+        "Pricing/turnaround: '$10 per square inch, which includes three copies of your design'; 'ship within 9-14 calendar days'. Super Swift 4-layer $20/in^2 (5-6 business days); Medium Run $2/in^2 (100 in^2 min). (four-layer, services)"
+      ]
+    },
+    {
+      "id": "six-layer",
+      "label": "Six Layer Prototype, 1 oz outer / 0.5 oz inner, FR408HR, 1.6 mm, ENIG ($15/in^2 for 3 copies)",
+      "layers": [6],
+      "copper_weight_oz": [1, 0.5],
+      "min_track_mm": 0.127,
+      "min_clearance_mm": 0.127,
+      "min_via_drill_mm": 0.2032,
+      "min_via_diameter_mm": null,
+      "min_annular_ring_mm": 0.1016,
+      "min_pth_drill_mm": 0.2032,
+      "max_pth_drill_mm": 6.604,
+      "min_npth_drill_mm": 0.2032,
+      "min_hole_to_copper_mm": 0.254,
+      "min_hole_to_hole_mm": null,
+      "min_slot_width_mm": 0.508,
+      "min_board_edge_to_copper_mm": 0.381,
+      "min_silkscreen_line_mm": 0.127,
+      "min_silkscreen_text_height_mm": null,
+      "min_soldermask_bridge_mm": 0.1016,
+      "soldermask_expansion_mm": null,
+      "board_thickness_mm": [1.6],
+      "min_board_size_mm": [6.35, 6.35],
+      "max_board_size_mm": [406.4, 558.8],
+      "castellated_holes": true,
+      "impedance_control": null,
+      "surface_finishes": ["ENIG"],
+      "stackups": [
+        {
+          "name": "OSH Park 6-layer FR408HR",
+          "thickness_mm": 1.6,
+          "layers": 6,
+          "notes": "Symmetric: 1 oz outer Cu (1.7 mil); prepreg FR408HR 106 75% 4.36 mil (0.1107 mm, Dk 3.23); 0.5 oz Cu; core FR408HR 2113 4 mil (0.1016 mm, Dk 3.66); 0.5 oz Cu; centre core FR408HR 36.44 mil (0.9256 mm); mirrored below. Substrate ISOLA FR408-HR, 175 Tg. Mask Taiyo PSR-4000BN purple.",
+          "source": "https://docs.oshpark.com/services/six-layer/"
+        }
+      ],
+      "notes": [
+        "'Trace Width: 5mil (0.127mm)', 'Trace Spacing: 5mil (0.127mm)', 'Minimum Drill Size: 8mil (0.2032mm)', 'Minimum Annular Ring: 4mil (0.1016mm)', 'Board Edge Keepout: 15mil (0.381)'. (six-layer)",
+        "min_hole_to_copper_mm 0.254 is 'Plated drill to internal copper clearance: 10 mil (0.254 mm)' - an inner-layer figure. No KiCad Board Setup table is published for 6-layer, so via diameter and hole-to-hole are null. (six-layer)",
+        "'$15 per square inch, which includes three copies of your design'; 'Orders will ship within 12-21 calendar days' (changelog 15-DEC-2025: turn time changed from 9-14 to 12-21 days). (six-layer)"
+      ]
+    }
+  ],
+  "assembly": {
+    "available": false,
+    "notes": [
+      "docs.oshpark.com/services lists fabrication services only (two-, four-, six-layer, flex, Super Swift, After Dark, Medium Run); no assembly or stencil service is described. (services)",
+      "Stencils: OSH Park's checkout can forward your paste layers to the partner OSH Stencils ('Ordering from OSH Stencils', blog 2020-06-18); include paste layers (F.Paste/B.Paste) in the upload if you want that option. (blog)"
+    ],
+    "required_bom_fields": [],
+    "sources": [
+      "https://docs.oshpark.com/services/",
+      "https://blog.oshpark.com/2020/06/18/ordering-from-osh-stencils/"
+    ]
+  },
+  "file_requirements": {
+    "gerber_format": "RS-274X Gerbers (filenames auto-detected) or native .kicad_pcb",
+    "drill_format": "Excellon, inches, 2:4 precision, zero suppression None or Leading",
+    "notes": [
+      "Native KiCad: 'We accept .kicad_pcb board layout files directly'; uploads are processed with the latest stable KiCad (9.x at retrieval); docs apply to KiCad 7+. (design-tools/kicad)",
+      "Zone fills: 'Due to KiCad's file format, we do not re-fill zones for uploaded .kicad_pcb files' - the .kicad_pro design rules are not uploaded, so fill all zones (press B) and save before uploading. (design-tools/kicad)",
+      "Fonts: custom/OS fonts are not embedded in KiCad 7/8 board files and will be substituted; in KiCad 9+ enable Board Setup > Board Data > Embedded Files > Embed Fonts, or upload Gerbers instead. (design-tools/kicad)",
+      "Gerbers from KiCad are accepted and 'the filenames are detected automatically'. Recognised extension pattern (not case sensitive): .GKO outline, .XLN drills, .GTO/.GBO silk, .GTS/.GBS mask, .GTL/.GBL copper, .G2L/.G3L inner layers (rename unusual inner-plane names such as GP1/G1 to G2L/G3L). (design-tools/kicad, naming-pattern)",
+      "Drill file: 'We require the drills to be indicated using the Excellon Drill format', units inches, format 2:4, zero suppression None or Leading, absolute origin. (drill-specs)",
+      "Board outline: a closed, small but nonzero-width line; cutouts must fit a 0.068 in (1.7272 mm) end mill and must not touch the outline or have copper beneath; circular cutouts under 250 mil should be drawn as non-plated holes instead. Native drill slots (KiCad oval holes) are supported at >= 20 mil width and must appear in the drill file. (board-outline, slots)",
+      "Design rules: OSH Park publishes KiCad Board Setup values but no downloadable .kicad_dru; the DRU files in this kit encode those numbers. (kicad-design-rules)"
+    ]
+  },
+  "kicad_dru_file": "oshpark-two-layer.kicad_dru"
+}

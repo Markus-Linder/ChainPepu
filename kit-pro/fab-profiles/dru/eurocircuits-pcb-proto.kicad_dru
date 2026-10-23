@@ -1,0 +1,39 @@
+# KiCad custom design rules - Eurocircuits - PCB proto, 2 or 4 layer, 1.55 mm, 18 um outer / 35 um inner, 1-5 boards, 2-3 working days
+# Fab: Eurocircuits (eurocircuits)   Process id: pcb-proto
+# Source: https://www.eurocircuits.com/services/pcb-proto/ (+ design guideline pages listed in eurocircuits.json)
+# Retrieved: 2026-10-23   Generated from kit-pro/fab-profiles/eurocircuits.json (schema_version 1)
+# Values are the fab's published MINIMUMS. Add margin. Constraints whose value is null in the JSON are omitted.
+# Usage: Board Setup > Design Rules > Custom Rules (paste), or copy next to your project as <project>.kicad_dru
+(version 1)
+(rule "eurocircuits min track width"
+  (constraint track_width (min 0.15mm)))
+(rule "eurocircuits min copper clearance"
+  (constraint clearance (min 0.15mm)))
+(rule "eurocircuits min via drill/diameter"
+  (condition "A.Type == 'Via'")
+  (constraint hole_size (min 0.25mm)))
+(rule "eurocircuits min PTH drill"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole'")
+  (constraint hole_size (min 0.25mm)))
+(rule "eurocircuits min NPTH drill"
+  (condition "A.Pad_Type == 'NPTH, mechanical'")
+  (constraint hole_size (min 0.35mm)))
+(rule "eurocircuits min hole to hole"
+  (constraint hole_to_hole (min 0.35mm)))
+# Applies only when the board has inner layers
+(rule "eurocircuits min hole to inner-layer copper (IPI)"
+  (layer inner)
+  (constraint hole_clearance (min 0.2mm)))
+# Routed edge value; V-cut edges need more (see JSON notes)
+(rule "eurocircuits min copper to board edge"
+  (constraint edge_clearance (min 0.25mm)))
+(rule "eurocircuits min inner-layer copper to board edge"
+  (layer inner)
+  (constraint edge_clearance (min 0.4mm)))
+(rule "eurocircuits min silkscreen to pad/copper clearance"
+  (constraint silk_clearance (min 0.1mm)))
+(rule "eurocircuits min silkscreen text"
+  (condition "A.Layer == 'F.Silkscreen' || A.Layer == 'B.Silkscreen'")
+  (constraint text_thickness (min 0.1mm))
+  (constraint text_height (min 1mm)))
+# Solder mask minimum web 0.075mm is not a custom-rule constraint: set it in Board Setup > Board Stackup > Solder Mask/Paste > 'Solder mask minimum web width'.

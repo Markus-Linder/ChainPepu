@@ -1,0 +1,37 @@
+# KiCad custom design rules - OSH Park - Six Layer Prototype, 1 oz outer / 0.5 oz inner, FR408HR, 1.6 mm, ENIG ($15/in^2 for 3 copies)
+# Fab: OSH Park (oshpark)   Process id: six-layer
+# Source: https://docs.oshpark.com/services/six-layer/
+# Retrieved: 2026-10-23   Generated from kit-pro/fab-profiles/oshpark.json (schema_version 1)
+# Values are the fab's published MINIMUMS. Add margin. Constraints whose value is null in the JSON are omitted.
+# Usage: Board Setup > Design Rules > Custom Rules (paste), or copy next to your project as <project>.kicad_dru
+(version 1)
+(rule "oshpark min track width"
+  (constraint track_width (min 0.127mm)))
+(rule "oshpark min copper clearance"
+  (constraint clearance (min 0.127mm)))
+(rule "oshpark min via drill/diameter"
+  (condition "A.Type == 'Via'")
+  (constraint hole_size (min 0.2032mm)))
+(rule "oshpark min PTH drill"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole'")
+  (constraint hole_size (min 0.2032mm)))
+(rule "oshpark min NPTH drill"
+  (condition "A.Pad_Type == 'NPTH, mechanical'")
+  (constraint hole_size (min 0.2032mm)))
+# Larger holes are routed/milled by the fab; check the JSON notes
+(rule "oshpark max drilled hole"
+  (constraint hole_size (max 6.604mm)))
+(rule "oshpark min annular ring"
+  (constraint annular_width (min 0.1016mm)))
+# Published as an inner-layer (isolation/IPI) figure only
+(rule "oshpark min hole to inner-layer copper"
+  (layer inner)
+  (constraint hole_clearance (min 0.254mm)))
+# Routed edge value; V-cut edges need more (see JSON notes)
+(rule "oshpark min copper to board edge"
+  (constraint edge_clearance (min 0.381mm)))
+(rule "oshpark min silkscreen text"
+  (condition "A.Layer == 'F.Silkscreen' || A.Layer == 'B.Silkscreen'")
+  (constraint text_thickness (min 0.127mm)))
+# Solder mask minimum web 0.1016mm is not a custom-rule constraint: set it in Board Setup > Board Stackup > Solder Mask/Paste > 'Solder mask minimum web width'.
+# Minimum slot width 0.508mm (plated) has no KiCad constraint; check oval holes manually.

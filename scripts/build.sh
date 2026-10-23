@@ -30,7 +30,7 @@ PY
 
 echo "== running kistack-review tests"
 if [ -d tools/kistack-review/tests ]; then
-  python3 -m unittest discover -s tools/kistack-review/tests -t tools/kistack-review >/dev/null && echo "  tests pass"
+  python3 -m unittest discover -s tools/kistack-review/tests 2>&1 | tail -1
 fi
 
 echo "== building free kit"
@@ -50,3 +50,10 @@ fi
 echo "Built $STAMP" > build/pro/kistack-pro-kit/VERSION
 ( cd build/pro && zip -qr "../../dist/kistack-pro-kit-$STAMP.zip" kistack-pro-kit )
 echo "  dist/kistack-pro-kit-$STAMP.zip ($(du -h dist/kistack-pro-kit-$STAMP.zip | cut -f1))  <- upload to Lemon Squeezy, do not commit"
+
+echo "== packaging Lovable project"
+if [ -d lovable ]; then
+  rm -f dist/kistack-lovable.zip
+  ( cd lovable && zip -qr ../dist/kistack-lovable.zip . -x "node_modules/*" "dist/*" ".env*" )
+  echo "  dist/kistack-lovable.zip ($(du -h dist/kistack-lovable.zip | cut -f1))  <- upload via Lovable: + → Import project → Upload code"
+fi

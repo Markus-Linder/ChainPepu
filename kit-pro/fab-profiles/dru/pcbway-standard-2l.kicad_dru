@@ -1,0 +1,36 @@
+# KiCad custom design rules - PCBWay - Standard PCB (quick-turn), 1-2 layer FR-4, 1 oz
+# Fab: PCBWay (pcbway)   Process id: standard-2l
+# Source: https://www.pcbway.com/capabilities.html
+# Retrieved: 2026-10-23   Generated from kit-pro/fab-profiles/pcbway.json (schema_version 1)
+# Values are the fab's published MINIMUMS. Add margin. Constraints whose value is null in the JSON are omitted.
+# Usage: Board Setup > Design Rules > Custom Rules (paste), or copy next to your project as <project>.kicad_dru
+(version 1)
+(rule "pcbway min track width"
+  (constraint track_width (min 0.1mm)))
+(rule "pcbway min copper clearance"
+  (constraint clearance (min 0.1mm)))
+(rule "pcbway min via drill/diameter"
+  (condition "A.Type == 'Via'")
+  (constraint hole_size (min 0.15mm)))
+(rule "pcbway min PTH drill"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole'")
+  (constraint hole_size (min 0.15mm)))
+(rule "pcbway min NPTH drill"
+  (condition "A.Pad_Type == 'NPTH, mechanical'")
+  (constraint hole_size (min 0.15mm)))
+# Larger holes are routed/milled by the fab; check the JSON notes
+(rule "pcbway max drilled hole"
+  (constraint hole_size (max 6mm)))
+(rule "pcbway min annular ring"
+  (constraint annular_width (min 0.15mm)))
+(rule "pcbway min hole to hole"
+  (constraint hole_to_hole (min 0.2794mm)))
+# Routed edge value; V-cut edges need more (see JSON notes)
+(rule "pcbway min copper to board edge"
+  (constraint edge_clearance (min 0.25mm)))
+(rule "pcbway min silkscreen text"
+  (condition "A.Layer == 'F.Silkscreen' || A.Layer == 'B.Silkscreen'")
+  (constraint text_thickness (min 0.15mm))
+  (constraint text_height (min 0.8mm)))
+# Solder mask minimum web 0.1016mm is not a custom-rule constraint: set it in Board Setup > Board Stackup > Solder Mask/Paste > 'Solder mask minimum web width'.
+# Minimum slot width 0.5mm (plated) has no KiCad constraint; check oval holes manually.

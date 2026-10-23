@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "fab": "jlcpcb",
+  "name": "JLCPCB",
+  "country": "CN",
+  "retrieved": "2026-10-23",
+  "sources": [
+    "https://jlcpcb.com/capabilities/pcb-capabilities",
+    "https://jlcpcb.com/impedance",
+    "https://jlcpcb.com/capabilities/pcb-assembly-capabilities",
+    "https://jlcpcb.com/help/article/pcb-assembly-price",
+    "https://jlcpcb.com/help/article/pcb-assembly-faqs",
+    "https://jlcpcb.com/help/article/how-to-generate-gerber-and-drill-files-in-kicad-9",
+    "https://jlcpcb.com/help/article/how-to-generate-gerber-and-drill-files-in-kicad-8",
+    "https://jlcpcb.com/help/article/how-to-generate-the-bom-and-centroid-file-from-kicad",
+    "https://jlcpcb.com/help/article/suggested-naming-patterns"
+  ],
+  "verify_note": "Capabilities change. Verify on the fab's capability page before ordering.",
+  "processes": [
+    {
+      "id": "standard-2l",
+      "label": "Standard FR-4, 1-2 layer, 1 oz outer copper",
+      "layers": [1, 2],
+      "copper_weight_oz": [1],
+      "min_track_mm": 0.10,
+      "min_clearance_mm": 0.10,
+      "min_via_drill_mm": 0.15,
+      "min_via_diameter_mm": 0.25,
+      "min_annular_ring_mm": 0.05,
+      "min_pth_drill_mm": 0.15,
+      "max_pth_drill_mm": 6.3,
+      "min_npth_drill_mm": 0.50,
+      "min_hole_to_copper_mm": 0.20,
+      "min_hole_to_hole_mm": 0.20,
+      "min_slot_width_mm": 0.5,
+      "min_board_edge_to_copper_mm": 0.20,
+      "min_silkscreen_line_mm": 0.15,
+      "min_silkscreen_text_height_mm": 1.0,
+      "min_soldermask_bridge_mm": 0.10,
+      "soldermask_expansion_mm": 0.0,
+      "board_thickness_mm": [0.4, 0.6, 0.8, 1.0, 1.2, 1.6, 2.0],
+      "min_board_size_mm": [3, 3],
+      "max_board_size_mm": [670, 600],
+      "castellated_holes": true,
+      "impedance_control": false,
+      "surface_finishes": ["HASL (leaded)", "HASL (lead-free)", "ENIG", "OSP"],
+      "stackups": [],
+      "notes": [
+        "Track/space: 'Min. track width and spacing (1 oz) ... 1- and 2-layer: 0.10 / 0.10 mm (4 / 4 mil)'. 2 oz: 0.16/0.16 mm. Track width tolerance +/-20%. (pcb-capabilities)",
+        "Via: '2-layer: 0.15mm hole size / 0.25mm via diameter'. 'Via diameter should be 0.1mm (0.15mm preferred) larger than Via hole size' -> min_annular_ring_mm 0.05 is the VIA ring (0.075 preferred). 'Preferred Min. Via hole size: 0.2mm'. 0.1/0.15 mm holes, and 0.2/0.25 mm holes with via diameter < 0.45 mm, cost more and must be selected at order time. 0.1 mm hole only for thickness <= 1 mm with ENIG/OSP. (pcb-capabilities)",
+        "PTH (component hole) annular ring is a separate, larger figure: 2-layer 1 oz 'Recommended 0.25 mm or above; absolute minimum 0.18 mm'; 2 oz 0.254 mm or above. NPTH pad annular ring >= 0.45 mm recommended. The .kicad_dru applies 0.05 mm to vias and 0.18 mm to through-hole pads. (pcb-capabilities)",
+        "Drill: '2-layer: 0.15 - 6.3 mm'; 'Min. drill diameter for 2- or more-layer PCBs is 0.1 mm (more costly!)'; holes >= 6.3 mm are CNC routed. Hole size tolerance +0.13/-0.08 mm. 'To avoid soldermask or tin stuck in the hole, recommended PTH size >= 0.5mm'. 1-layer boards: 0.3 - 6.3 mm, NPTH only. (pcb-capabilities)",
+        "Hole to copper: 'Via hole to Track 0.2mm'; 'PTH to Track 0.28mm (0.35mm is recommended)'; 'NPTH to Track 0.2mm'. min_hole_to_copper_mm records the via value; the .kicad_dru applies 0.28 mm to PTH pads. 'Pad to track clearance (1oz) 0.1mm'. 'Same-net track spacing 0.25mm'. (pcb-capabilities)",
+        "Hole to hole: 'Via Hole-to-Hole Spacing 0.2mm'; 'Pad Hole-to-Hole Spacing 0.45mm'. No same-net/different-net distinction is published. (pcb-capabilities)",
+        "Slots: 'Min. Plated Slots Width 2-layer: 0.5mm' (length >= 2x width, drawn as a pad); 'Min. Non-Plated Slots 1.0mm' drawn on the mechanical layer (GM1/GKO). (pcb-capabilities)",
+        "Board edge: 'Copper clearance from routed board edges: >= 0.2 mm'; V-cut edges >= 0.4 mm; mouse-bite panels >= 0.2 mm. (pcb-capabilities)",
+        "Soldermask: bridge 'Min. pad spacing: 0.10 mm (green, red, yellow, blue, purple)', 0.13 mm for black/white, 0.20 mm for 2 oz. 'Soldermask Expansion 1:1 ... Pad size:soldermask opening can be 1:1' since the June 2025 LDI upgrade, hence soldermask_expansion_mm 0.0; keep >= 0.09 mm between mask openings and neighbouring traces. (pcb-capabilities)",
+        "Silkscreen: 'Minimum Line Width >= 0.15mm'; 'Minimum text height 40 mil (1.0mm)'; width:height ratio 1:6; 'Pad To Silkscreen 0.15mm'. (pcb-capabilities)",
+        "Thickness: 'Thickness for FR4 are: 0.4/0.6/0.8/1.0/1.2/1.6/2.0 mm (2.5 mm and above are for 12+ layer PCBs only)'. Tolerance +/-10% (>= 1.0 mm), +/-0.1 mm (< 1.0 mm). (pcb-capabilities)",
+        "Size: min 'FR4/Rogers/PTFE: 3 x 3 mm' (castellated/plated edges 10 x 10 mm; limits apply at thickness >= 0.6 mm). Max 'FR4(2-layer): 670 x 600 mm' for thickness >= 0.8 mm; the same page also says '2-layer FR4 PCBs can reach a maximum size of 1020 x 600 mm' and thin FR4 (< 0.8 mm) is 599 x 497 mm. 1-layer: 606 x 510 mm. (pcb-capabilities)",
+        "Castellated holes: hole diameter >= 0.5 mm, hole to board edge >= 1 mm, hole to hole >= 0.5 mm, min PCB 10 x 10 mm, min thickness 0.6 mm. (pcb-capabilities)",
+        "Impedance control is listed for '4/6/8/10/12/14/16/18/20/.../32 layers' only; tolerance +/-10% (FAQ: +/-5% on special request). Not offered on 2-layer. (pcb-capabilities)",
+        "Surface finish: 'HASL (leaded / lead-free), ENIG, OSP (Single-sided FR-4 ... not supported for OSP)'. HASL not available for boards <= 0.4 mm thick. BGA pads 0.2-0.25 mm require ENIG. (pcb-capabilities)",
+        "Panelization: V-cut zero spacing by default, min panel 70 x 70 mm, max 475 x 475 mm, min spacing between V-cuts 2 mm (3 mm recommended), V-cut requires thickness >= 0.6 mm; mouse-bite/tab-route spacing 1.6 or 2 mm, tooling edge >= 3 mm (5 mm for JLCPCB SMT, with 2 mm tooling holes and 1 mm fiducials 3.85 mm from the panel edge). (pcb-capabilities)"
+      ]
+    },
+    {
+      "id": "standard-4l",
+      "label": "Standard FR-4, 4 layer, 1 oz outer / 0.5 oz inner",
+      "layers": [4],
+      "copper_weight_oz": [1, 0.5],
+      "min_track_mm": 0.09,
+      "min_clearance_mm": 0.09,
+      "min_via_drill_mm": 0.15,
+      "min_via_diameter_mm": 0.25,
+      "min_annular_ring_mm": 0.05,
+      "min_pth_drill_mm": 0.15,
+      "max_pth_drill_mm": 6.3,
+      "min_npth_drill_mm": 0.50,
+      "min_hole_to_copper_mm": 0.20,
+      "min_hole_to_hole_mm": 0.20,
+      "min_slot_width_mm": 0.35,
+      "min_board_edge_to_copper_mm": 0.20,
+      "min_silkscreen_line_mm": 0.15,
+      "min_silkscreen_text_height_mm": 1.0,
+      "min_soldermask_bridge_mm": 0.10,
+      "soldermask_expansion_mm": 0.0,
+      "board_thickness_mm": [0.8, 1.0, 1.2, 1.6, 2.0],
+      "min_board_size_mm": [3, 3],
+      "max_board_size_mm": [663, 593],
+      "castellated_holes": true,
+      "impedance_control": true,
+      "surface_finishes": ["HASL (leaded)", "HASL (lead-free)", "ENIG", "OSP"],
+      "stackups": [
+        {
+          "name": "JLC04161H-7628",
+          "thickness_mm": 1.6,
+          "layers": 4,
+          "notes": "Outer Cu 0.035 mm (1 oz), inner Cu 0.0152 mm (0.5 oz). Prepreg 7628 x1, 0.2104 mm (Dk 4.4) each side; core 1.065 mm (1.1 mm with copper, Dk 4.6). Listed first after 'No requirement Stackup' and identical to it. Thick prepreg, lowest-cost default.",
+          "source": "https://jlcpcb.com/impedance"
+        },
+        {
+          "name": "JLC04161H-3313",
+          "thickness_mm": 1.6,
+          "layers": 4,
+          "notes": "Outer Cu 0.035 mm (1 oz), inner Cu 0.0152 mm (0.5 oz). Prepreg 3313 x1, 0.0994 mm (Dk 4.1) each side; core 1.265 mm (1.3 mm with copper). Thin outer dielectric, commonly chosen for controlled impedance.",
+          "source": "https://jlcpcb.com/impedance"
+        },
+        {
+          "name": "JLC04161H-1080",
+          "thickness_mm": 1.6,
+          "layers": 4,
+          "notes": "Prepreg 1080 x1, 0.0764 mm (Dk 3.91) each side; core 1.265 mm (1.3 mm with copper).",
+          "source": "https://jlcpcb.com/impedance"
+        },
+        {
+          "name": "JLC04161H-2116",
+          "thickness_mm": 1.6,
+          "layers": 4,
+          "notes": "Prepreg 2116 x1, 0.1164 mm (Dk 4.16) each side; core 1.265 mm (1.3 mm with copper).",
+          "source": "https://jlcpcb.com/impedance"
+        }
+      ],
+      "notes": [
+        "Track/space: 'Multilayer: 0.09 / 0.09 mm (3.5 / 3.5 mil). 3 mil is acceptable in BGA fan-outs.' 2 oz multilayer: 0.15/0.15 mm. (pcb-capabilities)",
+        "Copper: 'Finished Outer Layer Copper ... Multi-layer: 1 oz / 2 oz'; 'Finished Inner Layer Copper 0.5 oz / 1 oz / 2 oz'. Every named 4-layer stackup on the impedance page shows outer 0.035 mm (1 oz) and inner 0.0152 mm (0.5 oz). (pcb-capabilities, impedance)",
+        "PTH annular ring, multilayer 1 oz: 'Recommended 0.20 mm or above; absolute minimum 0.15 mm'; 2 oz 0.254 mm. Via ring per 'Via diameter should be 0.1mm (0.15mm preferred) larger than Via hole size'. The .kicad_dru applies 0.05 mm to vias and 0.15 mm to through-hole pads. (pcb-capabilities)",
+        "Inner layers: 'Inner layer via hole to copper clearance 0.2mm'; 'Inner layer PTH pad hole to copper clearance 0.3mm'. (pcb-capabilities)",
+        "Plated slot: 'Multi-layer: 0.35mm'. Non-plated slot 1.0 mm. (pcb-capabilities)",
+        "Thickness: selectable 4-layer thicknesses on the stackup page are 0.8, 1.0, 1.2, 1.6 and 2.0 mm; the 1.6 mm named stackups are listed above. 0.8/1.0/1.2/2.0 mm variants carry suffixed names (e.g. JLC04161H-7628A/B/E/F/G, -2116A..E, -3313A, -1080A/B) on the same page. (impedance)",
+        "No 4-layer stackup containing 2313 prepreg is published; '2313' appears only inside the 6-layer JLC06161H-2116 build. The thin-prepreg 4-layer option is JLC04161H-3313. (impedance, retrieved 2026-10-23)",
+        "Max size: 'FR4(4-layer): 663 x 593 mm' (thickness >= 0.8 mm); the page also says '4-layer FR4 PCBs can reach a maximum size of 1016 x 596 mm'. (pcb-capabilities)",
+        "Impedance control available for 4+ layers, standard tolerance +/-10%; 'The PCB will be strictly produced in accordance with the following stackup' when an impedance stackup is selected. (pcb-capabilities, impedance)",
+        "Via-in-pad: 'Vias are filled with epoxy resin or copper paste and then plated over'; filled via diameter 0.15-0.55 mm; filled vias need >= 0.35 mm clearance from other mask openings and must be <= 0.5 mm wide. (pcb-capabilities)",
+        "Blind/buried vias are not supported on standard 4-layer orders (JLCPCB's naming-pattern article: a missing drill file on 4-layer Eagle exports 'usually means blind or buried vias were enabled ... which JLCPCB does not support'); HDI is a separate process. (suggested-naming-patterns)"
+      ]
+    },
+    {
+      "id": "standard-6l",
+      "label": "Standard FR-4, 6 layer, 1 oz outer / 0.5 oz inner",
+      "layers": [6],
+      "copper_weight_oz": [1, 0.5],
+      "min_track_mm": 0.09,
+      "min_clearance_mm": 0.09,
+      "min_via_drill_mm": 0.15,
+      "min_via_diameter_mm": 0.25,
+      "min_annular_ring_mm": 0.05,
+      "min_pth_drill_mm": 0.15,
+      "max_pth_drill_mm": 6.3,
+      "min_npth_drill_mm": 0.50,
+      "min_hole_to_copper_mm": 0.20,
+      "min_hole_to_hole_mm": 0.20,
+      "min_slot_width_mm": 0.35,
+      "min_board_edge_to_copper_mm": 0.20,
+      "min_silkscreen_line_mm": 0.15,
+      "min_silkscreen_text_height_mm": 1.0,
+      "min_soldermask_bridge_mm": 0.10,
+      "soldermask_expansion_mm": 0.0,
+      "board_thickness_mm": [1.2, 1.6, 2.0],
+      "min_board_size_mm": [3, 3],
+      "max_board_size_mm": [656, 586],
+      "castellated_holes": true,
+      "impedance_control": true,
+      "surface_finishes": ["ENIG", "OSP"],
+      "stackups": [
+        {
+          "name": "JLC06161H-3313",
+          "thickness_mm": 1.6,
+          "layers": 6,
+          "notes": "Prepreg sequence top to bottom 3313 0.0994 / 2116 0.1088 / 3313 0.0994 mm with two 0.55 mm cores. The 'No requirement' 6-layer stackup is the same build with 2116 0.1164 mm in the centre.",
+          "source": "https://jlcpcb.com/impedance"
+        },
+        {
+          "name": "JLC06161H-7628",
+          "thickness_mm": 1.6,
+          "layers": 6,
+          "notes": "Prepreg 7628 0.2104 / 7628 0.2028 / 7628 0.2104 mm with two 0.4 mm cores (no copper).",
+          "source": "https://jlcpcb.com/impedance"
+        }
+      ],
+      "notes": [
+        "Multilayer values (track/space, via, slot, annular ring) are the same as standard-4l. (pcb-capabilities)",
+        "Selectable 6-layer thicknesses on the stackup page: 1.2, 1.6 and 2.0 mm. (impedance)",
+        "HASL is not available: 'FR-4/HDI boards with 6 or more layers ... do not support HASL'. (pcb-capabilities)",
+        "Via-in-pad (epoxy/copper filled and capped) is the default for 6 layers and above. (pcb-capabilities)",
+        "Max size 'FR4(6-layer and above): 656 x 586 mm'. (pcb-capabilities)"
+      ]
+    }
+  ],
+  "assembly": {
+    "available": true,
+    "notes": [
+      "Two service tiers (pcb-assembly-capabilities): Economic = 'Single sided placement (SMT/Thru-hole)', min package 0402, min BGA pitch 0.5 mm, single PCB 10x10 mm to 470x500 mm, panel up to 250x250 mm. Standard = 'Single & double sided placement (SMT/Thru-hole)', min package 01005, min BGA pitch 0.3 mm, single PCB 70x70 mm to 460x500 mm. THT 'is available under both the Economic and Standard PCBA'.",
+      "Basic vs Extended parts (pcb-assembly-faqs): 'Basic components are those frequently used parts like chip resistors, chip capacitors etc.' Extended parts need feeders mounted manually: 'we charge $3 per extended component'.",
+      "Per-extended-part fee, price table (pcb-assembly-price, page last updated 2026-10-22, USD): 'Feeder loading' $3.07 per extended part on Economic PCBA (basic parts free); on Standard PCBA $1.53 per part for BOTH basic and extended parts. SOURCES CONFLICT: the FAQ says $3, the price table says $3.07 (Economic) / $1.53 (Standard). Use the live quote.",
+      "Other fees from the same price table: setup $8.18 (Economic) or $25.56 single-side / $51.12 double-side (Standard); stencil $1.53 (Economic) or $8.21 / $16.42 (Standard); SMT assembly $0.0016/joint; hand-soldering labour $3.58 per order; 'Confirm parts placement' $0.45; large PCB (> 650 cm2) $57.46. 'Prices may vary slightly due to exchange rate fluctuations.'",
+      "Preferred Extended parts are exempt from the Economic feeder-loading fee per the JLCPCB Q&A linked from help (help/answers/detail/837).",
+      "BOM must be .csv, .xls or .xlsx with Comment, Designator, Footprint and 'JLCPCB Part #' / 'LCSC Part #' columns. CPL columns: Designator, Mid X, Mid Y, Rotation, Layer; coordinates in millimetres; single file for both sides. KiCad's default headers (Reference/Qty/Value/Footprint; Ref/PosX/PosY/Rot/Side) must be renamed, or use the Fabrication Toolkit plugin (bennymeg) whose bom.csv/positions.csv match JLCPCB's templates and fix rotations. (how-to-generate-the-bom-and-centroid-file-from-kicad)"
+    ],
+    "required_bom_fields": ["Comment", "Designator", "Footprint", "LCSC Part #"],
+    "sources": [
+      "https://jlcpcb.com/capabilities/pcb-assembly-capabilities",
+      "https://jlcpcb.com/help/article/pcb-assembly-price",
+      "https://jlcpcb.com/help/article/pcb-assembly-faqs",
+      "https://jlcpcb.com/help/article/how-to-generate-the-bom-and-centroid-file-from-kicad",
+      "https://jlcpcb.com/help/answers/detail/837-What-is-the-practical-difference-between-Basic-and-Preferred"
+    ]
+  },
+  "file_requirements": {
+    "gerber_format": "RS-274X (Gerber X2 attributes accepted; KiCad 9 guide says to tick 'Use extended X2 format')",
+    "drill_format": "Excellon, millimetres, decimal format, separate PTH and NPTH .drl files, 'Use alternate drill mode for oval holes' ticked",
+    "notes": [
+      "Upload: 'The uploader accepts a single .zip or .rar archive only'; 'Put every Gerber file and both .drl drill files into one archive, with English filenames and no special characters'. (kicad-9 guide)",
+      "Native .kicad_pcb upload: NOT documented. Every JLCPCB KiCad help article (KiCad 5 through 10) requires exported Gerber + drill files; the only KiCad-source intake is the separate paid layout service (design.jlcpcb.com). Treat JLCPCB as Gerber-only. (verified 2026-10-23 against the help centre)",
+      "Layers to plot: F.Cu, B.Cu, In1.Cu/In2.Cu (4+ layers), F.Paste, B.Paste, F.Silkscreen, B.Silkscreen, F.Mask, B.Mask, Edge.Cuts. Options: plot reference designators, 'Use Protel filename extensions' ('JLCPCB prefers Protel filename extensions'), 'Subtract soldermask from silkscreen', tent vias, check zone fills before plotting. (kicad-8 guide)",
+      "Drill dialog: Excellon, Drill Origin Absolute, Units Millimeters, Zeros Decimal format, 'Use alternate drill mode for oval holes' ticked, PTH and NPTH in separate files; a drill map (PDF/Gerber) is optional but recommended. (kicad-8 and kicad-9 guides)",
+      "Recognised names ('known to work'): .GTL .GBL .GTS .GBS .GTO .GBO, outline .GKO or .GM1, inner .G2L/.G3L, drill .XLN; KiCad's own Gerber names are also recognised. If KiCad's UI language is not English, enable Protel filenames and rename Edge_Cuts.gbr to .GKO. Blind/buried vias are not supported on standard 4-layer uploads. (suggested-naming-patterns)",
+      "Draw NPTH holes on the mechanical/keep-out layer and non-plated slots as outlines on GM1/GKO; plated slots are drawn as pads. (pcb-capabilities)"
+    ]
+  },
+  "kicad_dru_file": "jlcpcb-standard-2l.kicad_dru"
+}

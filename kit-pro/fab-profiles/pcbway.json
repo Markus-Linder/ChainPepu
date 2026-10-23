@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "fab": "pcbway",
+  "name": "PCBWay",
+  "country": "CN",
+  "retrieved": "2026-10-23",
+  "sources": [
+    "https://www.pcbway.com/capabilities.html",
+    "https://www.pcbway.com/multi-layer-laminated-structure.html",
+    "https://www.pcbway.com/pcb-assembly.html",
+    "https://www.pcbway.com/assembly-file-requirements.html",
+    "https://www.pcbway.com/assembly-faq.html",
+    "https://www.pcbway.com/helpcenter/shoppingcart/Can_I_upload_file_information_to_upload_non_gerber_format_.html",
+    "https://www.pcbway.com/blog/help_center/Generate_Gerber_file_from_Kicad.html",
+    "https://www.pcbway.com/blog/News/PCBWay_Plug_In_for_KiCad_3ea6219c.html"
+  ],
+  "verify_note": "Capabilities change. Verify on the fab's capability page before ordering.",
+  "processes": [
+    {
+      "id": "standard-2l",
+      "label": "Standard PCB (quick-turn), 1-2 layer FR-4, 1 oz",
+      "layers": [1, 2],
+      "copper_weight_oz": [1],
+      "min_track_mm": 0.10,
+      "min_clearance_mm": 0.10,
+      "min_via_drill_mm": 0.15,
+      "min_via_diameter_mm": null,
+      "min_annular_ring_mm": 0.15,
+      "min_pth_drill_mm": 0.15,
+      "max_pth_drill_mm": 6.0,
+      "min_npth_drill_mm": 0.15,
+      "min_hole_to_copper_mm": null,
+      "min_hole_to_hole_mm": 0.2794,
+      "min_slot_width_mm": 0.5,
+      "min_board_edge_to_copper_mm": 0.25,
+      "min_silkscreen_line_mm": 0.15,
+      "min_silkscreen_text_height_mm": 0.8,
+      "min_soldermask_bridge_mm": 0.1016,
+      "soldermask_expansion_mm": null,
+      "board_thickness_mm": [0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.6, 2.0, 2.4, 2.6, 2.8, 3.0, 3.2],
+      "min_board_size_mm": [3, 3],
+      "max_board_size_mm": [600, 1200],
+      "castellated_holes": true,
+      "impedance_control": true,
+      "surface_finishes": ["HASL with lead", "HASL lead free", "Immersion gold (ENIG)", "OSP", "Hard Gold", "Immersion Silver", "Immersion Tin", "ENEPIG"],
+      "stackups": [],
+      "notes": [
+        "PCBWay publishes two tables on capabilities.html: 'Standard PCB' (Items | Manufacturing Capabilities | Remarks) and 'Advanced PCB' (Normal process | Medium difficulty | High difficulty | Non-standard). Values below marked [Standard] or [Advanced-normal]. Anything only in the Advanced table is not guaranteed for the quick-turn Standard service.",
+        "Track/space [Standard]: 'Min Trace 0.1mm/4mil'; 'Min manufacturable spacing is 4mil(0.1mm)'. SOURCES CONFLICT: the Advanced table's 'Normal process' column gives outer-layer 1 oz '>=5/6 mil' (0.127/0.152 mm) and 2 oz '>=7/8mil'; 4/4 mil is 'Medium'/'High' difficulty there. Design to 0.127/0.152 mm if you want the cheapest, no-review path.",
+        "Drill [Standard]: 'Drill Sizes (CNC) 0.15-6.0mm' with the remark that holes below 0.2 mm or above 6 mm 'incur extra charges'; finished hole 0.15-6.0 mm; PTH tolerance +/-0.08 mm, NPTH +/-0.05 mm. Advanced-normal: '0.20mm<=Drill diameter<=6.5mm'. The table does not separate PTH and NPTH minimums, so min_npth_drill_mm repeats the CNC minimum.",
+        "Annular ring [Standard]: 'Min Width of Annular Ring 0.15mm(6mil)' - 'For pads with vias in the middle'. Advanced-normal: via ring '>=5mil' (0.127 mm), component-hole ring '>=8mil' (0.2032 mm) for 1 oz outer.",
+        "min_via_diameter_mm is null: PCBWay does not publish a via pad diameter. Arithmetic from the two published numbers (0.15 mm drill + 2 x 0.15 mm ring) gives 0.45 mm; treat that as derived, not published.",
+        "Hole to hole [Advanced-normal]: 'via (<=0.45mm) >=11MIL' (0.2794 mm); component holes '>=16MIL' (0.4064 mm). Not in the Standard table.",
+        "Hole to copper: not published in either table -> null.",
+        "Slots [Advanced-normal]: 'Plated slot >=0.5mm', 'Non-plated slot >=0.8mm', length:width >= 2.",
+        "Board edge to copper [Advanced-normal]: 'Line to board edge, CNC milling 0.25mm' (0.20 mm medium difficulty).",
+        "Silkscreen [Standard]: 'Minimum Character Width (Legend) 0.15mm'; 'Minimum Character Height (Legend) 0.8mm'; ratio 1:5.",
+        "Soldermask bridge [Advanced-normal]: 4 mil (0.1016 mm) for copper < 2 oz, green; 5 mil for >= 2 oz; mask opening >= 2 mil. Standard table lists only 'LPI'.",
+        "Thickness [Standard]: '0.2-3.2mm' listed as 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.6, 2.0, 2.4, 2.6, 2.8, 3.0, 3.2 mm; tolerance +/-10% (>= 1.0 mm), +/-0.1 mm (< 1.0 mm). Advanced-normal 2-layer minimum >= 0.3 mm.",
+        "Size [Standard]: 'Single-sided PCB and double-sided PCB: 600*1200mm ... (min 3*3mm)'. SOURCES CONFLICT: Advanced-normal 'Min finished board size >=20mm' (10-20 mm medium difficulty) and max 508 x 610 mm for the normal process. Outline tolerance +/-0.2 mm CNC, +/-0.5 mm V-score.",
+        "Castellated [Standard]: 'Minimum Diameter of Plated Half Holes 0.4mm'. SOURCES CONFLICT: Advanced-normal castellated hole diameter '>=0.5mm' with edge-to-edge spacing '>=0.3mm' (0.4-0.5 mm is medium difficulty).",
+        "Impedance: not in the Standard table; Advanced-normal tolerance '+/-10%, 50 ohm and below: +/-5 ohm'. Available as an order option; recorded as true on that basis.",
+        "Surface finish [Standard]: 'HASL with lead, HASL lead free, Immersion gold, OSP, Hard Gold, Immersion Silver, Immersion Tin, ENEPIG'. Mask colours green/red/yellow/blue at no extra charge; white, black, matt green, matt black, purple, none also available.",
+        "Panelization [Standard]: 'V-scoring, Tab-routing, Tab-routing with Perforation (Stamp Holes)'; 1.6 mm minimum clearance between boards for break-routing; zero spacing for V-score. Advanced-normal V-cut: 20/30/45/60 deg, thickness 0.6-2.4 mm, remaining thickness >= 0.25 mm, up to 20 cuts."
+      ]
+    },
+    {
+      "id": "standard-4l",
+      "label": "Standard PCB, 4 layer FR-4, 1 oz outer / 1 oz inner",
+      "layers": [4],
+      "copper_weight_oz": [1, 1],
+      "min_track_mm": 0.10,
+      "min_clearance_mm": 0.10,
+      "min_via_drill_mm": 0.15,
+      "min_via_diameter_mm": null,
+      "min_annular_ring_mm": 0.15,
+      "min_pth_drill_mm": 0.15,
+      "max_pth_drill_mm": 6.0,
+      "min_npth_drill_mm": 0.15,
+      "min_hole_to_copper_mm": 0.1778,
+      "min_hole_to_hole_mm": 0.2794,
+      "min_slot_width_mm": 0.5,
+      "min_board_edge_to_copper_mm": 0.25,
+      "min_silkscreen_line_mm": 0.15,
+      "min_silkscreen_text_height_mm": 0.8,
+      "min_soldermask_bridge_mm": 0.1016,
+      "soldermask_expansion_mm": null,
+      "board_thickness_mm": [0.8, 1.0, 1.2, 1.6, 2.0],
+      "min_board_size_mm": [3, 3],
+      "max_board_size_mm": [560, 1150],
+      "castellated_holes": true,
+      "impedance_control": true,
+      "surface_finishes": ["HASL with lead", "HASL lead free", "Immersion gold (ENIG)", "OSP", "Hard Gold", "Immersion Silver", "Immersion Tin", "ENEPIG"],
+      "stackups": [
+        {
+          "name": "PCBWay 4-layer 1.6 mm Regular (laminated-structure entry 1)",
+          "thickness_mm": 1.6,
+          "layers": 4,
+          "notes": "1 oz outer (0.5 oz foil plated to 1 oz) / 1 oz inner. Prepreg 7628 RC46%, 0.1960 mm nominal -> 0.1855 mm pressed (70% inner residual copper); core 1.03 mm (1.1 mm with copper), Dk 4.6. Entries 2 and 3 are the same build at 50% / 30% inner residual copper.",
+          "source": "https://www.pcbway.com/multi-layer-laminated-structure.html"
+        },
+        {
+          "name": "PCBWay 4-layer 1.0 mm (entry 23)",
+          "thickness_mm": 1.0,
+          "layers": 4,
+          "notes": "Prepreg 7628 RC46%; core 0.43 mm (0.5 mm with copper); 1 oz / 1 oz.",
+          "source": "https://www.pcbway.com/multi-layer-laminated-structure.html"
+        },
+        {
+          "name": "PCBWay 4-layer 0.8 mm (entry 29)",
+          "thickness_mm": 0.8,
+          "layers": 4,
+          "notes": "Prepreg 7628 RC46%, 0.1960 -> 0.1855 mm; core 0.23 mm (0.3 mm with copper); 1 oz / 1 oz.",
+          "source": "https://www.pcbway.com/multi-layer-laminated-structure.html"
+        },
+        {
+          "name": "PCBWay 4-layer 1.2 mm (entry 17)",
+          "thickness_mm": 1.2,
+          "layers": 4,
+          "notes": "Prepreg 7628 RC46%; core 0.63 mm (0.7 mm with copper); 1 oz / 1 oz.",
+          "source": "https://www.pcbway.com/multi-layer-laminated-structure.html"
+        },
+        {
+          "name": "PCBWay 4-layer 2.0 mm (entry 11)",
+          "thickness_mm": 2.0,
+          "layers": 4,
+          "notes": "Prepreg 2116 RC58%, 0.1300 -> 0.1195 mm; core 1.53 mm (1.6 mm with copper); 1 oz / 1 oz.",
+          "source": "https://www.pcbway.com/multi-layer-laminated-structure.html"
+        }
+      ],
+      "notes": [
+        "Inner copper [Standard]: 'Inner Layer Copper Thickness 1oz/1.5oz/2oz/3oz/4oz' for 4-10 layer boards. PCBWay does not list a 0.5 oz inner option; its published 4-layer builds are 1 oz / 1 oz. (capabilities)",
+        "Track/space: Standard table 0.1 mm. Advanced-normal inner layer 1 oz '>=4/5 mil' (0.1016/0.127 mm), outer '>=5/6 mil'. (capabilities)",
+        "min_hole_to_copper_mm 0.1778 is the Advanced-normal 'Isolation ring, 4L >=7MIL' (inner-layer plane clearance around drilled holes); 6-layer is >= 8 mil. No outer-layer hole-to-copper is published. (capabilities)",
+        "Max size [Standard]: 'Multilayer PCB: 560*1150mm'. Advanced-normal max multilayer 508 x 600 mm. (capabilities)",
+        "Thickness: Advanced-normal 4-layer '>=0.60mm'; the published 4-layer stackups cover 0.8, 1.0, 1.2, 1.6 and 2.0 mm, which is the list recorded. Standard thickness list up to 3.2 mm applies in general. (capabilities, multi-layer-laminated-structure)",
+        "2 oz outer / 1 oz inner 4-layer builds are also published (entries 4-6, 14-16, 20-22, 26-28, 32-34). 6-layer builds exist on the same page but were not transcribed (page truncated); no 6-layer process is recorded. (multi-layer-laminated-structure)",
+        "Impedance [Advanced-normal]: '+/-10%, 50 ohm and below: +/-5 ohm'. (capabilities)"
+      ]
+    }
+  ],
+  "assembly": {
+    "available": true,
+    "notes": [
+      "Services: 'Kitted and Turn-Key PCB Assembly' (kitted, hybrid, turn-key); '2 sided SMT, THT Assembly', 'Mixed Assembly', 'Through-Hole Assembly'; BGA, Micro-BGA, QFN supported; reflow and wave soldering. Component footprints listed '0201, 0402, 0603...'; 'Small Pitch of 8 Mils'. (pcb-assembly)",
+      "BGA: 'We have the ability to handle BGA of 0.25mm pitch with X-ray testing.' Panelization is required when 'your PCB dimension is smaller than 50mmx100mm'. (assembly-faq)",
+      "Consigned/kitted minimums: 0201/0402 resistors, capacitors, diodes 'require a minimum of 100 pieces' supplied. (assembly-faq)",
+      "Pricing structure: instant quote 'covers the tooling, laser cut steel stencil, and labor'; turn-key adds component cost; no published per-extended-part fee (PCBWay has no basic/extended library model). Promotional headline '$29 for 20pcs PCBA' on the assembly page. (assembly-faq, pcb-assembly)",
+      "Files: Gerber RS-274X (at minimum silkscreen, copper and solder-paste layers), BOM as .xls/.xlsx/.csv (not PDF), centroid/pick-and-place with reference designator, X, Y, rotation and side; SMD parts only; through-hole designators may be excluded. BOM columns for consigned: Line#, Quantity, Reference Designator, Part Number, Description, Package, Type (SMT/THT); turn-key adds Manufacturer, Manufacturer Part Number, Distributor Part Number. Centroid units are not stated. (assembly-file-requirements)",
+      "KiCad: 'PCBWay Plug-in for KiCad' (Plugin and Content Manager, or ZIP from GitHub) exports Gerbers, IPC netlist, BOM and pick-and-place in one click and uploads them; updated for KiCad 10; assembly orders need a 'Manufacture Part Number' symbol field and 'Update Board from Schematic' before export. (PCBWay_Plug_In_for_KiCad)"
+    ],
+    "required_bom_fields": ["Reference Designator", "Quantity", "Part Number", "Manufacturer Part Number", "Package", "Description", "Type (SMT/THT)"],
+    "sources": [
+      "https://www.pcbway.com/pcb-assembly.html",
+      "https://www.pcbway.com/assembly-file-requirements.html",
+      "https://www.pcbway.com/assembly-faq.html",
+      "https://www.pcbway.com/blog/News/PCBWay_Plug_In_for_KiCad_3ea6219c.html"
+    ]
+  },
+  "file_requirements": {
+    "gerber_format": "RS-274X; Gerber X2 attributes must be OFF ('Do NOT check Use extended X2 format, otherwise, the format will not be accepted')",
+    "drill_format": "Excellon (.TXT); PCBWay's KiCad guide selects 'Suppress leading zeros' and 'Minimal header'",
+    "notes": [
+      "Accepted uploads: 'we only accept four types of file formats (Gerber files, .pcb, .pcbdoc, or .cam files) for PCB fabrication'. .kicad_pcb is NOT accepted directly; export Gerbers or use the PCBWay KiCad plugin. (helpcenter shopping cart article)",
+      "Zip: 'Gerber files should be inside a .rar or .zip archive' and uploaded through the PCB Instant Quote page; engineers review before production. (Generate_Gerber_file_from_Kicad)",
+      "KiCad plot: do not tick 'Include extended attributes' or 'Use extended X2 format'. Expected layer files for a 2-layer board: .GTL .GBL .GTS .GBS .GTO .GBO, drill .TXT, outline .GML or .GKO (Protel extensions). The guide predates KiCad 6 and does not cover drill units or PTH/NPTH merging; the newer plugin handles these. (Generate_Gerber_file_from_Kicad)",
+      "Board outline layer is required with every upload. (Generate_Gerber_file_from_Kicad)",
+      "For assembly the same RS-274X Gerbers are reused; paste layers must be included. (assembly-file-requirements)"
+    ]
+  },
+  "kicad_dru_file": "pcbway-standard-2l.kicad_dru"
+}

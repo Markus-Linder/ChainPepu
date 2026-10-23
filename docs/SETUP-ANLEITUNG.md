@@ -22,7 +22,40 @@ stehen und der Traffic Anfang September 2026 begonnen hat, stimmt die Annahme hi
 Falls du keine Search Console hast: unter https://search.google.com/search-console die Domain anlegen,
 per DNS-TXT-Eintrag verifizieren. Daten laufen ab dann auf.
 
-## Schritt 1: Website auf Cloudflare Pages (20 Minuten)
+## Schritt 1: Website live schalten
+
+Es gibt zwei fertige Varianten der Website im Repository. Du brauchst nur eine.
+
+| Variante | Ordner | Für wen |
+|---|---|---|
+| **A: Lovable** (empfohlen für dich) | `lovable/` bzw. die Zip-Datei `kistack-lovable.zip` | Du willst Texte und Design später per Chat ändern, ohne Code anzufassen |
+| B: Statisch auf Cloudflare Pages | `site/` | Fallback mit schlichterem Design, null laufende Kosten, Texte direkt in den HTML-Dateien |
+
+### Variante A: Lovable (15 Minuten)
+
+1. Auf https://lovable.dev einloggen. Im Eingabefeld auf **+** klicken → **Import project to Lovable** → unter
+   "Code & web" **Upload code** wählen → die Datei `kistack-lovable.zip` hochladen → **Start import**.
+   (Du findest die Zip in diesem Chat als Anhang oder im Repository unter `dist/`. Ohne `node_modules`,
+   ohne `dist`, genau so wie Lovable es will.)
+2. Lovable legt das Projekt an und meldet "migration complete". Die Seite läuft dann in der Vorschau.
+   Alle Seiten sind da: Startseite, Free Kit, Pro Kit, Review, Privacy, Imprint.
+3. Konten verbinden: In Lovable im Chat schreiben:
+   > Open src/config.ts and set buttondownUsername to "DEINNAME", lemonProKitUrl to "https://...",
+   > lemonProKitTeamUrl to "https://...", reviewIntakeUrl to "https://...", contactEmail to "hello@kistack.io".
+   Die Werte bekommst du in Schritt 2 bis 4.
+4. Veröffentlichen: oben rechts **Publish**. Dann **Settings → Domains → Connect domain** → `kistack.io`
+   eintragen. Lovable zeigt dir zwei DNS-Einträge (A-Record und TXT oder CNAME für www). Diese trägst du
+   bei deinem Domain-Anbieter ein. Nach 10 bis 60 Minuten ist die Seite unter kistack.io erreichbar.
+5. Später Texte ändern: einfach im Lovable-Chat sagen, was anders sein soll. Das Design ist in
+   `src/index.css` und `tailwind.config.ts` definiert, Lovable kennt beides.
+6. Optional: In Lovable **GitHub → Connect** aktivieren, dann landet jede Änderung automatisch in deinem
+   GitHub-Repository, und ich kann weiter daran arbeiten.
+
+Hinweis zum Import: Lovable baut importierte Projekte intern auf seinen eigenen Stack um. Falls nach dem
+Import etwas anders aussieht, schreib im Lovable-Chat: "Keep the dark copper design from src/index.css
+exactly as imported." Falls der Import-Button bei dir fehlt, nutze Variante B.
+
+### Variante B: Statisch auf Cloudflare Pages (20 Minuten)
 
 1. Konto auf https://dash.cloudflare.com anlegen.
 2. Links "Workers & Pages" → "Create" → "Pages" → "Connect to Git" → GitHub verbinden → Repository
@@ -56,7 +89,7 @@ per DNS-TXT-Eintrag verifizieren. Daten laufen ab dann auf.
    > fill the TODO lines, and ask your agent to run docs/REVIEW-CHECKLIST.md.
    > Reply to this email with what broke or what you wish it did. I read every reply.
 
-5. Trage in `site/assets/config.js` ein: `BUTTONDOWN_USERNAME: "kistack"` (dein Name).
+5. Trage den Benutzernamen ein: bei Lovable in `src/config.ts` (`buttondownUsername`), bei der statischen Variante in `site/assets/config.js` (`BUTTONDOWN_USERNAME`).
 
 ## Schritt 3: Pro Kit verkaufen mit Lemon Squeezy (45 Minuten)
 
@@ -73,8 +106,8 @@ per DNS-TXT-Eintrag verifizieren. Daten laufen ab dann auf.
    Unter "Files" die Zip-Datei hochladen. Lemon Squeezy schickt nach dem Kauf automatisch den Download-Link.
    Refund-Policy: 14 Tage, so steht es auf der Seite.
 4. Zweites Produkt: `KiStack Pro Kit – Team licence (5 seats)`, 99 USD, dieselbe Datei.
-5. Für jedes Produkt: "Share" → "Checkout link" kopieren. In `site/assets/config.js` eintragen:
-   `LEMON_PRO_KIT_URL` und `LEMON_PRO_KIT_TEAM_URL`.
+5. Für jedes Produkt: "Share" → "Checkout link" kopieren. Eintragen: bei Lovable in `src/config.ts`
+   (`lemonProKitUrl`, `lemonProKitTeamUrl`), statisch in `site/assets/config.js` (`LEMON_PRO_KIT_URL`, `LEMON_PRO_KIT_TEAM_URL`).
 6. Updates: Wenn du eine neue Kit-Version baust, einfach die Datei im Produkt ersetzen. Alle bisherigen
    Käufer bekommen über ihren alten Link automatisch die neue Datei.
 
@@ -85,7 +118,7 @@ per DNS-TXT-Eintrag verifizieren. Daten laufen ab dann auf.
    Stückzahl, "What worries you most about this board?" (Text), Upload (optional, KiCad-Projekt als Zip),
    Checkbox "I understand this is a review, not a design sign-off".
 2. Settings → Notifications → E-Mail an dich bei jeder Antwort.
-3. "Share" → Link kopieren → in `site/assets/config.js` unter `REVIEW_INTAKE_URL` eintragen.
+3. "Share" → Link kopieren → eintragen: Lovable `src/config.ts` (`reviewIntakeUrl`), statisch `site/assets/config.js` (`REVIEW_INTAKE_URL`).
 4. Wenn eine Anfrage kommt: Preis laut Tabelle auf der Review-Seite nennen, Rechnung über Lemon Squeezy
    (Produkt "Pre-Fab Review" mit variablem Preis anlegen) oder normale Rechnung. Die Review selbst:
    `kistack-review` auf das Projekt laufen lassen, dann die 37-Punkte-Checkliste mit einem Agenten
@@ -94,7 +127,9 @@ per DNS-TXT-Eintrag verifizieren. Daten laufen ab dann auf.
 
 ## Schritt 5: Konfiguration eintragen und veröffentlichen (10 Minuten)
 
-Datei `site/assets/config.js` öffnen (auf GitHub direkt im Browser: Datei anklicken → Stift-Symbol):
+**Lovable:** im Chat die Werte für `src/config.ts` nennen (siehe Schritt 1, Variante A) und erneut auf Publish klicken.
+
+**Statisch:** Datei `site/assets/config.js` öffnen (auf GitHub direkt im Browser: Datei anklicken → Stift-Symbol):
 
 ```js
 window.KISTACK = {
@@ -111,8 +146,8 @@ Speichern = Commit. Cloudflare Pages baut die Seite in einer Minute neu.
 
 ## Schritt 6: Rechtliches (30 Minuten, nicht überspringen)
 
-- `site/imprint/index.html`: deine Adresse eintragen (Pflicht in Deutschland, auch bei englischer Seite).
-- `site/privacy/index.html`: enthält nur eine Liste dessen, was die Seite technisch tut. Erzeuge eine echte
+- Impressum: deine Adresse eintragen (Pflicht in Deutschland, auch bei englischer Seite). Lovable: `src/pages/Imprint.tsx`, statisch: `site/imprint/index.html`. Im Lovable-Chat reicht: "Fill the imprint with: Name, Straße, PLZ Ort, E-Mail, USt-ID".
+- Datenschutz (`src/pages/Privacy.tsx` bzw. `site/privacy/index.html`): enthält nur eine Liste dessen, was die Seite technisch tut. Erzeuge eine echte
   Datenschutzerklärung (z. B. e-recht24.de, auf Englisch) und ersetze den Text.
 - Eine E-Mail-Adresse auf der Domain (z. B. `hello@kistack.io`): Cloudflare "Email Routing" leitet kostenlos
   an dein Gmail weiter.
