@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KiStack – AI agent skills for KiCad</title>
+<meta name="description" content="The AI agent stack for KiCad: skills, MCP servers and workflows that let Claude Code, Codex and OpenCode review schematics, run DRC/ERC and prep boards for fab. Independent guide and starter kit.">
+<meta property="og:title" content="KiStack – AI agent skills for KiCad">
+<meta property="og:description" content="Install guides, an honest comparison of KiCad agent skill packs, and a free KiCad Agent Starter Kit.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kistack.io/">
+<style>
+:root{
+  --bg:#f7f8f6;--surface:#ffffff;--text:#15201a;--muted:#5b6861;--border:#dfe5e0;
+  --accent:#0e7a4f;--accent-text:#ffffff;--code-bg:#111a15;--code-text:#d9f2e4;--warn:#9a5b00;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1411;--surface:#151d18;--text:#e6ede8;--muted:#9fb0a6;--border:#263129;
+    --accent:#3ccf8e;--accent-text:#0b1510;--code-bg:#0a0f0c;--code-text:#cdebd9;--warn:#f0b24a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1411;--surface:#151d18;--text:#e6ede8;--muted:#9fb0a6;--border:#263129;
+  --accent:#3ccf8e;--accent-text:#0b1510;--code-bg:#0a0f0c;--code-text:#cdebd9;--warn:#f0b24a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px}
+header{padding:20px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.logo{font-weight:700;letter-spacing:.02em;font-size:18px}
+.logo span{color:var(--accent)}
+nav a{color:var(--muted);text-decoration:none;margin-left:16px;font-size:14px}
+nav a:hover{color:var(--text)}
+.hero{padding:48px 0 32px}
+h1{font-size:clamp(30px,5vw,46px);line-height:1.1;margin:0 0 16px;letter-spacing:-.01em}
+.lead{font-size:19px;color:var(--muted);max-width:640px;margin:0 0 24px}
+.btn{display:inline-block;background:var(--accent);color:var(--accent-text);padding:12px 20px;border-radius:8px;font-weight:600;text-decoration:none;border:0;cursor:pointer;font-size:16px}
+.btn.secondary{background:transparent;color:var(--text);border:1px solid var(--border);margin-left:8px}
+section{padding:36px 0;border-top:1px solid var(--border)}
+h2{font-size:26px;margin:0 0 8px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0 0 20px}
+pre{background:var(--code-bg);color:var(--code-text);padding:14px 16px;border-radius:8px;overflow-x:auto;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:0}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}
+.card h3{margin:0 0 6px;font-size:17px}
+.card p{margin:0 0 10px;color:var(--muted);font-size:15px}
+.meta{font-size:13px;color:var(--muted)}
+.table{width:100%;border-collapse:collapse;font-size:15px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.table th,.table td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+.table th{font-weight:600;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.04em}
+.table tr:last-child td{border-bottom:0}
+.scroll{overflow-x:auto}
+ul{padding-left:20px;margin:0}
+li{margin:6px 0}
+.two{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.ok h3{color:var(--accent)}
+.no h3{color:var(--warn)}
+form{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+input[type=email]{flex:1;min-width:220px;padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:16px}
+.fine{font-size:13px;color:var(--muted);margin-top:8px}
+footer{padding:28px 0 40px;color:var(--muted);font-size:13px;border-top:1px solid var(--border)}
+footer a{color:var(--muted)}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">Ki<span>Stack</span>.io</div>
+    <nav>
+      <a href="#install">Install</a>
+      <a href="#compare">Compare</a>
+      <a href="#reality">What works</a>
+      <a href="#kit">Starter Kit</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <h1>The AI agent stack for KiCad.</h1>
+    <p class="lead">Skills, MCP servers and workflows that let Claude Code, Codex and OpenCode review schematics, run DRC/ERC, optimize BOMs and prep boards for fab. One page, no hype.</p>
+    <a class="btn" href="#install">Get started in 60 seconds</a>
+    <a class="btn secondary" href="#kit">Free Starter Kit</a>
+  </div>
+
+  <section id="install">
+    <h2>Install a KiCad skill pack</h2>
+    <p class="sub">All three are open source on GitHub. Pick one, point your agent at a KiCad project, and ask it to review the board.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>KiStack (American-Embedded)</h3>
+        <p>Human-written skills for schematic work, PCB review, parts and BOM decisions, exports and Gerber review.</p>
+        <pre>npx skills add American-Embedded/kistack</pre>
+        <p class="meta" style="margin-top:10px"><a href="https://github.com/American-Embedded/KiStack">github.com/American-Embedded/KiStack</a></p>
+      </div>
+      <div class="card">
+        <h3>Ki-Stack (Milind220)</h3>
+        <p>Teaches agents the native surfaces: kicad-python for live IPC, kicad-cli for render/export/DRC/ERC, kiutils-rs for offline file edits. MIT.</p>
+        <pre>git clone https://github.com/Milind220/Ki-Stack
+# then symlink skills/ki-stack/* into your agent's skills dir</pre>
+        <p class="meta" style="margin-top:10px"><a href="https://github.com/Milind220/Ki-Stack">github.com/Milind220/Ki-Stack</a></p>
+      </div>
+      <div class="card">
+        <h3>kicad-happy (aklofas)</h3>
+        <p>Broadest scope: schematic analysis, layout review, EMC pre-compliance, SPICE, datasheets, sourcing, fab prep. Claude Code and Codex.</p>
+        <pre>git clone https://github.com/aklofas/kicad-happy
+# see README for the install step</pre>
+        <p class="meta" style="margin-top:10px"><a href="https://github.com/aklofas/kicad-happy">github.com/aklofas/kicad-happy</a></p>
+      </div>
+    </div>
+    <p class="fine">Prerequisites for all of them: KiCad 8 or 9 with <code>kicad-cli</code> on your PATH, Python 3, and an agent CLI (Claude Code, Codex CLI or OpenCode).</p>
+  </section>
+
+  <section id="compare">
+    <h2>Compare the packs</h2>
+    <p class="sub">Numbers as of October 23, 2026. Stars are a rough proxy for adoption, not quality.</p>
+    <div class="scroll">
+    <table class="table">
+      <thead><tr><th>Pack</th><th>Focus</th><th>Agents</th><th>License</th><th>Stars</th></tr></thead>
+      <tbody>
+        <tr><td><strong>KiStack</strong><br><span class="meta">American-Embedded</span></td><td>Schematic, PCB review, BOM, exports, Gerber review. Asks the engineer before double-sided layouts and outline decisions.</td><td>Any agent that loads SKILL.md files (Claude Code, Codex CLI)</td><td>Custom</td><td>409</td></tr>
+        <tr><td><strong>Ki-Stack</strong><br><span class="meta">Milind220</span></td><td>Substrate skills (orient, render, live, file-surgery, verify) plus domain skills for PCB, schematic, symbols, footprints.</td><td>Claude Code, Codex, OpenCode</td><td>MIT</td><td>23</td></tr>
+        <tr><td><strong>kicad-happy</strong><br><span class="meta">aklofas</span></td><td>Widest feature list incl. EMC pre-compliance and SPICE. Community reports it as slow but promising.</td><td>Claude Code, Codex</td><td>see repo</td><td>~1.5k</td></tr>
+        <tr><td><strong>KiCad MCP servers</strong><br><span class="meta">various</span></td><td>Tool-based access: DRC, Gerber export, library search, placement, routing. Quality varies a lot between servers.</td><td>Any MCP client</td><td>varies</td><td>varies</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section id="reality">
+    <h2>What actually works today</h2>
+    <p class="sub">Distilled from engineers' reports (EEVblog, Hackaday, GitHub issues). Use agents where they are strong and keep yourself in the loop everywhere else.</p>
+    <div class="two">
+      <div class="card ok">
+        <h3>Reliable wins</h3>
+        <ul>
+          <li>BOM optimization: JLCPCB basic vs. extended parts, stock checks, alternates</li>
+          <li>DRC/ERC loops: run, read the report, fix the boring violations</li>
+          <li>Netlist and connectivity review against the datasheet</li>
+          <li>Footprint and symbol generation from existing library parts</li>
+          <li>Calculations: trace impedance, thermal, current capacity</li>
+          <li>Scripts: kicad-cli pipelines, export automation, panelization helpers</li>
+        </ul>
+      </div>
+      <div class="card no">
+        <h3>Still weak</h3>
+        <ul>
+          <li>Spatial judgment: agents cannot "see" a clean placement</li>
+          <li>Editing raw S-expression files without breaking ordering</li>
+          <li>Design intent: why a part sits where it sits is not in the netlist</li>
+          <li>Confident agreement with whatever framing you give the question</li>
+          <li>Running with permissions skipped: removes the human and degrades results</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="kit">
+    <h2>KiCad Agent Starter Kit (free)</h2>
+    <p class="sub">The missing pieces engineers keep asking for. Drop them into your project and every skill pack above gets better.</p>
+    <div class="grid">
+      <div class="card"><h3>CLAUDE.md for hardware projects</h3><p>Project conventions, fab profile, what the agent must ask before changing.</p></div>
+      <div class="card"><h3>Design-constraints template</h3><p>Signal groups, impedances, keep-outs, placement rules in a format agents read.</p></div>
+      <div class="card"><h3>Board review checklist</h3><p>Pre-fab checklist the agent walks through and reports on, item by item.</p></div>
+      <div class="card"><h3>JLCPCB BOM workflow</h3><p>Prompt sequence for basic/extended part optimization and stock verification.</p></div>
+    </div>
+    <!-- TODO: replace action with your newsletter provider endpoint (Beehiiv, Buttondown, Resend) -->
+    <form action="#" method="post" onsubmit="alert('Connect this form to your email provider.');return false;">
+      <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
+      <button class="btn" type="submit">Send me the kit</button>
+    </form>
+    <p class="fine">One email with the kit, then occasional updates on KiCad agent tooling. Unsubscribe any time.</p>
+  </section>
+
+  <footer>
+    <p>KiStack.io is an independent guide to AI agent tooling for KiCad. It is not affiliated with the KiCad project, American-Embedded or any skill pack author. Project names belong to their respective owners.</p>
+    <p><a href="/impressum">Imprint</a> · <a href="/privacy">Privacy</a> · <a href="https://github.com/American-Embedded/KiStack">KiStack on GitHub</a></p>
+  </footer>
+</div>
+</body>
+</html>
