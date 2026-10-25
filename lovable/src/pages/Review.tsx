@@ -28,7 +28,7 @@ export default function Review() {
           <span className="badge mb-5">Service</span>
           <h1 className="mb-5 text-[2.4rem] font-extrabold leading-[1.05] tracking-tight md:text-6xl">Pre-Fab Review</h1>
           <p className="mb-7 text-lg leading-relaxed text-muted">A respin costs a week and four figures. A review costs a fraction of that. Send the KiCad project, get a prioritized findings report within 3 business days: what blocks the order, what to fix before the next rev, what is fine.</p>
-          <ActionLink href={config.reviewIntakeUrl} className="btn px-6 py-3.5 text-[17px]" missingHint="Intake form not connected yet. Set reviewIntakeUrl in src/config.ts.">Request a review <ArrowRight className="h-4 w-4" /></ActionLink>
+          <ActionLink href={config.reviewIntakeUrl} className="btn px-6 py-3.5 text-[17px]" fallbackTo="#waitlist" fallbackLabel="Join the review waitlist">Request a review <ArrowRight className="h-4 w-4" /></ActionLink>
           <p className="mt-3 text-[13px] text-muted">Short intake form (board type, fab, quantity, what worries you), quote within one business day. Files are deleted 30 days after delivery unless you ask otherwise.</p>
         </div>
       </section>
@@ -58,7 +58,7 @@ export default function Review() {
         <p className="mt-4 max-w-3xl text-[13px] text-muted">A review is advice from the tool chain and an engineer. It is not a design sign-off and does not transfer liability for the board. You remain the engineer of record.</p>
       </section>
 
-      <section className="section pt-0">
+      <section id="waitlist" className="section scroll-mt-20 pt-0">
         <div className="relative overflow-hidden rounded-3xl border border-line bg-surface p-8 md:p-12">
           <div className="pointer-events-none absolute -left-20 -bottom-20 h-72 w-72 rounded-full bg-mint/10 blur-3xl" />
           <div className="relative grid items-center gap-8 md:grid-cols-[1.2fr_1fr]">

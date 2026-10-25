@@ -137,7 +137,7 @@ export default function Index() {
       </section>
 
       {/* Newsletter */}
-      <section className="section pt-0">
+      <section id="newsletter" className="section scroll-mt-20 pt-0">
         <div className="relative overflow-hidden rounded-3xl border border-line bg-surface p-8 md:p-12">
           <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-copper/10 blur-3xl" />
           <div className="relative grid items-center gap-8 md:grid-cols-[1.2fr_1fr]">

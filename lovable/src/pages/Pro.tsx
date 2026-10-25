@@ -21,7 +21,6 @@ const faq = [
   ["Refunds?", "14 days, no questions, via the purchase email."],
 ];
 
-const hint = "Checkout not connected yet. Set lemonProKitUrl / lemonProKitTeamUrl in src/config.ts.";
 
 function PriceCard() {
   return (
@@ -33,8 +32,8 @@ function PriceCard() {
       <ul className="mb-6 space-y-2.5 text-[15px]">
         {["5 fab profiles as JSON + .kicad_dru", "5 board-class constraint templates", "kistack-review CLI", "Prompt library + agent files", "Starter Kit included"].map((f) => <li key={f} className="flex gap-2.5"><Check className="mt-0.5 h-4 w-4 shrink-0 text-mint" />{f}</li>)}
       </ul>
-      <ActionLink href={config.lemonProKitUrl} className="btn w-full py-3.5 text-[17px] lemonsqueezy-button" missingHint={hint}>Buy the Pro Kit <ArrowRight className="h-4 w-4" /></ActionLink>
-      <ActionLink href={config.lemonProKitTeamUrl} className="btn btn-ghost mt-2 w-full text-sm" missingHint={hint}>Team licence, 5 seats · $99</ActionLink>
+      <ActionLink href={config.lemonProKitUrl} className="btn w-full py-3.5 text-[17px] lemonsqueezy-button" fallbackTo="/#newsletter" fallbackLabel="Notify me at launch">Buy the Pro Kit <ArrowRight className="h-4 w-4" /></ActionLink>
+      <ActionLink href={config.lemonProKitTeamUrl} className="btn btn-ghost mt-2 w-full text-sm" fallbackTo="/#newsletter" fallbackLabel="Team licence, 5 seats · $99 (soon)">Team licence, 5 seats · $99</ActionLink>
       <p className="mt-4 text-center text-xs text-muted">Instant download · VAT and sales tax handled at checkout · 14-day refund, no questions</p>
     </div>
   );
