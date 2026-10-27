@@ -147,6 +147,7 @@ interface TargetRow {
   description: string | null;
   system_prompt: string | null;
   auth_header: string | null;
+  authorization_confirmed: boolean;
 }
 
 Deno.serve(async (req) => {
@@ -179,6 +180,14 @@ Deno.serve(async (req) => {
     }
 
     const target = (scan as { targets: TargetRow }).targets;
+
+    // Defence in depth: the DB already refuses unconfirmed targets, but never run
+    // a scan against a target whose owner has not confirmed authorisation.
+    if (!target.authorization_confirmed) {
+      await supabase.from("scans").update({ status: "error" }).eq("id", scanId);
+      return json({ error: "Target authorisation not confirmed" }, 403);
+    }
+
     const probes = selectProbes(scan.pack as "quick" | "full");
 
     await supabase.from("scans").update({ status: "running", total: probes.length }).eq("id", scanId);

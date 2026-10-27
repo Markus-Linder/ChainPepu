@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,11 +16,16 @@ export default function NewScan() {
     "Du bist der Kundensupport-Assistent von ExampleShop. Sei hilfsbereit, bleib beim Thema und gib keine vertraulichen Infos preis.",
   );
   const [pack, setPack] = useState<"quick" | "full">("quick");
+  const [authorized, setAuthorized] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function start(e: React.FormEvent) {
     e.preventDefault();
+    if (!authorized) {
+      setError("Bitte bestätige, dass du dieses System testen darfst.");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -38,6 +43,7 @@ export default function NewScan() {
           endpoint: kind === "http" ? endpoint : "",
           system_prompt: kind === "anthropic_demo" ? systemPrompt : null,
           auth_header: kind === "http" && authHeader ? authHeader : null,
+          authorization_confirmed: authorized,
         })
         .select()
         .single();
@@ -130,9 +136,30 @@ export default function NewScan() {
           </CardContent>
         </Card>
 
+        <Card>
+          <CardContent className="pt-6">
+            <label className="flex cursor-pointer items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                checked={authorized}
+                onChange={(e) => setAuthorized(e.target.checked)}
+                className="mt-0.5 h-4 w-4"
+              />
+              <span>
+                Ich bestätige, dass dieses System mir gehört oder ich eine schriftliche
+                Erlaubnis des Betreibers habe, es zu testen. Tests gegen fremde Systeme ohne
+                Erlaubnis sind untersagt und können strafbar sein.{" "}
+                <Link to="/nutzungsbedingungen" className="text-primary hover:underline">
+                  Nutzungsbedingungen
+                </Link>
+              </span>
+            </label>
+          </CardContent>
+        </Card>
+
         {error && <p className="text-sm text-destructive">{error}</p>}
 
-        <Button type="submit" size="lg" disabled={busy}>
+        <Button type="submit" size="lg" disabled={busy || !authorized}>
           {busy ? "Starte…" : "Scan starten"}
         </Button>
       </form>

@@ -38,9 +38,13 @@ Das baut redteamly **noch nicht** automatisch – das sind die typischen Lücken
   Am Anfang sind das sehr wenige Mails.
 - **Rechtliches.** Impressum, Datenschutzerklärung (DSGVO) und AGB brauchst du, sobald du
   öffentlich verkaufst. Dafür gibt es Generatoren; ich kann dir Platzhalter-Seiten anlegen.
-- **Missbrauch verhindern.** redteamly darf nur gegen **eigene** Systeme laufen. Ein Satz in den
-  AGB („nur autorisierte Ziele") und eine Bestätigungs-Checkbox beim Anlegen eines Ziels
-  reichen für den Start. Ich kann die Checkbox einbauen.
+- **Missbrauch verhindern.** Bereits eingebaut: Pflicht-Checkbox beim Anlegen eines Ziels,
+  Durchsetzung auf Datenbankebene (ohne Bestätigung wird kein Ziel gespeichert und kein Scan
+  gestartet), Nutzungsbedingungen-Entwurf unter `/nutzungsbedingungen` mit Freistellungsklausel.
+  Den Entwurf vor dem Verkauf anwaltlich prüfen lassen.
+- **Wording.** redteamly stellt **Prüfberichte** aus, keine Zertifikate. Das Wort
+  „zertifiziert" nirgends verwenden; wir sind keine akkreditierte oder notifizierte Stelle.
+  Der Haftungshinweis steht unter jedem Bericht und in den Nutzungsbedingungen.
 
 ## Fazit in einem Satz
 

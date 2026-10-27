@@ -62,7 +62,7 @@ export default function Landing() {
             {[
               { icon: Bot, title: "1. Ziel verbinden", body: "Euren Assistenten per URL eintragen oder sofort mit einer Demo-Konfiguration testen." },
               { icon: Zap, title: "2. Scan läuft automatisch", body: "redteamly sendet die Testfälle und bewertet jede Antwort mit einem Judge-Modell." },
-              { icon: FileCheck, title: "3. Report & Score", body: "Ihr bekommt einen Sicherheits-Score, Schwachstellen nach Schweregrad und die Compliance-Zuordnung." },
+              { icon: FileCheck, title: "3. Prüfbericht & Score", body: "Ihr bekommt einen Sicherheits-Score, Schwachstellen nach Schweregrad und die Zuordnung zu OWASP und EU AI Act als Baustein eurer technischen Dokumentation." },
             ].map((s) => (
               <Card key={s.title}>
                 <CardContent className="pt-6">
@@ -129,8 +129,15 @@ export default function Landing() {
       </section>
 
       <footer className="border-t py-8">
-        <div className="container text-center text-sm text-muted-foreground">
+        <div className="container space-y-2 text-center text-sm text-muted-foreground">
           <p>redteamly · Testet nur Systeme, für die ihr autorisiert seid.</p>
+          <p className="text-xs">
+            redteamly erstellt automatisierte Prüfberichte. Wir sind keine akkreditierte
+            Zertifizierungsstelle und keine notifizierte Stelle im Sinne des EU AI Act.
+          </p>
+          <p className="text-xs">
+            <Link to="/nutzungsbedingungen" className="hover:underline">Nutzungsbedingungen</Link>
+          </p>
         </div>
       </footer>
     </div>

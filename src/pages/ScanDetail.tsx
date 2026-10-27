@@ -146,10 +146,18 @@ export default function ScanDetail() {
       </div>
 
       {scan.status === "done" && (
-        <div className="mt-6">
+        <div className="mt-6 space-y-4">
           <Button variant="outline" onClick={() => window.print()}>
-            Als PDF exportieren / drucken
+            Prüfbericht als PDF exportieren
           </Button>
+          <p className="max-w-3xl text-xs text-muted-foreground">
+            Hinweis: Dieser Prüfbericht ist eine automatisierte Momentaufnahme des getesteten
+            Systems zum Zeitpunkt des Scans. Er ist keine Zertifizierung, keine
+            Konformitätsbewertung im Sinne des EU AI Act und keine Garantie für die Sicherheit
+            des Systems. Er kann als Bestandteil eurer technischen Dokumentation (Risikomanagement,
+            Robustheit, Testnachweise) dienen. Ein bestandener Test schließt andere Schwachstellen
+            nicht aus.
+          </p>
         </div>
       )}
     </AppShell>

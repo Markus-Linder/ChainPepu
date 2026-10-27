@@ -7,6 +7,7 @@ import Dashboard from "@/pages/Dashboard";
 import NewScan from "@/pages/NewScan";
 import ScanDetail from "@/pages/ScanDetail";
 import SetupNotice from "@/pages/SetupNotice";
+import Terms from "@/pages/Terms";
 
 export default function App() {
   const { session, loading } = useAuth();
@@ -21,6 +22,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={session ? <Navigate to="/app" replace /> : <Landing />} />
       <Route path="/login" element={session ? <Navigate to="/app" replace /> : <Auth />} />
+      <Route path="/nutzungsbedingungen" element={<Terms />} />
       <Route path="/app" element={session ? <Dashboard /> : <Navigate to="/login" replace />} />
       <Route path="/app/new" element={session ? <NewScan /> : <Navigate to="/login" replace />} />
       <Route path="/app/scan/:id" element={session ? <ScanDetail /> : <Navigate to="/login" replace />} />

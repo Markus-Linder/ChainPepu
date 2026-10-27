@@ -15,6 +15,9 @@ create table if not exists public.targets (
   endpoint      text not null default '',
   system_prompt text,
   auth_header   text,
+  -- The user must confirm they are authorised to test this system (own system or
+  -- written permission). Enforced below in the RLS insert policy.
+  authorization_confirmed boolean not null default false,
   created_at    timestamptz not null default now()
 );
 
@@ -61,7 +64,8 @@ alter table public.scans   enable row level security;
 alter table public.results enable row level security;
 
 create policy "targets_owner" on public.targets
-  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  for all using (auth.uid() = user_id)
+  with check (auth.uid() = user_id and authorization_confirmed = true);
 
 create policy "scans_owner" on public.scans
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

@@ -6,6 +6,10 @@ Antwort mit einem Judge-Modell und liefert einen Score plus Report, zugeordnet z
 OWASP LLM Top 10 und dem EU AI Act.
 
 > Nur für Systeme einsetzen, für die ihr autorisiert seid (eure eigenen oder mit Erlaubnis).
+> Die App erzwingt dafür eine Bestätigung pro Ziel, auch auf Datenbankebene.
+>
+> redteamly erstellt **Prüfberichte**, keine Zertifikate. Es ist keine akkreditierte
+> Zertifizierungsstelle und keine notifizierte Stelle im Sinne des EU AI Act.
 
 ## Technik-Stack
 
