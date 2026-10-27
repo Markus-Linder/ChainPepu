@@ -1,0 +1,4 @@
+project_id = "redteamly"
+
+[functions.run-redteam]
+verify_jwt = true
