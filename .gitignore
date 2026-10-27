@@ -8,3 +8,5 @@ dist-ssr
 .supabase
 .DS_Store
 npm-debug.log*
+
+*.tsbuildinfo
