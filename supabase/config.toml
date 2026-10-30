@@ -1,0 +1,22 @@
+project_id = "profiangebot"
+
+[functions.analyze-quote]
+verify_jwt = false
+
+[functions.generate-lv]
+verify_jwt = false
+
+[functions.compare-quotes]
+verify_jwt = false
+
+[functions.release-lead]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.contact]
+verify_jwt = false

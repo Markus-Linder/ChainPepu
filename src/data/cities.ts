@@ -1,0 +1,36 @@
+export interface City { slug: string; name: string; state: string; plzPrefix: string[] }
+
+export const CITIES: City[] = [
+  { slug: "berlin", name: "Berlin", state: "Berlin", plzPrefix: ["10", "12", "13", "14"] },
+  { slug: "hamburg", name: "Hamburg", state: "Hamburg", plzPrefix: ["20", "21", "22"] },
+  { slug: "muenchen", name: "München", state: "Bayern", plzPrefix: ["80", "81", "85"] },
+  { slug: "koeln", name: "Köln", state: "Nordrhein-Westfalen", plzPrefix: ["50", "51"] },
+  { slug: "frankfurt", name: "Frankfurt am Main", state: "Hessen", plzPrefix: ["60", "65"] },
+  { slug: "stuttgart", name: "Stuttgart", state: "Baden-Württemberg", plzPrefix: ["70"] },
+  { slug: "duesseldorf", name: "Düsseldorf", state: "Nordrhein-Westfalen", plzPrefix: ["40"] },
+  { slug: "leipzig", name: "Leipzig", state: "Sachsen", plzPrefix: ["04"] },
+  { slug: "dortmund", name: "Dortmund", state: "Nordrhein-Westfalen", plzPrefix: ["44"] },
+  { slug: "essen", name: "Essen", state: "Nordrhein-Westfalen", plzPrefix: ["45"] },
+  { slug: "bremen", name: "Bremen", state: "Bremen", plzPrefix: ["28"] },
+  { slug: "dresden", name: "Dresden", state: "Sachsen", plzPrefix: ["01"] },
+  { slug: "hannover", name: "Hannover", state: "Niedersachsen", plzPrefix: ["30"] },
+  { slug: "nuernberg", name: "Nürnberg", state: "Bayern", plzPrefix: ["90"] },
+  { slug: "duisburg", name: "Duisburg", state: "Nordrhein-Westfalen", plzPrefix: ["47"] },
+  { slug: "bochum", name: "Bochum", state: "Nordrhein-Westfalen", plzPrefix: ["44"] },
+  { slug: "wuppertal", name: "Wuppertal", state: "Nordrhein-Westfalen", plzPrefix: ["42"] },
+  { slug: "bielefeld", name: "Bielefeld", state: "Nordrhein-Westfalen", plzPrefix: ["33"] },
+  { slug: "bonn", name: "Bonn", state: "Nordrhein-Westfalen", plzPrefix: ["53"] },
+  { slug: "muenster", name: "Münster", state: "Nordrhein-Westfalen", plzPrefix: ["48"] },
+  { slug: "karlsruhe", name: "Karlsruhe", state: "Baden-Württemberg", plzPrefix: ["76"] },
+  { slug: "mannheim", name: "Mannheim", state: "Baden-Württemberg", plzPrefix: ["68"] },
+  { slug: "augsburg", name: "Augsburg", state: "Bayern", plzPrefix: ["86"] },
+  { slug: "wiesbaden", name: "Wiesbaden", state: "Hessen", plzPrefix: ["65"] },
+  { slug: "heilbronn", name: "Heilbronn", state: "Baden-Württemberg", plzPrefix: ["74"] },
+  { slug: "ulm", name: "Ulm", state: "Baden-Württemberg", plzPrefix: ["89"] },
+  { slug: "schwaebisch-hall", name: "Schwäbisch Hall", state: "Baden-Württemberg", plzPrefix: ["74"] },
+  { slug: "crailsheim", name: "Crailsheim", state: "Baden-Württemberg", plzPrefix: ["74"] },
+  { slug: "ansbach", name: "Ansbach", state: "Bayern", plzPrefix: ["91"] },
+  { slug: "wuerzburg", name: "Würzburg", state: "Bayern", plzPrefix: ["97"] },
+];
+
+export const CITY_BY_SLUG = Object.fromEntries(CITIES.map((c) => [c.slug, c])) as Record<string, City>;

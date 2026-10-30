@@ -1,0 +1,49 @@
+{
+  "name": "profiangebot-plattform",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/generate-sitemap.mjs && tsc -b && vite build",
+    "build:dev": "vite build --mode development",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "sitemap": "node scripts/generate-sitemap.mjs",
+    "stripe:setup": "node scripts/stripe-setup.mjs",
+    "typecheck:functions": "tsc -p .deno-typecheck/tsconfig.json"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-label": "^2.1.2",
+    "@radix-ui/react-slot": "^1.1.2",
+    "@radix-ui/react-tabs": "^1.1.3",
+    "@supabase/supabase-js": "^2.49.4",
+    "@tanstack/react-query": "^5.66.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.475.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-helmet-async": "^2.0.5",
+    "react-router-dom": "^6.30.0",
+    "sonner": "^1.7.4",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
+    "@types/node": "^22.13.4",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react-swc": "^3.8.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.2",
+    "stripe": "^17.7.0",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.14",
+    "zod": "^4.6.7"
+  }
+}
