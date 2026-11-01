@@ -1,0 +1,15 @@
+# Secrets – niemals committen
+config.php
+.env
+
+# Composer
+vendor/
+
+# Laufzeitdaten (Rate-Limit, Logs)
+storage/
+public/api/storage/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.log
