@@ -1,0 +1,49 @@
+# Supabase project configuration (used by `supabase start` / `supabase functions deploy`).
+project_id = "chainpepu"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+
+[db]
+port = 54322
+major_version = 17
+
+[auth]
+enabled = true
+site_url = "http://localhost:8080"
+additional_redirect_urls = ["http://localhost:8080/auth/callback"]
+enable_anonymous_sign_ins = true
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+
+[storage]
+enabled = true
+file_size_limit = "8MiB"
+
+[functions.hatch]
+verify_jwt = false
+[functions.creature-action]
+verify_jwt = false
+[functions.creature-chat]
+verify_jwt = false
+[functions.gift]
+verify_jwt = false
+[functions.battle]
+verify_jwt = false
+[functions.converse]
+verify_jwt = false
+[functions.checkout]
+verify_jwt = false
+[functions.stripe-webhook]
+verify_jwt = false
+[functions.tiktok-auth]
+verify_jwt = false
+[functions.tick]
+verify_jwt = false
+[functions.payout]
+verify_jwt = false

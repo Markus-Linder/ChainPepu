@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"], "@shared/*": ["./supabase/functions/_shared/*"] },
+    "types": ["vite/client"]
+  },
+  "include": ["src", "supabase/functions/_shared/dna.ts", "supabase/functions/_shared/hash.ts", "supabase/functions/_shared/lifecycle.ts", "supabase/functions/_shared/catalog.ts", "supabase/functions/_shared/economy.ts", "supabase/functions/_shared/battle.ts", "supabase/functions/_shared/persona.ts", "supabase/functions/_shared/quests.ts"]
+}

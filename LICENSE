@@ -1,0 +1,14 @@
+Copyright (c) 2026 ChainPepu. All rights reserved.
+
+This software and its source code, designs, game mechanics, assets and documentation
+("the Software") are proprietary and confidential.
+
+No part of the Software may be copied, modified, merged, published, distributed,
+sublicensed, sold or otherwise used, in whole or in part, without the prior written
+permission of the copyright holder. Access to this repository does not grant any license.
+
+The copyright holder reserves the right to assign, license or sell all rights in the
+Software to a third party. Third-party open-source dependencies remain under their own
+licenses (see package.json and the lock file).
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
