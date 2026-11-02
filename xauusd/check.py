@@ -21,15 +21,22 @@ try:
     spot = float(get("https://api.gold-api.com/price/XAU")["price"])
 except Exception as e:
     out["errors"].append(f"gold-api: {e}")
-try:
-    d = get("https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1h&range=2d")["chart"]["result"][0]
-    fut = float(d["meta"]["regularMarketPrice"])
+def yahoo(interval, rng):
+    d = get(f"https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval={interval}&range={rng}")["chart"]["result"][0]
     q = d["indicators"]["quote"][0]
-    for t, o, h, l, c in zip(d["timestamp"], q["open"], q["high"], q["low"], q["close"]):
-        if None not in (o, h, l, c):
-            candles.append({"t": t, "o": o, "h": h, "l": l, "c": c})
+    cs = [{"t": t, "o": o, "h": h, "l": l, "c": c}
+          for t, o, h, l, c in zip(d["timestamp"], q["open"], q["high"], q["low"], q["close"]) if None not in (o, h, l, c)]
+    return float(d["meta"]["regularMarketPrice"]), cs
+
+c15 = []
+try:
+    fut, candles = yahoo("1h", "1mo")
 except Exception as e:
-    out["errors"].append(f"yahoo: {e}")
+    out["errors"].append(f"yahoo 1h: {e}")
+try:
+    _, c15 = yahoo("15m", "5d")
+except Exception as e:
+    out["errors"].append(f"yahoo 15m: {e}")
 
 price = spot if spot else fut
 if price is None:
@@ -89,6 +96,90 @@ for z in zones["zones"]:
     d = (mid - price) / price * 100
     if abs(d) <= 1.5: near.append({"zone": z["name"], "distance_pct": round(d, 2)})
 out["near_zones"] = near
+
+# ---------- Kurzfrist-Einschaetzung (regelbasiert) ----------
+def ema(vals, n):
+    k = 2 / (n + 1); e = vals[0]; res = []
+    for v in vals:
+        e = v * k + e * (1 - k); res.append(e)
+    return res
+
+def rsi(vals, n=14):
+    if len(vals) < n + 1: return None
+    gains = [max(vals[i] - vals[i-1], 0) for i in range(1, len(vals))]
+    losses = [max(vals[i-1] - vals[i], 0) for i in range(1, len(vals))]
+    ag, al = sum(gains[:n]) / n, sum(losses[:n]) / n
+    for g, l in zip(gains[n:], losses[n:]):
+        ag, al = (ag * (n - 1) + g) / n, (al * (n - 1) + l) / n
+    return 100.0 if al == 0 else 100 - 100 / (1 + ag / al)
+
+def atr(cs, n=14):
+    if len(cs) < n + 1: return None
+    trs = [max(c["h"] - c["l"], abs(c["h"] - cs[i-1]["c"]), abs(c["l"] - cs[i-1]["c"])) for i, c in enumerate(cs) if i > 0]
+    a = sum(trs[:n]) / n
+    for t in trs[n:]: a = (a * (n - 1) + t) / n
+    return a
+
+assess = {}
+if len(candles) >= 60 and len(c15) >= 60:
+    cl1 = [c["c"] + basis for c in candles]
+    cl15 = [c["c"] + basis for c in c15]
+    e20_1, e50_1 = ema(cl1, 20)[-1], ema(cl1, 50)[-1]
+    e20_15, e50_15 = ema(cl15, 20)[-1], ema(cl15, 50)[-1]
+    r15, r1 = rsi(cl15), rsi(cl1)
+    a15 = atr(c15)
+    day_cs = [c for c in c15 if c["t"] >= now.replace(hour=0, minute=0, second=0, microsecond=0).timestamp()]
+    day_hi = max(c["h"] for c in day_cs) + basis if day_cs else None
+    day_lo = min(c["l"] for c in day_cs) + basis if day_cs else None
+    chg_1h = (price - cl1[-2]) / cl1[-2] * 100 if len(cl1) > 1 else 0
+    chg_4h = (price - cl1[-5]) / cl1[-5] * 100 if len(cl1) > 4 else 0
+
+    score, why = 0.0, []
+    if price > e20_1 > e50_1: score += 1; why.append("1h-Trend aufwaerts (Kurs > EMA20 > EMA50)")
+    elif price < e20_1 < e50_1: score -= 1; why.append("1h-Trend abwaerts (Kurs < EMA20 < EMA50)")
+    else: why.append("1h-Trend uneinheitlich (EMAs verschraenkt)")
+    if price > e20_15 > e50_15: score += 1; why.append("15m-Momentum positiv")
+    elif price < e20_15 < e50_15: score -= 1; why.append("15m-Momentum negativ")
+    else: why.append("15m-Momentum neutral")
+    if r15 is not None:
+        if r15 >= 70: score -= 0.5; why.append(f"RSI15 ueberkauft ({r15:.0f})")
+        elif r15 <= 30: score += 0.5; why.append(f"RSI15 ueberverkauft ({r15:.0f})")
+        elif r15 > 55: score += 0.25
+        elif r15 < 45: score -= 0.25
+    res_above = sorted([z for z in zones["zones"] if z["low"] > price], key=lambda z: z["low"])
+    sup_below = sorted([z for z in zones["zones"] if z["high"] < price], key=lambda z: -z["high"])
+    nr = res_above[0] if res_above else None
+    ns = sup_below[0] if sup_below else None
+    if nr and (nr["low"] - price) / price < 0.003: score -= 0.5; why.append(f"direkt unter Widerstand {nr['name']}")
+    if ns and (price - ns["high"]) / price < 0.003: score += 0.5; why.append(f"direkt ueber Unterstuetzung {ns['name']}")
+
+    if score >= 1.5: bias = "LONG"
+    elif score <= -1.5: bias = "SHORT"
+    else: bias = "NEUTRAL / abwarten"
+    stop_dist = max(1.5 * a15, price * 0.003) if a15 else price * 0.004
+    plan = {}
+    if bias == "LONG" and nr:
+        stop = min(price - stop_dist, ns["low"] - 0.1 * stop_dist) if ns else price - stop_dist
+        plan = {"einstieg": round(price, 1), "stop": round(stop, 1), "ziel": round(nr["low"], 1),
+                "crv": round((nr["low"] - price) / max(price - stop, 1e-9), 2)}
+    elif bias == "SHORT" and ns:
+        stop = max(price + stop_dist, nr["high"] + 0.1 * stop_dist) if nr else price + stop_dist
+        plan = {"einstieg": round(price, 1), "stop": round(stop, 1), "ziel": round(ns["high"], 1),
+                "crv": round((price - ns["high"]) / max(stop - price, 1e-9), 2)}
+    if plan and plan["crv"] < 1.0:
+        why.append(f"CRV nur {plan['crv']} -> kein Einstieg, auf Ruecklauf oder Zonenbruch warten")
+        bias = "NEUTRAL / abwarten"; plan = {}
+    assess = {
+        "richtung": bias, "score": round(score, 2), "begruendung": why, "plan": plan,
+        "indikatoren": {"ema20_1h": round(e20_1, 1), "ema50_1h": round(e50_1, 1), "ema20_15m": round(e20_15, 1),
+                        "ema50_15m": round(e50_15, 1), "rsi14_15m": round(r15, 1) if r15 else None,
+                        "rsi14_1h": round(r1, 1) if r1 else None, "atr14_15m": round(a15, 1) if a15 else None,
+                        "tageshoch": round(day_hi, 1) if day_hi else None, "tagestief": round(day_lo, 1) if day_lo else None,
+                        "aenderung_1h_pct": round(chg_1h, 2), "aenderung_4h_pct": round(chg_4h, 2)},
+        "naechster_widerstand": nr["name"] if nr else None, "naechste_unterstuetzung": ns["name"] if ns else None,
+        "in_zone": [z["name"] for z in zones["zones"] if z["low"] * (1 - BAND) <= price <= z["high"] * (1 + BAND)],
+    }
+out["einschaetzung"] = assess
 
 upd = dt.date.fromisoformat(zones["updated_at"])
 out["review_due"] = (now.date() - upd).days >= REVIEW_DAYS
