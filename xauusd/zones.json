@@ -1,0 +1,16 @@
+{
+  "updated_at": "2026-11-02",
+  "note": "Spot-Zonen XAU/USD in USD. Band: Zone gilt als angelaufen, wenn der Kurs bis auf 0,25 % herankommt. Bei Bedarf hier anpassen.",
+  "zones": [
+    {"name": "4250 Widerstand (Trendwende-Marke)", "low": 4250, "high": 4250, "kind": "resistance"},
+    {"name": "4075-4100 Widerstand (100er EMA, 20-Tage-Linie)", "low": 4075, "high": 4100, "kind": "resistance"},
+    {"name": "4000-4025 Widerstand (psychologisch, 50er EMA)", "low": 4000, "high": 4025, "kind": "resistance"},
+    {"name": "3942-3952 Widerstand (altes Tief, Schluesselmarke)", "low": 3942, "high": 3952, "kind": "resistance"},
+    {"name": "3920 Widerstand (23,6 % Fibonacci)", "low": 3920, "high": 3920, "kind": "resistance"},
+    {"name": "3870 Unterstuetzung (Einjahrestief)", "low": 3870, "high": 3870, "kind": "support"},
+    {"name": "3828 Unterstuetzung", "low": 3828, "high": 3828, "kind": "support"},
+    {"name": "3790 Unterstuetzung (Measured-Move-Ziel)", "low": 3790, "high": 3790, "kind": "support"},
+    {"name": "3650-3706 Unterstuetzung (Fibonacci-Zone)", "low": 3650, "high": 3706, "kind": "support"},
+    {"name": "3500 Unterstuetzung (April-2025-Hoch)", "low": 3500, "high": 3500, "kind": "support"}
+  ]
+}
