@@ -11,3 +11,9 @@ Manuell ausführen:
 ```bash
 python3 xauusd/check.py
 ```
+
+## Minuten-Wächter (1m-Chart)
+
+- `minute.py` – läuft als Daemon, wertet jede Minute den 1-Minuten-Chart aus (Zonen-Test/-Bruch, EMA9/21-Kreuz mit 5m-Trendfilter, 60-Minuten-Range-Ausbruch, RSI14-Umkehr) und schreibt `SIGNAL|…`-Zeilen in `minute.log`. Entprellung in `minute_state.json`.
+- `start_watcher.sh` / `stop_watcher.sh` – Daemon starten bzw. stoppen.
+- `wait_signal.py [Sekunden]` – blockiert, bis neue Signal-Zeilen erscheinen (oder Timeout), und gibt sie aus. Der stündliche Auftrag ruft es in einer Schleife auf und schickt je Signal eine Push-Nachricht.
