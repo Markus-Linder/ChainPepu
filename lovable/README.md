@@ -9,6 +9,10 @@ Dieser Ordner enthält alles, was Lovable braucht, um die Website **llmreadiness
 | `DATA_CONTRACT.md` | JSON-Struktur eines Berichts und geplante API, damit das Frontend die echten Daten anzeigen kann |
 | `samples/sample-report.json` | Echter Beispielbericht (linde-mh.de) zum Entwickeln der Ergebnisansicht |
 | `samples/sample-report.md` | Derselbe Bericht als Markdown, so sieht die Kundendatei aus |
+| `public/` | Fertige `robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt`: unverändert in den `public`-Ordner des Lovable-Projekts legen |
+| `seo/SEO_PLAN.md` | Keywords, Seitentitel und Descriptions pro Route, Inhaltsplan, technische Checkliste, Messung |
+| `seo/jsonld-*.json` | JSON-LD für Organisation, Leistungen mit Preisen und FAQ, in die Seiten einbinden |
+| `seo/probe-questions.txt` | Fester Fragenkatalog für den monatlichen KI-Sichtbarkeitstest der eigenen Seite |
 
 ## Vorgehen in Lovable
 

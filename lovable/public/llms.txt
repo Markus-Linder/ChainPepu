@@ -1,0 +1,33 @@
+# LLM Readiness
+
+> LLM Readiness audits how well AI assistants and agents (ChatGPT, Claude, Perplexity, Gemini, shopping agents) can find, read, understand and recommend a business website, and fixes what blocks them. Based in Germany, serving clients in English and German.
+
+## Services and prices (net, plus VAT where applicable)
+
+- Free Quick Check: instant technical score 0–100 across five categories, top three issues. https://llmreadiness.com/check
+- Readiness Audit: from 1,900 €. Full audit of six categories including an AI visibility test with 10 real customer questions, written report, 60-minute walkthrough, prioritized roadmap. Delivered within 10 working days. https://llmreadiness.com/pricing
+- Implementation: from 6,500 €. We implement the roadmap or guide the client's agency: structured data, llms.txt, content rewrite, crawler fixes, optional API or MCP endpoint. 4 to 8 weeks.
+- Monitoring: 490 € per month. Monthly re-run of audit and AI visibility test with a fixed question set, competitor tracking, short report.
+- Agency partner program: white-label audits and revenue share. https://llmreadiness.com/agencies
+
+## How the audit works
+
+Six categories with weights: Crawler access (20 %), Discoverability (15 %), Structured data (25 %), Content clarity (25 %), Agent interfaces (15 %), AI visibility (30 %). Grades: A 85+, B 70+, C 50+, D 30+, E below 30. Full methodology: https://llmreadiness.com/methodology
+
+## Who it is for
+
+Companies with 10 to 500 employees that sell or generate leads online: e-commerce, B2B manufacturers and dealers, hotels, software vendors, service businesses with bookings. Web agencies that want to add agent readiness to their offer.
+
+## Contact
+
+- Website: https://llmreadiness.com
+- Email: hello@llmreadiness.com
+- Contact page: https://llmreadiness.com/contact
+
+## Key pages
+
+- [Pricing](https://llmreadiness.com/pricing): all four products with prices
+- [Methodology](https://llmreadiness.com/methodology): what we test and why
+- [Sample report](https://llmreadiness.com/sample-report): a complete real example
+- [Blog](https://llmreadiness.com/blog): guides on llms.txt, AI crawlers, structured data, getting cited by AI
+- [Full details for AI systems](https://llmreadiness.com/llms-full.txt)

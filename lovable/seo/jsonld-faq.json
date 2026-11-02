@@ -1,0 +1,12 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "What is LLM readiness?", "acceptedAnswer": {"@type": "Answer", "text": "LLM readiness describes how well AI assistants and agents such as ChatGPT, Claude, Perplexity or Gemini can find, read, understand and recommend a website. It covers crawler access, machine-readable data, clear content and interfaces for agents."}},
+    {"@type": "Question", "name": "How is LLM readiness different from SEO?", "acceptedAnswer": {"@type": "Answer", "text": "SEO optimizes for ranking in a list of links. LLM readiness optimizes for being read, understood and cited inside a generated answer. Many SEO basics still help, but AI systems additionally need structured data, llms.txt, visible prices and text that works without JavaScript."}},
+    {"@type": "Question", "name": "What does the audit cost?", "acceptedAnswer": {"@type": "Answer", "text": "The Quick Check is free. The full Readiness Audit with AI visibility test starts at 1,900 € net, implementation from 6,500 € net, monitoring is 490 € per month net."}},
+    {"@type": "Question", "name": "How long does an audit take?", "acceptedAnswer": {"@type": "Answer", "text": "The Quick Check takes under a minute. The full audit including the written report and walkthrough call is delivered within 10 working days."}},
+    {"@type": "Question", "name": "Do you guarantee that AI assistants will recommend my business?", "acceptedAnswer": {"@type": "Answer", "text": "No. We remove the technical and content barriers that keep AI systems from finding and understanding you, and we measure mentions before and after. Whether an assistant recommends you also depends on your offer, reviews and competitors."}},
+    {"@type": "Question", "name": "Which AI crawlers should I allow?", "acceptedAnswer": {"@type": "Answer", "text": "For visibility, allow the search and answer crawlers: OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Google-Extended and Applebot-Extended. Training crawlers such as GPTBot or CCBot are a separate business decision and do not affect visibility in answers."}}
+  ]
+}

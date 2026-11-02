@@ -1,0 +1,24 @@
+{
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "@id": "https://llmreadiness.com/#organization",
+  "name": "LLM Readiness",
+  "url": "https://llmreadiness.com",
+  "logo": "https://llmreadiness.com/logo.png",
+  "description": "Audits and fixes how well AI assistants and agents can find, read, understand and recommend a business website.",
+  "email": "hello@llmreadiness.com",
+  "telephone": "+49 000 0000000",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "TODO Street 1",
+    "postalCode": "TODO",
+    "addressLocality": "TODO City",
+    "addressCountry": "DE"
+  },
+  "areaServed": ["DE", "AT", "CH", "EU", "US", "GB"],
+  "availableLanguage": ["en", "de"],
+  "sameAs": [
+    "https://www.linkedin.com/company/llmreadiness"
+  ],
+  "knowsAbout": ["LLM readiness", "AI visibility", "generative engine optimization", "llms.txt", "schema.org structured data", "AI crawlers", "Model Context Protocol"]
+}

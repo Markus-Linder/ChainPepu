@@ -35,7 +35,13 @@ Pages and routes:
 
 7. `/about`, `/contact`, `/imprint`, `/privacy`, `/terms`. Imprint and Privacy need placeholders for a German company (name, address, managing director, VAT ID, contact), clearly marked TODO.
 
-Static files to generate in `public/`:
+8. `/unsubscribe` Reads `?e=<email>&t=<token>` from the query string, shows a one-line confirmation and writes `{email, token, created_at}` to a Supabase table `unsubscribes` on load (no extra click). Add `Disallow: /unsubscribe` is already in robots.txt. No navigation link to this page.
+
+9. `/blog` and five articles with the slugs from sitemap.xml: `what-is-llm-readiness`, `llms-txt-guide`, `ai-crawlers-robots-txt`, `get-cited-by-chatgpt-perplexity`, `structured-data-for-ai-agents`. Use the titles and descriptions from `seo/SEO_PLAN.md`. Create the article pages with placeholder outlines (H2 questions, 2 sentences each) that I will fill; each with Article JSON-LD (headline, author, datePublished, dateModified).
+
+Static files in `public/`: use the files provided in the `public/` folder of the upload (robots.txt, sitemap.xml, llms.txt, llms-full.txt) unchanged. Use the JSON-LD from `seo/jsonld-organization.json` on every page, `seo/jsonld-services.json` on / and /pricing, `seo/jsonld-faq.json` on / where the FAQ is rendered. Page titles and meta descriptions come from the table in `seo/SEO_PLAN.md`.
+
+If those files are not available, generate them as follows in `public/`:
 - `robots.txt` allowing all crawlers, explicitly listing OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Google-Extended, Applebot-Extended with `Allow: /`, and `Sitemap: https://llmreadiness.com/sitemap.xml`.
 - `sitemap.xml` with all public routes.
 - `llms.txt` in Markdown: H1 "LLM Readiness", a blockquote summary, sections "Services and prices", "How the audit works", "Contact", "Key pages" with absolute links.

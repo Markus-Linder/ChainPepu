@@ -45,7 +45,21 @@ Eigene Fragen statt generierter (eine Frage pro Zeile):
 agent-readiness audit https://beispiel.de --probe --questions-file fragen.txt
 ```
 
+Bericht auf Englisch (Dateien bekommen das Suffix `.en`):
+
+```bash
+agent-readiness audit https://example.com --lang en
+```
+
 Weitere Optionen: `--out ORDNER`, `--region AT`, `--model claude-opus-5-5`, `--no-fallbacks`, `--quiet`.
+
+## Outreach: persönliche Erstkontakt-Mails
+
+```bash
+agent-readiness outreach https://example.com --to ceo@example.com --name "Ms. Smith" --lang en --legal-basis b2b-allowed-jurisdiction
+```
+
+Führt das Audit aus und schreibt einen Mailentwurf mit den drei wichtigsten Befunden nach `outreach/drafts/`. Mit `--send` wird per SMTP versendet. Rechtlicher Rahmen, DNS-Einrichtung (SPF, DKIM, DMARC) und Ablauf stehen in `outreach/README.md`. **Vor der ersten Mail lesen**, in DACH sind Kaltmails ohne Einwilligung unzulässig.
 
 Ohne Installation geht auch `python -m agent_readiness audit …`.
 
@@ -70,7 +84,9 @@ Die Nennungsquote schwankt zwischen Läufen, weil Suchergebnisse und Antworten n
 pytest
 ```
 
-Die Tests laufen offline mit Fixtures und einem Fake-Client, es werden keine API-Aufrufe gemacht.
+Die Tests laufen offline mit Fixtures und einem Fake-Client, es werden keine API-Aufrufe gemacht. Ein Test prüft, dass jeder Text im Code eine deutsche Übersetzung hat.
+
+Sprachen: Die Texte im Code sind Englisch, `agent_readiness/translations/de.py` enthält die deutschen Fassungen. Neue Texte immer mit `_("...")` umschließen und in `de.py` ergänzen.
 
 Aufbau:
 
@@ -82,6 +98,10 @@ agent_readiness/
   probe.py          Sichtbarkeitstest mit Claude
   scoring.py        Gewichtung und Noten
   report.py         Markdown- und JSON-Ausgabe
+  i18n.py           Übersetzungsschicht, translations/de.py deutsche Texte
+  outreach/         Mailvorlagen (de/en), Entwürfe, SMTP-Versand
+lovable/            Unterlagen für die Website llmreadiness.com (Briefing, SEO-Dateien, JSON-LD)
+outreach/           Anleitung, Rechtsrahmen, .env-Vorlage, Sperrliste
 tests/              Offline-Tests und HTML-Fixtures
 ```
 

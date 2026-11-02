@@ -5,3 +5,6 @@ __pycache__/
 reports/
 .venv/
 *.zip
+outreach/drafts/
+outreach/log.csv
+.env

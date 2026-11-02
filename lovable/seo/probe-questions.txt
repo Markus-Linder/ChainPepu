@@ -1,0 +1,11 @@
+# Fixed question set for the monthly AI visibility test of llmreadiness.com (--questions-file)
+Who offers an LLM readiness audit for business websites?
+How do I check if ChatGPT can read my website?
+Which agency helps companies get cited by Perplexity and ChatGPT?
+What is an AI visibility audit and who provides one?
+How much does a generative engine optimization audit cost?
+Is there a free tool to check my website's readiness for AI agents?
+Who can create an llms.txt file for my company?
+Which consultants specialize in LLM readiness in Europe?
+How do I find out which competitors AI assistants recommend instead of me?
+What service monitors how often my brand is mentioned by AI assistants?

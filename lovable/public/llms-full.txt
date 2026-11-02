@@ -1,0 +1,39 @@
+# LLM Readiness – full description for AI systems
+
+## What LLM Readiness is
+
+LLM Readiness is a consulting service and audit tool that answers one question: can AI assistants and agents find, read, understand and recommend a business? AI assistants increasingly stand between a company and its customers. People ask ChatGPT, Claude, Perplexity or Gemini for a supplier, a product comparison or a recommendation before they open a search engine. Shopping and procurement agents read product data directly. A website that is built only for human eyes is often invisible to these systems.
+
+## The six audit categories
+
+1. Crawler access (weight 20 %). We check robots.txt for blocks against AI search crawlers (OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Google-Extended, Applebot-Extended, meta-externalagent), X-Robots-Tag headers, network-level bot blocking by firewalls or CDNs, TLS certificate validity and sitemap references.
+2. Discoverability (weight 15 %). Sitemap, llms.txt and llms-full.txt, RSS or Atom feeds, canonical links, language declaration.
+3. Structured data (weight 25 %). JSON-LD for Organization or LocalBusiness with contact data, Product, Service and Offer with prices, FAQPage, BreadcrumbList, Open Graph, and syntax validity.
+4. Content clarity (weight 25 %). Text readable without JavaScript, page title, meta description, exactly one H1, visible prices, contact details as text, facts instead of buzzwords, alt texts, dependence on PDFs.
+5. Agent interfaces (weight 15 %). OpenAPI descriptions, Model Context Protocol (MCP) endpoints, agent manifests, direct mailto and tel links instead of forms only.
+6. AI visibility (weight 30 %). We generate realistic customer questions that do not contain the brand name, ask an AI assistant with web search, and measure whether the business is mentioned, whether its pages are cited as sources, and which competitors are named instead.
+
+## Scoring
+
+Each category scores 0 to 100. The total is the weighted average of the categories that were run. Grades: A 85 and above (agent-ready), B 70 to 84 (good with gaps), C 50 to 69 (partially visible), D 30 to 49 (hard for agents to use), E below 30 (practically invisible).
+
+## Products and prices
+
+- Free Quick Check, 0 €: the five technical categories, instant result, top three issues.
+- Readiness Audit, from 1,900 € net: all six categories including the AI visibility test with 10 customer questions, written report in English or German, 60-minute walkthrough call, prioritized roadmap. Delivery within 10 working days.
+- Implementation, from 6,500 € net: we implement the roadmap or guide the client's web agency. Typical scope: structured data, llms.txt, content rewrite with facts and prices, crawler and CDN fixes, optional public API or MCP endpoint. Duration 4 to 8 weeks.
+- Monitoring, 490 € per month net: monthly re-run of the audit and the AI visibility test with a fixed question set so results are comparable, competitor tracking, short report.
+- Agency partner program: white-label audits and a revenue share for agencies that resell the service.
+
+## Typical findings and fixes
+
+- AI crawlers blocked by a CDN "block AI bots" switch: allow the search and answer crawlers, keep training crawlers blocked if desired.
+- No structured data: add Organization, Service or Product with Offer and price, FAQPage.
+- Prices hidden behind "request a quote": publish "from" prices or ranges, otherwise comparison questions skip the company.
+- Single-page application without server rendering: prerender public pages.
+- Catalog only as PDF: publish the same content as HTML pages.
+- No llms.txt: add a Markdown summary of offer, prices, contact and key pages.
+
+## Company
+
+LLM Readiness is operated from Germany. Languages: English and German. Contact: hello@llmreadiness.com, https://llmreadiness.com/contact. Legal information: https://llmreadiness.com/imprint. Privacy: https://llmreadiness.com/privacy.

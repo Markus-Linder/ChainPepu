@@ -1,7 +1,8 @@
-"""Gewichtet die Kategorien zu einem Gesamtwert von 0 bis 100."""
+"""Weights the categories into a total score from 0 to 100."""
 
 from __future__ import annotations
 
+from .i18n import _
 from .models import CategoryResult
 
 
@@ -15,11 +16,11 @@ def total_score(categories: list[CategoryResult]) -> int:
 
 def grade(score: int) -> str:
     if score >= 85:
-        return "A – agentenfähig"
+        return _("A – agent-ready")
     if score >= 70:
-        return "B – gut, mit Lücken"
+        return _("B – good, with gaps")
     if score >= 50:
-        return "C – teilweise sichtbar"
+        return _("C – partially visible")
     if score >= 30:
-        return "D – für Agenten schwer nutzbar"
-    return "E – praktisch unsichtbar"
+        return _("D – hard for agents to use")
+    return _("E – practically invisible")

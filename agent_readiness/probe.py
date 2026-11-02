@@ -67,13 +67,14 @@ class Prober:
         return self.client.messages.create(**kwargs)
 
     def generate_questions(self, site_summary: str) -> list[str]:
+        lang_name = {"de": "German", "en": "English"}.get(self.config.language, self.config.language)
         prompt = (
-            f"Du hilfst bei einem Sichtbarkeitstest. Unten steht die Zusammenfassung einer Website.\n"
-            f"Formuliere {self.config.n_questions} realistische Fragen, die potenzielle Kunden einem KI-Assistenten "
-            f"stellen würden, BEVOR sie diese Firma kennen. Die Fragen dürfen den Firmennamen '{self.config.brand}' "
-            f"und die Domain nicht enthalten. Mischung aus: Anbieter-Suche in der Region, Preisvergleich, "
-            f"Produkt- oder Leistungsempfehlung, konkrete Problemlösung. Sprache: {self.config.language}. "
-            f"Markt: {self.config.region}.\n\nWebsite-Zusammenfassung:\n{site_summary[:6000]}"
+            "You are helping with an AI visibility test. Below is a summary of a website.\n"
+            f"Write {self.config.n_questions} realistic questions that potential customers would ask an AI assistant "
+            f"BEFORE they know this company. The questions must not contain the company name '{self.config.brand}' "
+            "or the domain. Mix of: finding a provider in the region, price comparison, product or service "
+            f"recommendation, solving a concrete problem. Language of the questions: {lang_name}. "
+            f"Market: {self.config.region}.\n\nWebsite summary:\n{site_summary[:6000]}"
         )
         resp = self._create(
             model=self.config.model,
@@ -88,10 +89,11 @@ class Prober:
     def ask(self, question: str) -> ProbeQuestion:
         """Stellt eine Frage so, wie ein Endkunde sie stellen würde, mit Websuche."""
         pq = ProbeQuestion(question=question)
+        lang_name = {"de": "German", "en": "English"}.get(self.config.language, self.config.language)
         system = (
-            f"Du bist ein hilfreicher Assistent für Verbraucher und Einkäufer in {self.config.region}. "
-            "Beantworte die Frage konkret und nenne, wo sinnvoll, konkrete Anbieter, Produkte oder Websites mit Namen. "
-            f"Antworte auf {self.config.language}."
+            f"You are a helpful assistant for consumers and buyers in {self.config.region}. "
+            "Answer the question concretely and, where useful, name specific providers, products or websites. "
+            f"Answer in {lang_name}."
         )
         messages: list[dict[str, Any]] = [{"role": "user", "content": question}]
         tools = [{
@@ -141,10 +143,10 @@ class Prober:
         lowered = pq.answer.lower()
         pq.target_mentioned = self.config.brand.lower() in lowered or self.config.domain in lowered
         prompt = (
-            "Liste alle Firmen, Marken, Shops oder Websites, die in der folgenden Antwort als Anbieter oder "
-            "Empfehlung genannt werden (nur Eigennamen, keine Gattungsbegriffe). "
-            f"Setze target_mentioned auf true, wenn '{self.config.brand}' oder '{self.config.domain}' "
-            f"darunter ist, auch in abweichender Schreibweise.\n\nAntwort:\n{pq.answer[:12000]}"
+            "List every company, brand, shop or website that the following answer names as a provider or "
+            "recommendation (proper names only, no generic terms). "
+            f"Set target_mentioned to true if '{self.config.brand}' or '{self.config.domain}' "
+            f"is among them, including variant spellings.\n\nAnswer:\n{pq.answer[:12000]}"
         )
         resp = self._create(
             model=self.config.model,

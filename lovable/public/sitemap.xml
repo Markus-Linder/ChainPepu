@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://llmreadiness.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://llmreadiness.com/check</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://llmreadiness.com/pricing</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://llmreadiness.com/methodology</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://llmreadiness.com/sample-report</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://llmreadiness.com/agencies</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://llmreadiness.com/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://llmreadiness.com/blog/what-is-llm-readiness</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://llmreadiness.com/blog/llms-txt-guide</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://llmreadiness.com/blog/ai-crawlers-robots-txt</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://llmreadiness.com/blog/get-cited-by-chatgpt-perplexity</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://llmreadiness.com/blog/structured-data-for-ai-agents</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://llmreadiness.com/about</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://llmreadiness.com/contact</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://llmreadiness.com/imprint</loc><changefreq>yearly</changefreq><priority>0.1</priority></url>
+  <url><loc>https://llmreadiness.com/privacy</loc><changefreq>yearly</changefreq><priority>0.1</priority></url>
+</urlset>

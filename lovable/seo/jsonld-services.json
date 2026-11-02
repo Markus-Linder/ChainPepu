@@ -1,0 +1,38 @@
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Free Quick Check",
+    "serviceType": "LLM readiness quick check",
+    "provider": {"@id": "https://llmreadiness.com/#organization"},
+    "url": "https://llmreadiness.com/check",
+    "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR", "availability": "https://schema.org/InStock"}
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Readiness Audit",
+    "serviceType": "LLM readiness audit with AI visibility test",
+    "provider": {"@id": "https://llmreadiness.com/#organization"},
+    "url": "https://llmreadiness.com/pricing",
+    "offers": {"@type": "Offer", "price": "1900", "priceCurrency": "EUR", "priceSpecification": {"@type": "UnitPriceSpecification", "price": "1900", "priceCurrency": "EUR", "valueAddedTaxIncluded": false}, "availability": "https://schema.org/InStock"}
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Implementation",
+    "serviceType": "Implementation of LLM readiness roadmap",
+    "provider": {"@id": "https://llmreadiness.com/#organization"},
+    "url": "https://llmreadiness.com/pricing",
+    "offers": {"@type": "Offer", "price": "6500", "priceCurrency": "EUR", "availability": "https://schema.org/InStock"}
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Monitoring",
+    "serviceType": "Monthly LLM readiness and AI visibility monitoring",
+    "provider": {"@id": "https://llmreadiness.com/#organization"},
+    "url": "https://llmreadiness.com/pricing",
+    "offers": {"@type": "Offer", "price": "490", "priceCurrency": "EUR", "priceSpecification": {"@type": "UnitPriceSpecification", "price": "490", "priceCurrency": "EUR", "unitText": "month", "billingIncrement": 1}, "availability": "https://schema.org/InStock"}
+  }
+]
