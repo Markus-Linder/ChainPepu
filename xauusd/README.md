@@ -17,3 +17,9 @@ python3 xauusd/check.py
 - `minute.py` – läuft als Daemon, wertet jede Minute den 1-Minuten-Chart aus (Zonen-Test/-Bruch, EMA9/21-Kreuz mit 5m-Trendfilter, 60-Minuten-Range-Ausbruch, RSI14-Umkehr) und schreibt `SIGNAL|…`-Zeilen in `minute.log`. Entprellung in `minute_state.json`.
 - `start_watcher.sh` / `stop_watcher.sh` – Daemon starten bzw. stoppen.
 - `wait_signal.py [Sekunden]` – blockiert, bis neue Signal-Zeilen erscheinen (oder Timeout), und gibt sie aus. Der stündliche Auftrag ruft es in einer Schleife auf und schickt je Signal eine Push-Nachricht.
+
+## Charts und Signal-Seite
+
+- `chart.py` – zeichnet Kerzencharts (Pillow) mit Zonen, Einstieg, Stopp, Ziel und EMAs. Der Minuten-Wächter hängt an jede `SIGNAL|…`-Zeile `|chart=<pfad>` an (1m-Chart, `charts/`), `check.py --chart` erzeugt `charts/hourly.png` (15m-Chart).
+- `build_page.py` – baut `signal_page.html` (letzter Signal-Chart, Stunden-Chart, Signalliste, Bilder eingebettet).
+- `artifact_url.txt` – feste Artifact-Adresse der Signal-Seite. Der Auftrag liest die Seite per Artifact-Tool (`read` mit dieser URL) und veröffentlicht `signal_page.html` mit `url` darauf neu. Der Link steht in jeder Push-Nachricht.

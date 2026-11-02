@@ -2,3 +2,5 @@ minute.log
 minute.out
 minute.pid
 minute.offset
+charts/
+signal_page.html

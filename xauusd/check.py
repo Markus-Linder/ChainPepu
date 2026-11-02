@@ -180,6 +180,22 @@ if len(candles) >= 60 and len(c15) >= 60:
         "in_zone": [z["name"] for z in zones["zones"] if z["low"] * (1 - BAND) <= price <= z["high"] * (1 + BAND)],
     }
 out["einschaetzung"] = assess
+if "--chart" in sys.argv and assess and c15:
+    try:
+        sys.path.insert(0, HERE); import chart as ch
+        win = [{k: (v + basis if k in "ohlc" else v) for k, v in c.items()} for c in c15[-160:]]
+        pl = assess.get("plan") or {}
+        bias = assess["richtung"].split()[0]
+        cl = [c["c"] for c in win]
+        outp = os.path.join(HERE, "charts", "hourly.png")
+        ch.render(win, zones["zones"], outp, f"XAU/USD 15m – Stunden-Einschaetzung: {assess['richtung']}",
+                  now.astimezone(ch.BERLIN).strftime("%d.%m.%Y %H:%M") + " · " + "; ".join(assess["begruendung"])[:120],
+                  entry=pl.get("einstieg"), stop=pl.get("stop"), target=pl.get("ziel"), price=price, interval_min=15,
+                  direction=bias if bias in ("LONG", "SHORT") else "NEUTRAL",
+                  emas={"EMA20": (ema(cl, 20), (30, 90, 200, 255)), "EMA50": (ema(cl, 50), (230, 140, 20, 255))})
+        out["chart"] = outp
+    except Exception as e:
+        out["errors"].append(f"chart: {e}")
 
 upd = dt.date.fromisoformat(zones["updated_at"])
 out["review_due"] = (now.date() - upd).days >= REVIEW_DAYS

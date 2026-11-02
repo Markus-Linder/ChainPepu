@@ -4,6 +4,7 @@ Signale: ZONE_TEST, ZONE_BREAK (Zonen aus zones.json), EMA_CROSS (EMA9/21 auf 1m
 RANGE_BREAK (Ausbruch aus der Spanne der letzten 60 Minuten), RSI_REV (RSI14 dreht aus Extremzone).
 Aufruf: python3 minute.py [--once]"""
 import json, os, sys, time, urllib.request, datetime as dt
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from zoneinfo import ZoneInfo
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -92,12 +93,14 @@ def analyze(state, now):
     last, prev = cs[-1], cs[-2]
     sig = []
 
+    plans = {}
     def plan(direction):
         if direction == "LONG":
             stop = price - 1.5 * a5; tgt = nr["low"] if nr else price + 3 * a5
         else:
             stop = price + 1.5 * a5; tgt = ns["high"] if ns else price - 3 * a5
         crv = abs(tgt - price) / max(abs(price - stop), 1e-9)
+        plans[direction] = {"entry": price, "stop": stop, "target": tgt}
         return f"{direction} Stopp {stop:.1f} Ziel {tgt:.1f} CRV {crv:.1f}"
 
     for z in zones:
@@ -129,7 +132,21 @@ def analyze(state, now):
     ts = now.astimezone(BERLIN).strftime("%H:%M")
     for kind, key, text in sig:
         state["alerts"][key] = now.isoformat()
-        emit(f"SIGNAL|{ts}|{kind}|XAU/USD {price:.1f}: {text}")
+        direction = "LONG" if "LONG" in text else "SHORT" if "SHORT" in text else None
+        pl = plans.get(direction, {})
+        chart = ""
+        try:
+            import chart as ch
+            out = os.path.join(HERE, "charts", now.astimezone(BERLIN).strftime("%Y%m%d_%H%M") + f"_{kind}.png")
+            win = cs[-180:]
+            ch.render(win, zones, out, f"XAU/USD 1m – {kind}", f"{ts} Uhr: {text}"[:150],
+                      entry=pl.get("entry"), stop=pl.get("stop"), target=pl.get("target"), price=price, direction=direction,
+                      emas={"EMA9": (e9[-len(win):], (30, 90, 200, 255)), "EMA21": (e21[-len(win):], (230, 140, 20, 255))})
+            import shutil; shutil.copy(out, os.path.join(HERE, "charts", "latest_signal.png"))
+            chart = "|chart=" + out
+        except Exception as e:
+            print(f"chart-fehler: {e}", file=sys.stderr, flush=True)
+        emit(f"SIGNAL|{ts}|{kind}|XAU/USD {price:.1f}: {text}{chart}")
     state["last"] = {"time": now.isoformat(), "price": round(price, 1), "rsi1m": round(r, 1) if r else None,
                      "ema9": round(e9[-1], 1), "ema21": round(e21[-1], 1), "trend5": trend5, "atr5": round(a5, 1),
                      "range60": [round(rl, 1), round(rh, 1)]}
