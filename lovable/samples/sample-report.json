@@ -1,0 +1,256 @@
+{
+  "url": "https://www.linde-mh.de/",
+  "domain": "linde-mh.de",
+  "brand": "Startseite Linde Material Handling",
+  "generated_at": "2026-11-01 22:43 UTC",
+  "categories": [
+    {
+      "key": "crawlers",
+      "name": "Crawler-Zugang",
+      "weight": 20,
+      "score": 100,
+      "findings": [
+        {
+          "severity": "ok",
+          "title": "KI-Such-Crawler dürfen lesen",
+          "detail": "Keiner der bekannten Antwort-Crawler ist gesperrt.",
+          "recommendation": "",
+          "evidence": {}
+        }
+      ],
+      "skipped": false,
+      "skipped_reason": ""
+    },
+    {
+      "key": "discovery",
+      "name": "Auffindbarkeit",
+      "weight": 15,
+      "score": 45,
+      "findings": [
+        {
+          "severity": "ok",
+          "title": "Sitemap vorhanden",
+          "detail": "https://www.linde-mh.de/de/technical/sitemap.xml mit 402 Einträgen",
+          "recommendation": "",
+          "evidence": {
+            "url": "https://www.linde-mh.de/de/technical/sitemap.xml",
+            "entries": 402
+          }
+        },
+        {
+          "severity": "warnung",
+          "title": "Keine llms.txt",
+          "detail": "Agenten finden keine kompakte, maschinenlesbare Zusammenfassung des Angebots.",
+          "recommendation": "Eine /llms.txt im Markdown-Format anlegen: Was bietet die Firma, für wen, zu welchen Konditionen, Links zu den Kernseiten.",
+          "evidence": {}
+        },
+        {
+          "severity": "hinweis",
+          "title": "Kein RSS/Atom-Feed",
+          "detail": "Nicht zwingend, hilft aber bei Neuigkeiten und Produktupdates.",
+          "recommendation": "",
+          "evidence": {}
+        },
+        {
+          "severity": "ok",
+          "title": "Canonical gesetzt",
+          "detail": "https://www.linde-mh.de/de/",
+          "recommendation": "",
+          "evidence": {}
+        },
+        {
+          "severity": "ok",
+          "title": "Sprache deklariert",
+          "detail": "lang=\"de\"",
+          "recommendation": "",
+          "evidence": {}
+        }
+      ],
+      "skipped": false,
+      "skipped_reason": ""
+    },
+    {
+      "key": "structured",
+      "name": "Strukturierte Daten",
+      "weight": 25,
+      "score": 55,
+      "findings": [
+        {
+          "severity": "ok",
+          "title": "Strukturierte Daten vorhanden",
+          "detail": "Typen: Brand, ContactPoint, Country, ImageObject, Organization, PostalAddress, WebPage, WebSite",
+          "recommendation": "",
+          "evidence": {
+            "types": [
+              "Brand",
+              "ContactPoint",
+              "Country",
+              "ImageObject",
+              "Organization",
+              "PostalAddress",
+              "WebPage",
+              "WebSite"
+            ]
+          }
+        },
+        {
+          "severity": "ok",
+          "title": "Unternehmen/Organisation ausgezeichnet",
+          "detail": "Organization",
+          "recommendation": "",
+          "evidence": {}
+        },
+        {
+          "severity": "hinweis",
+          "title": "Organisationsdaten unvollständig",
+          "detail": "Fehlt: telephone",
+          "recommendation": "name, url, telephone, address, sameAs (Social-Profile) ergänzen.",
+          "evidence": {}
+        },
+        {
+          "severity": "warnung",
+          "title": "Keine Product-, Service- oder Offer-Auszeichnung",
+          "detail": "Startseite nennt keine maschinenlesbaren Leistungen.",
+          "recommendation": "Kernleistungen als Service/Product mit Offer auszeichnen, auf Startseite oder verlinkten Seiten.",
+          "evidence": {}
+        },
+        {
+          "severity": "ok",
+          "title": "Ergänzende Typen",
+          "detail": "ContactPoint, WebSite",
+          "recommendation": "",
+          "evidence": {}
+        },
+        {
+          "severity": "hinweis",
+          "title": "Keine FAQPage",
+          "detail": "",
+          "recommendation": "Häufige Kundenfragen als FAQPage auszeichnen. Agenten übernehmen solche Antworten besonders gern.",
+          "evidence": {}
+        },
+        {
+          "severity": "ok",
+          "title": "Open-Graph-Daten vorhanden",
+          "detail": "Willkommen bei Linde Material Handling!",
+          "recommendation": "",
+          "evidence": {}
+        }
+      ],
+      "skipped": false,
+      "skipped_reason": ""
+    },
+    {
+      "key": "content",
+      "name": "Inhaltsklarheit",
+      "weight": 25,
+      "score": 75,
+      "findings": [
+        {
+          "severity": "ok",
+          "title": "Ausreichend Text im HTML",
+          "detail": "1229 Wörter ohne JavaScript lesbar",
+          "recommendation": "",
+          "evidence": {}
+        },
+        {
+          "severity": "ok",
+          "title": "Seitentitel vorhanden",
+          "detail": "Startseite Linde Material Handling",
+          "recommendation": "",
+          "evidence": {}
+        },
+        {
+          "severity": "ok",
+          "title": "Meta-Description vorhanden",
+          "detail": "Linde Material Handling: Stapler, Lagertechnik und Automatisierung für effiziente Intralogistik ✓Produkte ✓Service ✓Lösungen ✓Beratung",
+          "recommendation": "",
+          "evidence": {}
+        },
+        {
+          "severity": "ok",
+          "title": "Genau eine H1",
+          "detail": "Linde Material Handling",
+          "recommendation": "",
+          "evidence": {}
+        },
+        {
+          "severity": "warnung",
+          "title": "Keine Preise oder Preisspannen im Text",
+          "detail": "Agenten können das Angebot nicht einordnen oder vergleichen.",
+          "recommendation": "Zumindest 'ab'-Preise oder Preisspannen nennen. Wer keine Preise zeigt, wird bei Vergleichsfragen übergangen.",
+          "evidence": {}
+        },
+        {
+          "severity": "ok",
+          "title": "Kontaktdaten im Text",
+          "detail": "+49 6021 99 0 / info@linde-mh.de",
+          "recommendation": "",
+          "evidence": {}
+        },
+        {
+          "severity": "ok",
+          "title": "Faktendichte in Ordnung",
+          "detail": "45 Zahlenangaben, 1 Floskeln",
+          "recommendation": "",
+          "evidence": {}
+        }
+      ],
+      "skipped": false,
+      "skipped_reason": ""
+    },
+    {
+      "key": "interfaces",
+      "name": "Agenten-Schnittstellen",
+      "weight": 15,
+      "score": 10,
+      "findings": [
+        {
+          "severity": "hinweis",
+          "title": "Keine OpenAPI-Beschreibung",
+          "detail": "",
+          "recommendation": "Für Verfügbarkeit, Preise oder Terminbuchung eine kleine öffentliche API mit OpenAPI-Datei anbieten.",
+          "evidence": {}
+        },
+        {
+          "severity": "hinweis",
+          "title": "Kein MCP-Server",
+          "detail": "",
+          "recommendation": "Ein Model-Context-Protocol-Server erlaubt Agenten direkte Aktionen: Angebot anfragen, Termin buchen, Bestand prüfen.",
+          "evidence": {}
+        },
+        {
+          "severity": "hinweis",
+          "title": "2 Formular(e), aber keine Schnittstelle",
+          "detail": "Agenten können Formulare schlecht ausfüllen. Direkter Weg fehlt.",
+          "recommendation": "Die wichtigste Aktion (Anfrage, Termin, Bestellung) zusätzlich per API oder E-Mail-Adresse anbieten.",
+          "evidence": {}
+        },
+        {
+          "severity": "ok",
+          "title": "Direkte Kontaktlinks (mailto/tel)",
+          "detail": "Agenten können Kontakt ohne Formular aufnehmen.",
+          "recommendation": "",
+          "evidence": {}
+        }
+      ],
+      "skipped": false,
+      "skipped_reason": ""
+    },
+    {
+      "key": "visibility",
+      "name": "KI-Sichtbarkeit",
+      "weight": 30,
+      "score": 0,
+      "findings": [],
+      "skipped": true,
+      "skipped_reason": "Nicht ausgeführt. Mit --probe aktivieren (benötigt Anthropic-API-Zugang)."
+    }
+  ],
+  "total_score": 61,
+  "probe": [],
+  "meta": {
+    "final_url": "https://www.linde-mh.de/de/",
+    "http_status": 200,
+    "title": "Startseite Linde Material Handling"
+  }
+}
