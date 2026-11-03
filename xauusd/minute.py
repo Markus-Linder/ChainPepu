@@ -5,6 +5,7 @@ RANGE_BREAK (Ausbruch aus der Spanne der letzten 60 Minuten), RSI_REV (RSI14 dre
 Aufruf: python3 minute.py [--once]"""
 import json, os, sys, time, urllib.request, datetime as dt
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import orders as od
 from zoneinfo import ZoneInfo
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -90,7 +91,9 @@ def analyze(state, now):
     res_above = sorted([z for z in zones if z["low"] > price], key=lambda z: z["low"])
     sup_below = sorted([z for z in zones if z["high"] < price], key=lambda z: -z["high"])
     nr, ns = (res_above[0] if res_above else None), (sup_below[0] if sup_below else None)
+    nr2, ns2 = (res_above[1] if len(res_above) > 1 else None), (sup_below[1] if len(sup_below) > 1 else None)
     last, prev = cs[-1], cs[-2]
+    swing_hi, swing_lo = max(c["h"] for c in cs[-12:]), min(c["l"] for c in cs[-12:])
     sig = []
 
     plans = {}
@@ -108,45 +111,46 @@ def analyze(state, now):
         k = z["name"]
         if last["l"] <= zh and last["h"] >= zl and fresh(state, k + "|test", "ZONE_TEST", now):
             side = "von unten" if price <= (z["low"] + z["high"]) / 2 else "von oben"
-            sig.append(("ZONE_TEST", k + "|test", f"Zone {k} {side} angelaufen"))
+            sig.append(("ZONE_TEST", k + "|test", f"Zone {k} {side} angelaufen", od.for_zone_test(z, price, a5, nr, ns, nr2, ns2)))
         if prev["c"] <= z["high"] and last["c"] > z["high"] * (1 + BAND) and fresh(state, k + "|break", "ZONE_BREAK", now):
-            sig.append(("ZONE_BREAK", k + "|break", f"Zone {k} nach OBEN gebrochen (1m-Schluss {last['c']:.1f}). {plan('LONG')}"))
+            sig.append(("ZONE_BREAK", k + "|break", f"Zone {k} nach OBEN gebrochen (1m-Schluss {last['c']:.1f}). {plan('LONG')}", od.for_zone_break(z, True, price, a5, nr, ns)))
         if prev["c"] >= z["low"] and last["c"] < z["low"] * (1 - BAND) and fresh(state, k + "|break", "ZONE_BREAK", now):
-            sig.append(("ZONE_BREAK", k + "|break", f"Zone {k} nach UNTEN gebrochen (1m-Schluss {last['c']:.1f}). {plan('SHORT')}"))
+            sig.append(("ZONE_BREAK", k + "|break", f"Zone {k} nach UNTEN gebrochen (1m-Schluss {last['c']:.1f}). {plan('SHORT')}", od.for_zone_break(z, False, price, a5, nr, ns)))
     if e9[-2] <= e21[-2] and e9[-1] > e21[-1] and trend5 > 0 and fresh(state, "ema|long", "EMA_CROSS", now):
-        sig.append(("EMA_CROSS", "ema|long", f"EMA9 kreuzt EMA21 nach oben, 5m-Trend aufwaerts. {plan('LONG')}"))
+        sig.append(("EMA_CROSS", "ema|long", f"EMA9 kreuzt EMA21 nach oben, 5m-Trend aufwaerts. {plan('LONG')}", od.for_ema_cross("LONG", price, a5, e21[-1], last["h"], last["l"], nr, ns)))
     if e9[-2] >= e21[-2] and e9[-1] < e21[-1] and trend5 < 0 and fresh(state, "ema|short", "EMA_CROSS", now):
-        sig.append(("EMA_CROSS", "ema|short", f"EMA9 kreuzt EMA21 nach unten, 5m-Trend abwaerts. {plan('SHORT')}"))
+        sig.append(("EMA_CROSS", "ema|short", f"EMA9 kreuzt EMA21 nach unten, 5m-Trend abwaerts. {plan('SHORT')}", od.for_ema_cross("SHORT", price, a5, e21[-1], last["h"], last["l"], nr, ns)))
     win = cs[-64:-4]
     rh, rl = max(c["h"] for c in win), min(c["l"] for c in win)
     if last["c"] > rh and prev["c"] <= rh and fresh(state, "range|up", "RANGE_BREAK", now):
-        sig.append(("RANGE_BREAK", "range|up", f"Ausbruch ueber 60-Minuten-Hoch {rh:.1f}. {plan('LONG')}"))
+        sig.append(("RANGE_BREAK", "range|up", f"Ausbruch ueber 60-Minuten-Hoch {rh:.1f}. {plan('LONG')}", od.for_range_break(True, price, a5, rh, rl, nr, ns)))
     if last["c"] < rl and prev["c"] >= rl and fresh(state, "range|down", "RANGE_BREAK", now):
-        sig.append(("RANGE_BREAK", "range|down", f"Bruch unter 60-Minuten-Tief {rl:.1f}. {plan('SHORT')}"))
+        sig.append(("RANGE_BREAK", "range|down", f"Bruch unter 60-Minuten-Tief {rl:.1f}. {plan('SHORT')}", od.for_range_break(False, price, a5, rh, rl, nr, ns)))
     if r is not None and r_prev is not None:
         if r_prev >= 75 and r < 75 and fresh(state, "rsi|down", "RSI_REV", now):
-            sig.append(("RSI_REV", "rsi|down", f"RSI14 (1m) dreht aus ueberkauft ({r_prev:.0f} -> {r:.0f}), Rueckschlag moeglich. {plan('SHORT')}"))
+            sig.append(("RSI_REV", "rsi|down", f"RSI14 (1m) dreht aus ueberkauft ({r_prev:.0f} -> {r:.0f}), Rueckschlag moeglich. {plan('SHORT')}", od.for_rsi_rev("SHORT", price, a5, swing_hi, swing_lo, e21[-1])))
         if r_prev <= 25 and r > 25 and fresh(state, "rsi|up", "RSI_REV", now):
-            sig.append(("RSI_REV", "rsi|up", f"RSI14 (1m) dreht aus ueberverkauft ({r_prev:.0f} -> {r:.0f}), Erholung moeglich. {plan('LONG')}"))
+            sig.append(("RSI_REV", "rsi|up", f"RSI14 (1m) dreht aus ueberverkauft ({r_prev:.0f} -> {r:.0f}), Erholung moeglich. {plan('LONG')}", od.for_rsi_rev("LONG", price, a5, swing_hi, swing_lo, e21[-1])))
 
     ts = now.astimezone(BERLIN).strftime("%H:%M")
-    for kind, key, text in sig:
+    for kind, key, text, ords in sig:
         state["alerts"][key] = now.isoformat()
         direction = "LONG" if "LONG" in text else "SHORT" if "SHORT" in text else None
         pl = plans.get(direction, {})
+        text = f"{text} || Orders: {od.fmt(ords)}"
         chart = ""
         try:
             import chart as ch
             out = os.path.join(HERE, "charts", now.astimezone(BERLIN).strftime("%Y%m%d_%H%M") + f"_{kind}.png")
             win = cs[-180:]
-            ch.render(win, zones, out, f"XAU/USD 1m – {kind}", f"{ts} Uhr: {text}"[:150],
-                      entry=pl.get("entry"), stop=pl.get("stop"), target=pl.get("target"), price=price, direction=direction,
+            ch.render(win, zones, out, f"XAU/USD 1m – {kind}", f"{ts} Uhr: {text.split(' || ')[0]}"[:150],
+                      orders=ords, price=price, direction=direction or (ords[0]["typ"].split()[0].upper() == "BUY" and "LONG" or "SHORT"),
                       emas={"EMA9": (e9[-len(win):], (30, 90, 200, 255)), "EMA21": (e21[-len(win):], (230, 140, 20, 255))})
             import shutil; shutil.copy(out, os.path.join(HERE, "charts", "latest_signal.png"))
             chart = "|chart=" + out
         except Exception as e:
             print(f"chart-fehler: {e}", file=sys.stderr, flush=True)
-        emit(f"SIGNAL|{ts}|{kind}|XAU/USD {price:.1f}: {text}{chart}")
+        emit(f"SIGNAL|{ts}|{kind}|XAU/USD {price:.1f}: {text}{chart}|push={od.fmt_short(ords)}")
     state["last"] = {"time": now.isoformat(), "price": round(price, 1), "rsi1m": round(r, 1) if r else None,
                      "ema9": round(e9[-1], 1), "ema21": round(e21[-1], 1), "trend5": trend5, "atr5": round(a5, 1),
                      "range60": [round(rl, 1), round(rh, 1)]}

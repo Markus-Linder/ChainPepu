@@ -19,7 +19,7 @@ def _nice_step(rng, n=8):
     return 1000
 
 def render(cs, zones, out, title, subtitle="", entry=None, stop=None, target=None,
-           emas=None, price=None, interval_min=1, direction=None):
+           emas=None, price=None, interval_min=1, direction=None, orders=None):
     """cs: Liste von {t,o,h,l,c} (Spot-Niveau). zones: [{name,low,high,kind}]. emas: {label: [werte je Kerze]}."""
     W, H = 1280, 720
     L, R, T, B = 24, 150, 84, 56
@@ -30,6 +30,8 @@ def render(cs, zones, out, title, subtitle="", entry=None, stop=None, target=Non
     ymin, ymax = min(lows), max(highs)
     for v in (entry, stop, target, price):
         if v: ymin, ymax = min(ymin, v), max(ymax, v)
+    for o in (orders or []):
+        for v in (o["preis"], o["sl"], o["tp"]): ymin, ymax = min(ymin, v), max(ymax, v)
     rng = max(ymax - ymin, 1.0); lo0, hi0 = ymin - rng * 0.3, ymax + rng * 0.3
     for z in zones:   # nur Zonen nahe am Kursbereich aufnehmen
         if z["low"] < hi0 and z["high"] > lo0:
@@ -89,6 +91,11 @@ def render(cs, zones, out, title, subtitle="", entry=None, stop=None, target=Non
     hline(stop, (200, 40, 40, 255), "SL")
     hline(target, (30, 140, 70, 255), "TP")
     hline(entry, (30, 90, 200, 255), "Einstieg")
+    for i, o in enumerate(orders or []):
+        a = 255 if i == 0 else 150; p = "" if i == 0 else "Alt "
+        hline(o["sl"], (200, 40, 40, a), p + "SL")
+        hline(o["tp"], (30, 140, 70, a), p + "TP")
+        hline(o["preis"], (30, 90, 200, a), p + o["typ"])
     if price: hline(price, (40, 40, 40, 255), "Kurs", dash=False)
     # Titel
     d.rectangle([0, 0, W, T - 8], fill=(250, 250, 250, 255))

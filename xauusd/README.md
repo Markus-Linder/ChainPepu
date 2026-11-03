@@ -23,3 +23,7 @@ python3 xauusd/check.py
 - `chart.py` – zeichnet Kerzencharts (Pillow) mit Zonen, Einstieg, Stopp, Ziel und EMAs. Der Minuten-Wächter hängt an jede `SIGNAL|…`-Zeile `|chart=<pfad>` an (1m-Chart, `charts/`), `check.py --chart` erzeugt `charts/hourly.png` (15m-Chart).
 - `build_page.py` – baut `signal_page.html` (letzter Signal-Chart, Stunden-Chart, Signalliste, Bilder eingebettet).
 - `artifact_url.txt` – feste Artifact-Adresse der Signal-Seite. Der Auftrag liest die Seite per Artifact-Tool (`read` mit dieser URL) und veröffentlicht `signal_page.html` mit `url` darauf neu. Der Link steht in jeder Push-Nachricht.
+
+## Order-Vorschläge
+
+`orders.py` liefert je Signal bis zu zwei konkrete Orders (Limit oder Stop mit SL und TP, CRV): Abpraller-Limit an der Zonenkante plus Ausbruchs-Stop dahinter (ZONE_TEST), Retest-Limit plus Fortsetzungs-Stop (ZONE_BREAK, RANGE_BREAK), Rücklauf-Limit am EMA21 plus Stop über/unter der Signalkerze (EMA_CROSS), Gegenbewegungs-Limit am Swing (RSI_REV). Die Stunden-Einschätzung liefert bei LONG/SHORT Limit am EMA20 (15m) plus Stop, bei NEUTRAL Ausbruchs-Orders ober- und unterhalb der nächsten Zonen (`einschaetzung.orders_kurz`). Die SIGNAL-Zeile trägt `|push=<Kurzform>` für die Push-Nachricht; im Chart sind die Orders als Linien eingezeichnet (erste Order kräftig, Alternative blass).

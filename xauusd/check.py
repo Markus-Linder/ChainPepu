@@ -169,8 +169,13 @@ if len(candles) >= 60 and len(c15) >= 60:
     if plan and plan["crv"] < 1.0:
         why.append(f"CRV nur {plan['crv']} -> kein Einstieg, auf Ruecklauf oder Zonenbruch warten")
         bias = "NEUTRAL / abwarten"; plan = {}
+    sys.path.insert(0, HERE); import orders as od
+    nr2, ns2 = (res_above[1] if len(res_above) > 1 else None), (sup_below[1] if len(sup_below) > 1 else None)
+    if bias in ("LONG", "SHORT"): ords = od.for_bias(bias, price, a15 or price * 0.002, e20_15, nr, ns)
+    else: ords = od.bracket(price, a15 or price * 0.002, nr, ns, nr2, ns2)
     assess = {
         "richtung": bias, "score": round(score, 2), "begruendung": why, "plan": plan,
+        "orders": ords, "orders_text": od.fmt(ords), "orders_kurz": od.fmt_short(ords),
         "indikatoren": {"ema20_1h": round(e20_1, 1), "ema50_1h": round(e50_1, 1), "ema20_15m": round(e20_15, 1),
                         "ema50_15m": round(e50_15, 1), "rsi14_15m": round(r15, 1) if r15 else None,
                         "rsi14_1h": round(r1, 1) if r1 else None, "atr14_15m": round(a15, 1) if a15 else None,
@@ -190,7 +195,7 @@ if "--chart" in sys.argv and assess and c15:
         outp = os.path.join(HERE, "charts", "hourly.png")
         ch.render(win, zones["zones"], outp, f"XAU/USD 15m – Stunden-Einschaetzung: {assess['richtung']}",
                   now.astimezone(ch.BERLIN).strftime("%d.%m.%Y %H:%M") + " · " + "; ".join(assess["begruendung"])[:120],
-                  entry=pl.get("einstieg"), stop=pl.get("stop"), target=pl.get("ziel"), price=price, interval_min=15,
+                  orders=assess.get("orders"), price=price, interval_min=15,
                   direction=bias if bias in ("LONG", "SHORT") else "NEUTRAL",
                   emas={"EMA20": (ema(cl, 20), (30, 90, 200, 255)), "EMA50": (ema(cl, 50), (230, 140, 20, 255))})
         out["chart"] = outp
