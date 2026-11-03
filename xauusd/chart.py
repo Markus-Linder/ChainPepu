@@ -2,7 +2,12 @@
 """Zeichnet einen Kerzenchart (PNG) mit Zonen, Einstieg, Stopp, Ziel und EMAs. Nur Pillow noetig."""
 import os, datetime as dt
 from zoneinfo import ZoneInfo
-from PIL import Image, ImageDraw, ImageFont
+try:
+    from PIL import Image, ImageDraw, ImageFont
+except ImportError:                      # Selbstheilung: Pillow nachinstallieren
+    import subprocess, sys
+    subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "--user", "pillow"], check=False)
+    from PIL import Image, ImageDraw, ImageFont
 
 BERLIN = ZoneInfo("Europe/Berlin")
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"

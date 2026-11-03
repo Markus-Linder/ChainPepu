@@ -149,7 +149,11 @@ def analyze(state, now):
             import shutil; shutil.copy(out, os.path.join(HERE, "charts", "latest_signal.png"))
             chart = "|chart=" + out
         except Exception as e:
-            print(f"chart-fehler: {e}", file=sys.stderr, flush=True)
+            import traceback
+            print("chart-fehler:\n" + traceback.format_exc(), file=sys.stderr, flush=True)
+            if fresh(state, "charterror", "ERROR", now):
+                state["alerts"]["charterror"] = now.isoformat()
+                emit(f"ERROR|{ts}|Chart konnte nicht gezeichnet werden: {type(e).__name__}: {e}")
         emit(f"SIGNAL|{ts}|{kind}|XAU/USD {price:.1f}: {text}{chart}|push={od.fmt_short(ords)}")
     state["last"] = {"time": now.isoformat(), "price": round(price, 1), "rsi1m": round(r, 1) if r else None,
                      "ema9": round(e9[-1], 1), "ema21": round(e21[-1], 1), "trend5": trend5, "atr5": round(a5, 1),

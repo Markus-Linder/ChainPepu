@@ -200,7 +200,8 @@ if "--chart" in sys.argv and assess and c15:
                   emas={"EMA20": (ema(cl, 20), (30, 90, 200, 255)), "EMA50": (ema(cl, 50), (230, 140, 20, 255))})
         out["chart"] = outp
     except Exception as e:
-        out["errors"].append(f"chart: {e}")
+        import traceback
+        out["errors"].append(f"chart: {type(e).__name__}: {e} @ {traceback.format_exc().strip().splitlines()[-3]}")
 
 upd = dt.date.fromisoformat(zones["updated_at"])
 out["review_due"] = (now.date() - upd).days >= REVIEW_DAYS
