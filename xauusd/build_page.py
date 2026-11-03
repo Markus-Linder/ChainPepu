@@ -12,11 +12,11 @@ try: lines = [l.strip() for l in open(os.path.join(HERE, "minute.log")) if l.sta
 except Exception: pass
 sigs = []
 for l in lines[-12:][::-1]:
-    parts = l.split("|"); chart = ""
+    parts = l.split("|", 3); chart = ""
     if len(parts) >= 4:
-        txt = parts[3]; m = re.search(r"\|?chart=(\S+)", l)
+        txt = parts[3]; m = re.search(r"\|chart=(\S+?)(?:\||$)", txt)
         if m: chart = m.group(1)
-        txt = re.sub(r"\|?(chart|push)=[^|]*", "", txt).strip()
+        txt = re.sub(r"\|(chart|push)=[^|]*", "", txt).replace(" || ", " · ").strip()
         sigs.append({"time": parts[1], "kind": parts[2], "text": txt, "chart": chart})
 latest = sigs[0] if sigs else None
 latest_img = b64(latest["chart"]) if latest and latest.get("chart") else b64(os.path.join(CH, "latest_signal.png"))

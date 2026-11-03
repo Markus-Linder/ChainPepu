@@ -4,3 +4,5 @@ minute.pid
 minute.offset
 charts/
 signal_page.html
+python_path
+__pycache__/

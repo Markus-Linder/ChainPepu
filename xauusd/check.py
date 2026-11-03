@@ -187,7 +187,14 @@ if len(candles) >= 60 and len(c15) >= 60:
 out["einschaetzung"] = assess
 if "--chart" in sys.argv and assess and c15:
     try:
-        sys.path.insert(0, HERE); import chart as ch
+        sys.path.insert(0, HERE)
+        try:
+            import chart as ch
+        except Exception:
+            alt = open(os.path.join(HERE, "python_path")).read().strip() if os.path.exists(os.path.join(HERE, "python_path")) else ""
+            if alt and os.path.realpath(alt) != os.path.realpath(sys.executable) and "--reexec" not in sys.argv:
+                os.execv(alt, [alt, os.path.abspath(__file__)] + sys.argv[1:] + ["--reexec"])
+            raise
         win = [{k: (v + basis if k in "ohlc" else v) for k, v in c.items()} for c in c15[-160:]]
         pl = assess.get("plan") or {}
         bias = assess["richtung"].split()[0]
