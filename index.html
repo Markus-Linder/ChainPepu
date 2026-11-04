@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f0f14">
+  <meta name="description" content="Stamina Coach – diskreter Ausdauer-Trainer (Stop-Start-Methode, Beckenboden, Atmung) mit Leveln und Statistik.">
+  <title>Stamina Coach</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Altersabfrage -->
+  <div id="gate" class="gate">
+    <div class="gate-card">
+      <div class="logo">⏱</div>
+      <h1>Stamina Coach</h1>
+      <p>Diese App enthält Inhalte zum Thema sexuelle Gesundheit und richtet sich ausschließlich an Erwachsene.</p>
+      <p class="muted">Alle Daten bleiben lokal auf deinem Gerät. Es wird nichts hochgeladen.</p>
+      <button id="gate-yes" class="btn primary">Ich bin 18 oder älter</button>
+      <a class="btn ghost" href="https://www.google.com">Verlassen</a>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <div class="brand"><span class="logo-sm">⏱</span> Stamina Coach</div>
+      <div class="level-badge" id="level-badge">Level 1</div>
+    </header>
+
+    <main id="view"></main>
+
+    <nav class="tabbar">
+      <button data-tab="home" class="tab active"><span>🏠</span>Start</button>
+      <button data-tab="train" class="tab"><span>⏱</span>Training</button>
+      <button data-tab="kegel" class="tab"><span>💪</span>Beckenboden</button>
+      <button data-tab="breath" class="tab"><span>🌬️</span>Atmen</button>
+      <button data-tab="stats" class="tab"><span>📈</span>Statistik</button>
+    </nav>
+  </div>
+
+  <!-- Templates -->
+  <template id="tpl-home">
+    <section class="card hero">
+      <h2>Hallo 👋</h2>
+      <p>Dein Ziel: Kontrolle und Ausdauer aufbauen. Trainiere regelmäßig, kurz und bewusst – nicht so oft wie möglich.</p>
+      <div class="hero-stats">
+        <div><b data-k="streak">0</b><span>Tage Serie</span></div>
+        <div><b data-k="best">0:00</b><span>Beste Zeit</span></div>
+        <div><b data-k="sessions">0</b><span>Sessions</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Heutiger Plan</h3>
+      <ul class="plan" data-k="plan"></ul>
+      <button class="btn primary wide" data-go="train">Training starten</button>
+    </section>
+
+    <section class="card">
+      <h3>So funktioniert's</h3>
+      <ol class="howto">
+        <li><b>Stop-Start-Methode:</b> Stimuliere dich und drücke <i>„Kurz vor dem Punkt“</i>, sobald du spürst, dass du dem Höhepunkt nahe kommst (ca. 7–8 von 10). Dann komplett pausieren, bis die Erregung deutlich sinkt.</li>
+        <li><b>Atmung:</b> In der Pause langsam und tief durch den Bauch atmen. Angespannte Muskeln bewusst lockern.</li>
+        <li><b>Beckenboden:</b> Täglich kurz trainieren. Ein starker Beckenboden hilft, den Reflex besser zu kontrollieren.</li>
+        <li><b>Geduld:</b> Fortschritte kommen über Wochen. 3–4 Sessions pro Woche reichen.</li>
+      </ol>
+    </section>
+
+    <section class="card settings">
+      <h3>Einstellungen</h3>
+      <label class="row"><span>Vibration bei Signalen</span><input type="checkbox" data-set="vibrate"></label>
+      <label class="row"><span>Ton bei Signalen</span><input type="checkbox" data-set="sound"></label>
+      <label class="row"><span>Bildschirm wach halten</span><input type="checkbox" data-set="wakelock"></label>
+      <label class="row"><span>Pausendauer (Sek.)</span><input type="number" min="10" max="120" step="5" data-set="pauseSec"></label>
+      <button class="btn ghost wide danger" data-action="reset">Alle Daten löschen</button>
+    </section>
+  </template>
+
+  <template id="tpl-train">
+    <section class="card trainer" data-state="idle">
+      <div class="goal-line">
+        <span>Ziel: <b data-k="goalTime"></b></span>
+        <span><b data-k="goalEdges"></b> Stopps</span>
+      </div>
+      <div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 200 200">
+          <circle class="ring-bg" cx="100" cy="100" r="88"/>
+          <circle class="ring-fg" cx="100" cy="100" r="88" data-k="ringFg"/>
+        </svg>
+        <div class="ring-center">
+          <div class="phase" data-k="phase">Bereit</div>
+          <div class="time" data-k="time">0:00</div>
+          <div class="sub" data-k="sub">Aktive Zeit</div>
+        </div>
+      </div>
+
+      <div class="arousal">
+        <div class="arousal-label">Erregung <b data-k="arousal">0</b>/10</div>
+        <input type="range" min="0" max="10" value="0" data-k="arousalSlider" aria-label="Erregungslevel">
+        <div class="arousal-hint" data-k="hint">Starte, wenn du bereit bist.</div>
+      </div>
+
+      <div class="counters">
+        <div><b data-k="edges">0</b><span>Stopps</span></div>
+        <div><b data-k="pauses">0</b><span>Pausen</span></div>
+        <div><b data-k="total">0:00</b><span>Gesamt</span></div>
+      </div>
+
+      <div class="controls">
+        <button class="btn primary big" data-action="start">Session starten</button>
+        <button class="btn edge big hidden" data-action="edge">Kurz vor dem Punkt – STOPP</button>
+        <button class="btn primary big hidden" data-action="resume">Weiter</button>
+        <div class="row-btns">
+          <button class="btn ghost hidden" data-action="finish">Session beenden</button>
+          <button class="btn ghost hidden" data-action="abort">Abbrechen</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card result hidden" data-k="result">
+      <h3>Session abgeschlossen ✅</h3>
+      <div class="result-grid" data-k="resultGrid"></div>
+      <p data-k="resultMsg"></p>
+      <button class="btn primary wide" data-action="again">Zurück</button>
+    </section>
+
+    <section class="card">
+      <h3>Tipps für diese Session</h3>
+      <ul class="tips">
+        <li>Stoppe <b>bevor</b> es zu spät ist. Lieber einmal zu früh als zu spät.</li>
+        <li>Während der Pause: Beckenboden <b>locker</b> lassen, Bauchatmung, Oberschenkel entspannen.</li>
+        <li>Schieb den Regler ehrlich. Ziel ist, lange im Bereich 5–7 zu bleiben.</li>
+        <li>Abschluss ist optional – viele beenden die Session ohne Höhepunkt.</li>
+      </ul>
+    </section>
+  </template>
+
+  <template id="tpl-kegel">
+    <section class="card">
+      <h2>Beckenboden-Training</h2>
+      <p>Spanne den Muskel an, mit dem du den Urinstrahl stoppen würdest. Bauch, Po und Oberschenkel bleiben locker. Normal weiteratmen.</p>
+    </section>
+    <section class="card kegel" data-state="idle">
+      <div class="kegel-visual"><div class="kegel-dot" data-k="dot"></div></div>
+      <div class="kegel-phase" data-k="phase">Bereit</div>
+      <div class="kegel-count" data-k="count">–</div>
+      <div class="kegel-progress">Wiederholung <b data-k="rep">0</b>/<span data-k="reps">10</span> · Satz <b data-k="set">1</b>/<span data-k="sets">3</span></div>
+      <div class="kegel-opts">
+        <label>Halten <input type="number" min="2" max="15" data-set="kegelHold"> s</label>
+        <label>Lockern <input type="number" min="2" max="15" data-set="kegelRest"> s</label>
+        <label>Wdh. <input type="number" min="5" max="30" data-set="kegelReps"></label>
+        <label>Sätze <input type="number" min="1" max="6" data-set="kegelSets"></label>
+      </div>
+      <button class="btn primary big" data-action="kstart">Start</button>
+      <button class="btn ghost big hidden" data-action="kstop">Stopp</button>
+    </section>
+    <section class="card">
+      <h3>Varianten</h3>
+      <ul class="tips">
+        <li><b>Lange Halte:</b> 10 s anspannen, 10 s lockern – baut Kraft auf.</li>
+        <li><b>Schnelle Pulse:</b> 1 s an, 1 s aus, 20× – verbessert die Reaktion.</li>
+        <li><b>Umgekehrter Kegel:</b> Bewusstes Lockern/Entspannen üben – genau das brauchst du in der Pause.</li>
+      </ul>
+    </section>
+  </template>
+
+  <template id="tpl-breath">
+    <section class="card">
+      <h2>Atemübung</h2>
+      <p>Langsames Atmen senkt die Erregung und beruhigt das Nervensystem. Nutze es in der Pause oder zur Vorbereitung.</p>
+    </section>
+    <section class="card breath" data-state="idle">
+      <div class="breath-circle" data-k="circle"><span data-k="label">Bereit</span></div>
+      <div class="breath-count" data-k="count"></div>
+      <div class="breath-modes">
+        <button class="chip active" data-mode="478">4-7-8</button>
+        <button class="chip" data-mode="box">Box 4-4-4-4</button>
+        <button class="chip" data-mode="slow">Langsam 5-5</button>
+      </div>
+      <button class="btn primary big" data-action="bstart">Start</button>
+      <button class="btn ghost big hidden" data-action="bstop">Stopp</button>
+    </section>
+  </template>
+
+  <template id="tpl-stats">
+    <section class="card">
+      <h2>Statistik</h2>
+      <div class="hero-stats">
+        <div><b data-k="avg">0:00</b><span>Ø aktive Zeit</span></div>
+        <div><b data-k="best">0:00</b><span>Beste Zeit</span></div>
+        <div><b data-k="edgesTotal">0</b><span>Stopps gesamt</span></div>
+      </div>
+      <div class="level-progress">
+        <div class="lp-head"><span data-k="levelName"></span><span data-k="levelPct"></span></div>
+        <div class="bar"><div class="bar-fill" data-k="levelBar"></div></div>
+        <p class="muted" data-k="levelNext"></p>
+      </div>
+    </section>
+    <section class="card">
+      <h3>Letzte 14 Sessions</h3>
+      <div class="chart" data-k="chart"></div>
+    </section>
+    <section class="card">
+      <h3>Verlauf</h3>
+      <ul class="history" data-k="history"></ul>
+    </section>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>

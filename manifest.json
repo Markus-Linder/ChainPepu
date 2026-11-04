@@ -1,0 +1,13 @@
+{
+  "name": "Stamina Coach",
+  "short_name": "Stamina",
+  "description": "Diskreter Ausdauer-Trainer: Stop-Start-Methode, Beckenboden, Atmung.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f0f14",
+  "theme_color": "#0f0f14",
+  "lang": "de",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
