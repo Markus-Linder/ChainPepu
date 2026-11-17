@@ -1,4 +1,4 @@
-// ChainPepu – die begehbare Suchmaschine.
+// ser7 – die begehbare Suchmaschine.
 //
 // Aufbau: Eine WebGL-Szene (Straße, Gebäude, Bäume, Passanten, Himmel) liegt ÜBER
 // einer CSS3D-Ebene mit den echten Webseiten. An den Bildschirmen stanzt WebGL
@@ -40,7 +40,7 @@ root.innerHTML = `
   <div id="gl-layer"></div>
   <div id="loader"><div class="bar"><i></i></div><span>Die Stadt wird gebaut …</span></div>
   <header id="searchbar" class="intro">
-    <div class="brand">Chain<span>Pepu</span></div>
+    <div class="brand">ser<span>7</span></div>
     <form id="search-form" autocomplete="off" role="search">
       <input id="q" name="q" type="search" placeholder="Wonach suchst du?" aria-label="Suchbegriff" enterkeyhint="search" />
       <button type="submit">Suchen</button>

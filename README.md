@@ -1,4 +1,4 @@
-# ChainPepu – die begehbare Suchmaschine
+# ser7 – die begehbare Suchmaschine
 
 **Live:** https://chainpepu.higgsfield.app
 
