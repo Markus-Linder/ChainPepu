@@ -27,10 +27,10 @@ BRAVE_API_KEY=dein_schluessel npm start
 
 | Desktop | Handy |
 |---|---|
+| Scrollen hoch/runter: laufen | Wischen hoch/runter: laufen |
+| Seitlich scrollen (Touchpad) oder Shift+Mausrad: drehen | Wischen links/rechts: drehen |
 | Klick auf eine Webseite: hineingehen | Antippen einer Webseite: hineingehen |
 | Klick auf den Boden: dorthin laufen | Antippen des Bodens: dorthin laufen |
-| Ziehen: umsehen | Wischen: umsehen |
-| Mausrad, W A S D, Pfeiltasten: laufen | ▲ ▼: laufen |
 | ☾ / ☀ oben rechts: Nacht oder Tag | ☾ / ☀ oben rechts: Nacht oder Tag |
 
 ## Wie es funktioniert
@@ -47,6 +47,8 @@ BRAVE_API_KEY=dein_schluessel npm start
   - zwei 360°-Panoramen (Sonnenuntergang und Nacht), Pflaster, vier Fassaden (GPT Image 2.6)
   - 3D-Modelle: Platane, Pariser Laterne, Parkbank, zwei Passanten mit Laufanimation (Meshy 6),
     mit glTF-Transform auf je ca. 1 MB komprimiert
+- **Webseiten kommen zu dir:** Der Bildschirm, an dem du gerade vorbeiläufst, fährt aus der
+  Fassade heraus und dreht sich zu dir – abwechselnd links und rechts.
 - **Tag und Nacht** richten sich nach der Uhrzeit des Besuchers.
 - **Hosting:** Die Live-Seite läuft als Higgsfield-Website (Cloudflare Worker).
   Dort übernehmen die Server-Routen `/api/search` und `/api/frameable` die Aufgaben von `server.js`.

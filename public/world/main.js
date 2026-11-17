@@ -55,7 +55,7 @@ root.innerHTML = `
     <p></p>
     <button id="btn-enter" type="button">Webseite betreten</button>
   </aside>
-  <div id="help" hidden>Ziehen: umsehen · Auf den Boden tippen: hingehen · Auf eine Webseite tippen: hineingehen</div>
+  <div id="help" hidden>Scrollen oder wischen: hoch/runter laufen, seitlich drehen · Webseite antippen: hineingehen</div>
   <div id="touch" hidden>
     <button data-move="fwd" aria-label="Vorwärts">▲</button>
     <button data-move="back" aria-label="Zurück">▼</button>
@@ -84,6 +84,20 @@ const viewer = $('#viewer');
 const loaderEl = $('#loader');
 const dayNightBtn = $('#daynight');
 const isTouch = matchMedia('(pointer: coarse)').matches;
+
+// Suche sofort anschließen – auch während die Welt noch lädt.
+// (Sonst würde der Browser das Formular normal abschicken und eine leere Seite laden.)
+let worldReadyResolve;
+const worldReady = new Promise((r) => { worldReadyResolve = r; });
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const q = input.value.trim();
+  if (!q) return;
+  input.blur();
+  setStatus('Suche läuft …');
+  await worldReady;
+  runSearch(q);
+});
 
 // ---------- Renderer ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -133,18 +147,20 @@ const texLoader = new THREE.TextureLoader(manager);
 const gltfLoader = new GLTFLoader(manager);
 const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
+// Kein Laden darf die Welt blockieren: nach spätestens 25 s geht es ohne das Teil weiter
+const withTimeout = (p, ms = 25000) => Promise.race([p, new Promise((r) => setTimeout(() => r(null), ms))]);
 function tex(file, repeat) {
-  return new Promise((resolve) => {
+  return withTimeout(new Promise((resolve) => {
     texLoader.load(ASSET(file), (t) => {
       t.colorSpace = THREE.SRGBColorSpace;
       t.anisotropy = maxAniso;
       if (repeat) t.wrapS = t.wrapT = THREE.RepeatWrapping;
       resolve(t);
     }, undefined, () => resolve(null));
-  });
+  }));
 }
 function glb(file, height) {
-  return new Promise((resolve) => {
+  return withTimeout(new Promise((resolve) => {
     gltfLoader.load(ASSET(file), (g) => {
       const obj = g.scene;
       obj.traverse((o) => {
@@ -167,7 +183,7 @@ function glb(file, height) {
       wrap.add(obj);
       resolve({ object: wrap, animations: g.animations });
     }, undefined, () => resolve(null));
-  });
+  }));
 }
 
 const pmrem = new THREE.PMREMGenerator(renderer);
@@ -440,21 +456,25 @@ function buildStreet(results, query) {
     const d = ((SCREEN_M.w / 2) * Math.sin(tilt) + 0.4) / Math.cos(tilt);
     const center = new THREE.Vector3(faceX, screenY, z).addScaledVector(n, d);
 
+    // Alles, was zum Bildschirm gehört, hängt an einer Gruppe – so kann der
+    // Bildschirm beim Vorbeilaufen zum Betrachter herausfahren
+    const screen = new THREE.Group();
+    screen.position.copy(center);
+    screen.rotation.y = rotY;
+    street.add(screen);
+
     const bezel = new THREE.Mesh(new THREE.BoxGeometry(SCREEN_M.w + 0.45, SCREEN_M.h + 0.45, 0.3), bezelMat);
-    bezel.position.copy(center).addScaledVector(n, -0.17);
-    bezel.rotation.y = rotY;
+    bezel.position.z = -0.17;
     bezel.castShadow = true;
-    street.add(bezel);
+    screen.add(bezel);
     const post = new THREE.Mesh(new THREE.BoxGeometry(0.25, screenY - SCREEN_M.h / 2, 0.25), bezelMat);
     post.position.copy(center).addScaledVector(n, -0.3);
     post.position.y = (screenY - SCREEN_M.h / 2) / 2;
     street.add(post);
 
     const hole = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN_M.w, SCREEN_M.h), holeMat);
-    hole.position.copy(center);
-    hole.rotation.y = rotY;
     hole.renderOrder = 10;
-    street.add(hole);
+    screen.add(hole);
 
     const host = safeHost(result.url);
     const signTex = makeLabelTexture([
@@ -465,20 +485,19 @@ function buildStreet(results, query) {
       new THREE.PlaneGeometry(SCREEN_M.w + 0.45, (SCREEN_M.w + 0.45) / 4),
       new THREE.MeshStandardMaterial({ map: signTex, emissive: 0xffffff, emissiveMap: signTex, emissiveIntensity: 0.85, roughness: 0.4 })
     );
-    sign.position.copy(center).addScaledVector(n, -0.02);
-    sign.position.y = screenY + SCREEN_M.h / 2 + 1.45;
-    sign.rotation.y = rotY;
-    street.add(sign);
+    sign.position.set(0, SCREEN_M.h / 2 + 1.45, -0.02);
+    screen.add(sign);
 
     const el = document.createElement('div');
     el.className = 'site-screen';
     const css = new CSS3DObject(el);
-    css.position.copy(hole.position);
+    css.position.copy(center);
     css.rotation.y = rotY;
     css.scale.setScalar(PX_TO_M);
     cssScene.add(css);
 
-    const slot = { result, rank: i + 1, side, normal: n.clone(), screenPos: hole.position.clone(), css, el, bezel, live: false, frameable: null };
+    const slot = { result, rank: i + 1, side, normal: n.clone(), screenPos: center.clone(), css, el, bezel, hole, screen,
+      homePos: center.clone(), homeRot: rotY, f: 0, live: false, frameable: null };
     for (const m of [hole, bezel, sign]) { m.userData.slot = slot; clickables.push(m); }
     showPreview(slot);
     slots.push(slot);
@@ -606,11 +625,7 @@ async function search(q) {
 }
 function setStatus(text) { statusEl.hidden = !text; statusEl.textContent = text || ''; }
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const q = input.value.trim();
-  if (!q) return;
-  input.blur();
+async function runSearch(q) {
   setStatus('Suche läuft …');
   try {
     const results = await search(q);
@@ -628,7 +643,7 @@ form.addEventListener('submit', async (e) => {
     console.error(err);
     setStatus('Die Suche hat nicht geklappt. Bitte gleich noch einmal versuchen.');
   }
-});
+}
 
 // ---------- Steuerung: nur Zeigen, Ziehen und Tippen ----------
 let yaw = 0, pitch = 0, intro = true;
@@ -660,10 +675,18 @@ glLayer.addEventListener('pointermove', (e) => {
   if (drag && e.pointerId === drag.id) {
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 6) drag.moved = true;
-    if (drag.moved) {
-      const k = e.pointerType === 'mouse' ? 0.0035 : 0.005;
-      yaw += dx * k;
-      pitch = Math.max(-1.1, Math.min(1.1, pitch + dy * k));
+    if (drag.moved && !intro) {
+      // Wischen/Ziehen wie Scrollen: hoch/runter = laufen, links/rechts = drehen
+      const now = performance.now();
+      const dtMs = Math.max(8, now - (drag.lt || drag.t));
+      const turnK = e.pointerType === 'mouse' ? 0.004 : 0.006;
+      const walkK = e.pointerType === 'mouse' ? 0.05 : 0.07;
+      yaw += dx * turnK;
+      const step = -dy * walkK;
+      moveForward(step);
+      glide = Math.max(-14, Math.min(14, (step / dtMs) * 1000 * 0.6));
+      turnVel = (dx * turnK / dtMs) * 1000 * 0.5;
+      drag.lt = now;
       walkTarget = null;
     }
     drag.x = e.clientX; drag.y = e.clientY;
@@ -680,6 +703,7 @@ glLayer.addEventListener('pointerup', (e) => {
   const wasTap = !drag.moved && performance.now() - drag.t < 600;
   drag = null;
   if (!wasTap || intro) return;
+  glide = 0; turnVel = 0;
   const p = pick(e.clientX, e.clientY);
   if (p?.slot) enterSite(p.slot);
   else if (p?.ground) {
@@ -689,13 +713,22 @@ glLayer.addEventListener('pointerup', (e) => {
   }
 });
 glLayer.addEventListener('pointercancel', () => { drag = null; });
+// Scrollen: hoch/runter = laufen, seitlich (Touchpad) oder Shift+Rad = drehen
 glLayer.addEventListener('wheel', (e) => {
-  if (intro || !viewer.hidden) return;
+  if (intro || !viewer.hidden || flyTo) return;
   e.preventDefault();
   walkTarget = null;
-  const f = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
-  camera.position.addScaledVector(f, -Math.sign(e.deltaY) * 1.6);
+  const unit = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1;
+  let dX = e.deltaX * unit, dY = e.deltaY * unit;
+  if (e.shiftKey && !dX) { dX = dY; dY = 0; }
+  glide = Math.max(-14, Math.min(14, glide + dY * 0.045));
+  turnVel = Math.max(-3, Math.min(3, turnVel - dX * 0.012));
 }, { passive: false });
+function moveForward(d) {
+  camera.position.x += -Math.sin(yaw) * d;
+  camera.position.z += -Math.cos(yaw) * d;
+}
+let glide = 0, turnVel = 0;
 
 function setHover(slot) {
   if (slot === hoverSlot) return;
@@ -745,7 +778,7 @@ function enterSite(slot) {
   const to = slot.screenPos.clone().addScaledVector(slot.normal, dist);
   to.y = slot.screenPos.y;
   const yawTo = Math.atan2(slot.normal.x, slot.normal.z);
-  flyTo = { t: 0, start: performance.now(), from, to, yawFrom: yaw, yawTo: nearestAngle(yaw, yawTo), pitchFrom: pitch, url };
+  flyTo = { slot, t: 0, start: performance.now(), from, to, yawFrom: yaw, yawTo: nearestAngle(yaw, yawTo), pitchFrom: pitch, url };
 }
 function nearestAngle(from, to) {
   let d = (to - from) % (Math.PI * 2);
@@ -768,6 +801,55 @@ function closeViewer() {
 }
 viewer.querySelector('.vclose').addEventListener('click', closeViewer);
 
+// ---------- Webseiten kommen zum Betrachter ----------
+// Der Bildschirm, an dem man gerade vorbeiläuft, fährt aus der Fassade heraus,
+// kommt näher und dreht sich zum Betrachter – abwechselnd links und rechts.
+const PRESENT_X = 4.8;      // Abstand von der Straßenmitte, wenn herangeholt
+const PRESENT_Y = 2.75;
+const PRESENT_SCALE = 0.8;
+const AHEAD = 9;            // wie weit vor dem Betrachter der „aktuelle“ Bildschirm liegt
+const tmpV = new THREE.Vector3();
+const tmpQ = new THREE.Quaternion();
+const presentPos = new THREE.Vector3();
+let focusSlot = null;
+const lerpAngle = (a, b, t) => { let d = (b - a) % (Math.PI * 2); if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2; return a + d * t; };
+const smooth = (x) => x * x * (3 - 2 * x);
+
+function updateScreens(dt) {
+  if (!slots.length) return;
+  if (flyTo) focusSlot = flyTo.slot;
+  else if (!intro) {
+    const aheadZ = camera.position.z - Math.cos(yaw) * AHEAD;
+    let best = null, bestD = Infinity;
+    for (const s of slots) {
+      const dz = Math.abs(s.homePos.z - aheadZ);
+      if (dz < bestD) { bestD = dz; best = s; }
+    }
+    focusSlot = bestD < 12 ? best : null;
+  }
+  const k = 1 - Math.exp(-dt * 2.6);
+  for (const s of slots) {
+    s.f += ((s === focusSlot ? 1 : 0) - s.f) * k;
+    const e = smooth(Math.min(1, Math.max(0, s.f)));
+    presentPos.set(s.side * PRESENT_X, PRESENT_Y, s.homePos.z);
+    s.screen.position.lerpVectors(s.homePos, presentPos, e);
+    // zum Betrachter drehen
+    const face = Math.atan2(camera.position.x - s.screen.position.x, camera.position.z - s.screen.position.z);
+    const rot = lerpAngle(s.homeRot, face, e);
+    s.screen.rotation.y = rot;
+    s.screen.scale.setScalar(1 + (PRESENT_SCALE - 1) * e);
+    s.normal.set(Math.sin(rot), 0, Math.cos(rot));
+    s.screenPos.copy(s.screen.position);
+    // die echte Webseite (CSS-Ebene) folgt dem Bildschirm
+    s.hole.updateWorldMatrix(true, false);
+    s.hole.getWorldPosition(tmpV);
+    s.hole.getWorldQuaternion(tmpQ);
+    s.css.position.copy(tmpV);
+    s.css.quaternion.copy(tmpQ);
+    s.css.scale.setScalar(PX_TO_M * s.screen.scale.x);
+  }
+}
+
 // ---------- Hauptschleife ----------
 const clock = new THREE.Clock();
 const fwd = new THREE.Vector3();
@@ -781,6 +863,7 @@ function tick() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const t = clock.elapsedTime;
   updatePeople(dt);
+  updateScreens(dt);
 
   if (intro) {
     yaw = Math.sin(t * 0.07) * 0.35;
@@ -804,6 +887,12 @@ function tick() {
     if (keys.has('ArrowLeft')) yaw += 1.6 * dt;
     if (keys.has('ArrowRight')) yaw -= 1.6 * dt;
     let moving = false;
+    if (Math.abs(glide) > 0.05 || Math.abs(turnVel) > 0.01) {
+      if (!drag) { moveForward(glide * dt); yaw += turnVel * dt; }
+      glide *= Math.exp(-dt * 2.2);
+      turnVel *= Math.exp(-dt * 4);
+      moving = Math.abs(glide) > 0.3;
+    } else { glide = 0; turnVel = 0; }
     if (mv.lengthSq() > 0) { walkTarget = null; mv.normalize().multiplyScalar(speed); camera.position.add(mv); moving = true; }
     else if (walkTarget) {
       const d = new THREE.Vector3(walkTarget.x - camera.position.x, 0, walkTarget.z - camera.position.z);
@@ -814,6 +903,7 @@ function tick() {
     camera.position.x = Math.max(-SIDEWALK_X + 0.5, Math.min(SIDEWALK_X - 0.5, camera.position.x));
     camera.position.z = Math.max(streetEnd + 4, Math.min(30, camera.position.z));
     bob = moving ? bob + dt * 9 : bob * 0.85;
+    pitch *= Math.exp(-dt * 3);
     camera.position.y = EYE + Math.sin(bob) * 0.03;
   }
   euler.set(pitch, yaw, 0);
@@ -834,7 +924,7 @@ function tick() {
       s.dist = camera.position.distanceTo(s.screenPos);
       if (s.dist < bestD) { bestD = s.dist; best = s; }
     }
-    updateInfo(bestD < INFO_DIST ? best : null);
+    updateInfo(focusSlot && focusSlot.f > 0.4 ? focusSlot : bestD < INFO_DIST ? best : null);
     liveCheckT -= dt;
     if (liveCheckT <= 0) {
       liveCheckT = 0.5;
@@ -863,5 +953,11 @@ addEventListener('resize', () => {
 const hour = new Date().getHours();
 buildStreet([], '');
 setNight(hour < 7 || hour >= 19);
+worldReadyResolve();
+// Direktlink wie /?q=Eiffelturm startet sofort die Suche
+try {
+  const q0 = new URLSearchParams(location.search).get('q');
+  if (q0) { input.value = q0; runSearch(q0.trim()); }
+} catch { /* ignorieren */ }
 window.__chainpepu = { get slots() { return slots; }, camera, pick, get flyTo() { return flyTo; } };
 tick();

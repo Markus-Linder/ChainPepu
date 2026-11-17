@@ -10,7 +10,9 @@
   color: var(--text);
 }
 #chainpepu * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: #0d0f14; overscroll-behavior: none; }
+html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; }
+/* Echtes Foto der Straße als Hintergrund, schon bevor die 3D-Welt steht */
+html, body { background: #0d0f14 url(assets/sky.jpg) center 52% / cover no-repeat !important; }
 #chainpepu [hidden] { display: none !important; }
 
 #css-layer, #gl-layer { position: fixed; inset: 0; }
@@ -25,7 +27,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0d0f14; ove
 /* Ladebalken */
 #loader {
   position: fixed; inset: 0; z-index: 20; display: grid; place-content: center; gap: 14px; justify-items: center;
-  background: #0d0f14; color: var(--muted); font-size: 14px; transition: opacity .8s;
+  background: rgba(13, 15, 20, 0.35); color: var(--text); font-size: 15px; transition: opacity .8s;
+  text-shadow: 0 1px 6px rgba(0,0,0,.6);
 }
 #loader.done { opacity: 0; pointer-events: none; }
 #loader .bar { width: min(260px, 70vw); height: 3px; border-radius: 3px; background: rgba(255,255,255,.1); overflow: hidden; }
