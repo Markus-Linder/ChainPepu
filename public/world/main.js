@@ -11,6 +11,9 @@ import * as THREE from 'three';
 import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { T, LANG, UI_LANG } from './i18n.js';
+
+document.documentElement.lang = UI_LANG;
 
 const ASSET = (f) => new URL(`./assets/${f}`, import.meta.url).href;
 
@@ -38,25 +41,29 @@ if (!root || root.tagName === 'MAIN') {
 root.innerHTML = `
   <div id="css-layer"></div>
   <div id="gl-layer"></div>
-  <div id="loader"><div class="bar"><i></i></div><span>Die Stadt wird gebaut …</span></div>
+  <div id="loader"><div class="bar"><i></i></div><span>${T.loading}</span></div>
   <header id="searchbar" class="intro">
     <div class="brand">ser<span>7</span></div>
     <form id="search-form" autocomplete="off" role="search">
-      <input id="q" name="q" type="search" placeholder="Wonach suchst du?" aria-label="Suchbegriff" enterkeyhint="search" />
-      <button type="submit">Suchen</button>
+      <input id="q" name="q" type="search" placeholder="${T.placeholder}" aria-label="${T.query}" enterkeyhint="search" />
+      <button type="submit">${T.search}</button>
     </form>
-    <div class="modes" role="radiogroup" aria-label="Suchart">
-      <label><input type="radio" name="mode" value="web" checked /><span>Web</span></label>
-      <label><input type="radio" name="mode" value="video" /><span>Videos</span></label>
+    <div class="modes" role="radiogroup" aria-label="${T.searchType}">
+      <label><input type="radio" name="mode" value="web" checked /><span>${T.web}</span></label>
+      <label><input type="radio" name="mode" value="video" /><span>${T.videos}</span></label>
     </div>
-    <p class="tagline">Geh durch deine Suchergebnisse.</p>
-    <nav class="intro-links"><a href="/eintragen/">Webseite eintragen</a><a href="/werbung/">Werbung schalten</a></nav>
+    <p class="tagline">${T.tagline}</p>
+    <nav class="intro-links"><a href="/submit/">${T.addSite}</a><a href="/advertise/">${T.advertise}</a><a href="/imprint/">${T.imprint}</a><a href="/privacy/">${T.privacy}</a></nav>
   </header>
-  <button id="daynight" type="button" aria-label="Tag oder Nacht">☾</button>
-  <button id="menu-btn" type="button" aria-label="Menü" aria-expanded="false">☰</button>
+  <button id="daynight" type="button" aria-label="${T.dayNight}">☾</button>
+  <button id="menu-btn" type="button" aria-label="${T.menu}" aria-expanded="false">☰</button>
   <nav id="menu" hidden>
-    <a href="/eintragen/">Webseite oder Video eintragen</a>
-    <a href="/werbung/">Werbung schalten</a>
+    <a href="/submit/">${T.addSiteVideo}</a>
+    <a href="/advertise/">${T.advertise}</a>
+    <hr />
+    <a href="/imprint/">${T.imprint}</a>
+    <a href="/terms/">${T.terms}</a>
+    <a href="/privacy/">${T.privacy}</a>
   </nav>
   <aside id="info" hidden>
     <div class="rank"></div>
@@ -64,19 +71,19 @@ root.innerHTML = `
     <h2></h2>
     <div class="url"></div>
     <p></p>
-    <button id="btn-enter" type="button">Webseite betreten</button>
+    <button id="btn-enter" type="button">${T.enter}</button>
   </aside>
-  <div id="help" hidden>Scrollen oder wischen: hoch/runter laufen, seitlich drehen · Webseite antippen: hineingehen</div>
+  <div id="help" hidden>${T.help}</div>
   <div id="touch" hidden>
-    <button data-move="fwd" aria-label="Vorwärts">▲</button>
-    <button data-move="back" aria-label="Zurück">▼</button>
+    <button data-move="fwd" aria-label="${T.fwd}">▲</button>
+    <button data-move="back" aria-label="${T.back}">▼</button>
   </div>
   <div id="status" hidden></div>
   <div id="viewer" hidden>
     <div class="bar">
-      <button class="vclose" type="button">← Zurück auf die Straße</button>
+      <button class="vclose" type="button">${T.backToStreet}</button>
       <span class="vurl"></span>
-      <a class="vopen" target="_blank" rel="noopener">Im neuen Tab ↗</a>
+      <a class="vopen" target="_blank" rel="noopener">${T.newTab}</a>
     </div>
     <iframe title="Webseite" referrerpolicy="no-referrer"></iframe>
     <video class="vvideo" controls playsinline hidden></video>
@@ -110,7 +117,7 @@ form.addEventListener('submit', async (e) => {
   const q = input.value.trim();
   if (!q) return;
   input.blur();
-  setStatus('Suche läuft …');
+  setStatus(T.searching);
   await worldReady;
   runSearch(q);
 });
@@ -246,7 +253,7 @@ let night = false;
 function setNight(on) {
   night = on;
   dayNightBtn.textContent = on ? '☀' : '☾';
-  dayNightBtn.setAttribute('aria-label', on ? 'Zum Tag wechseln' : 'Zur Nacht wechseln');
+  dayNightBtn.setAttribute('aria-label', on ? T.toDay : T.toNight);
   const sky = on ? skyNight : skyDay;
   scene.background = sky || new THREE.Color(on ? 0x0b1020 : 0xc9a27e);
   scene.environment = on ? envNight : envDay;
@@ -270,9 +277,11 @@ dayNightBtn.addEventListener('click', () => setNight(!night));
 const groundGroup = new THREE.Group();
 scene.add(groundGroup);
 let groundMesh = null;
+let groundEnd = 0;
 function buildGround(length) {
   groundGroup.clear();
   const len = length + 200;
+  groundEnd = 70 - len;
   let pave = null;
   if (pavingTex) {
     pave = pavingTex.clone();
@@ -388,13 +397,14 @@ function clearStreet() {
   shopMats.length = 0;
 }
 
+let curParent = street;   // Grundstück, an das gerade gebaut wird
 function placeModel(model, x, z, rotY = 0) {
   if (!model) return null;
   const o = model.object.clone();
   o.traverse((c) => { if (c.isMesh) c.userData.shared = true; });
   o.position.set(x, 0, z);
   o.rotation.y = rotY;
-  street.add(o);
+  curParent.add(o);
   return o;
 }
 
@@ -405,25 +415,36 @@ function addLamp(x, z) {
   } else {
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.11, 4.6, 12), bezelMat);
     pole.position.set(x, 2.3, z);
-    street.add(pole);
+    curParent.add(pole);
   }
   const glow = new THREE.Sprite(glowMat);
   glow.position.set(x, 4.25, z);
   glow.scale.setScalar(2.6);
-  street.add(glow);
+  curParent.add(glow);
   lampPositions.push(new THREE.Vector3(x, 4.1, z));
 }
 let lampPositions = [];
 
-function buildStreet(results, query) {
-  clearStreet();
-  lampPositions = [];
-  const count = Math.max(results.length, 10) + 2;
-  streetEnd = FIRST_Z - Math.ceil(count / 2) * SLOT_LEN;
-  buildGround(-streetEnd);
+// ---------- Endlose Straße ----------
+// Die Straße besteht aus Grundstücken. Beim Weiterlaufen werden neue Ergebnisse
+// nachgeladen und als weitere Grundstücke angebaut.
+let lots = [];
+let nextLot = -4;
+const feed = { q: '', mode: 'web', offset: 0, loading: false, done: false, seen: new Set(), count: 0 };
 
-  for (let i = -4; i < count; i++) {
-    const result = i >= 0 ? results[i] || null : null;
+function lotZ(i) {
+  const side = (i + 4) % 2 === 0 ? -1 : 1;
+  return FIRST_Z - Math.floor(i / 2) * SLOT_LEN - (side > 0 ? SLOT_LEN / 2 : 0);
+}
+
+function addLot(i, result) {
+  const lot = new THREE.Group();
+  lot.userData.z = lotZ(i);
+  street.add(lot);
+  lots.push(lot);
+  curParent = lot;
+  streetEnd = Math.min(streetEnd, lotZ(i) - SLOT_LEN);
+  if (streetEnd < groundEnd + 400) buildGround(-streetEnd + 4000);
     const side = (i + 4) % 2 === 0 ? -1 : 1;
     const z = FIRST_Z - Math.floor(i / 2) * SLOT_LEN - (side > 0 ? SLOT_LEN / 2 : 0);
     const height = 15 + Math.round(rand(i + 10) * 22);
@@ -448,7 +469,7 @@ function buildStreet(results, query) {
     const building = new THREE.Mesh(new THREE.BoxGeometry(depth, height - 4, width), bmat);
     building.position.set(fx, 4 + (height - 4) / 2, z);
     building.castShadow = building.receiveShadow = true;
-    street.add(building);
+    lot.add(building);
 
     // Erdgeschoss (Sockel) + Gesims + Dachkante
     const st = shopTex.clone(); st.needsUpdate = true; st.repeat.set(width / 9, 1);
@@ -462,14 +483,14 @@ function buildStreet(results, query) {
     const roof = new THREE.Mesh(new THREE.BoxGeometry(depth + 0.8, 0.6, width + 0.3), corniceMat);
     roof.position.set(fx - side * 0.4, height + 0.1, z);
     for (const m of [cornice, roof]) { m.castShadow = m.receiveShadow = true; }
-    street.add(plinth, cornice, roof);
+    lot.add(plinth, cornice, roof);
 
     // Straßenmöbel
     addLamp(side * SIDEWALK_X, z + SLOT_LEN / 2);
     placeModel(treeM, side * (SIDEWALK_X + 0.2), z - SLOT_LEN / 2 + 3.5, rand(i, 5) * Math.PI * 2);
     if (benchM && i % 3 === 0) placeModel(benchM, side * (SIDEWALK_X + 0.6), z + 5.5, side > 0 ? -Math.PI / 2 : Math.PI / 2);
 
-    if (!result) continue;
+    if (!result) return;
 
     // Bildschirm: schräg zur Straße gedreht wie eine große Werbetafel,
     // damit man die Seite schon beim Heranlaufen sieht (auch im Hochformat)
@@ -486,7 +507,7 @@ function buildStreet(results, query) {
     const screen = new THREE.Group();
     screen.position.copy(center);
     screen.rotation.y = rotY;
-    street.add(screen);
+    lot.add(screen);
 
     const sponsored = !!result.sponsored;
     const baseBezel = sponsored ? goldMat : bezelMat;
@@ -497,9 +518,10 @@ function buildStreet(results, query) {
     const post = new THREE.Mesh(new THREE.BoxGeometry(0.25, screenY - SCREEN_M.h / 2, 0.25), bezelMat);
     post.position.copy(center).addScaledVector(n, -0.3);
     post.position.y = (screenY - SCREEN_M.h / 2) / 2;
-    street.add(post);
+    lot.add(post);
 
-    const cardMat = new THREE.MeshBasicMaterial({ map: makeCard(result, i + 1), toneMapped: false });
+    const rank = ++feed.count;
+    const cardMat = new THREE.MeshBasicMaterial({ map: makeCard(result, rank), toneMapped: false });
     const hole = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN_M.w, SCREEN_M.h), cardMat);
     hole.renderOrder = 10;
     screen.add(hole);
@@ -507,11 +529,11 @@ function buildStreet(results, query) {
     const host = safeHost(result.url);
     const signTex = sponsored
       ? makeLabelTexture([
-          { text: `ANZEIGE  ·  ${host}`, size: 44, color: '#1b1206', weight: 800 },
+          { text: `${T.SPONSORED}  ·  ${host}`, size: 44, color: '#1b1206', weight: 800 },
           { text: result.title, size: 72, weight: 800, offset: 18, color: '#1b1206' },
         ], { bg: '#f5c542' })
       : makeLabelTexture([
-          { text: `#${i + 1}  ·  ${host}${result.kind === 'video' ? '  ·  VIDEO' : ''}`, size: 44, color: '#ffb35c', weight: 700 },
+          { text: `#${rank}  ·  ${host}${result.kind === 'video' ? `  ·  ${T.VIDEO}` : ''}`, size: 44, color: '#ffb35c', weight: 700 },
           { text: result.title, size: 72, weight: 700, offset: 18 },
         ]);
     const sign = new THREE.Mesh(
@@ -547,7 +569,7 @@ function buildStreet(results, query) {
     css.scale.setScalar(PX_TO_M);
     cssScene.add(css);
 
-    const slot = { result, rank: i + 1, side, normal: n.clone(), screenPos: center.clone(), css, el, bezel, hole, screen,
+    const slot = { result, rank, side, normal: n.clone(), screenPos: center.clone(), css, el, bezel, hole, screen,
       homePos: center.clone(), homeRot: rotY, f: 0, cardMat, live: false, frameable: null };
     slot.baseBezel = baseBezel;
     for (const m of [hole, bezel, sign, ...extra]) { m.userData.slot = slot; clickables.push(m); }
@@ -555,12 +577,28 @@ function buildStreet(results, query) {
     slots.push(slot);
     if (result.kind === 'video' && result.video) slot.frameable = true;
     else checkFrameable(result.url).then((ok) => { slot.frameable = ok; });
-  }
+}
+
+function addLots(results) {
+  for (const r of results) addLot(nextLot++, r);
+  curParent = street;
+}
+
+function buildStreet(results, query) {
+  clearStreet();
+  lampPositions = [];
+  lots = [];
+  nextLot = -4;
+  streetEnd = FIRST_Z;
+  buildGround(4000);
+  addLots([null, null, null, null]);        // Häuser hinter dem Start
+  addLots(results.length ? results : new Array(10).fill(null));
+  if (!results.length || feed.done) addLots([null, null, null, null]);
 
   if (query) {
     const t = makeLabelTexture([
-      { text: `„${query}“`, size: 96, weight: 800 },
-      { text: `${results.length} Ergebnisse – tippe auf eine Webseite, um hineinzugehen`, size: 40, color: '#ffb35c', offset: 20 },
+      { text: `“${query}”`, size: 96, weight: 800 },
+      { text: T.gateSub, size: 40, color: '#ffb35c', offset: 20 },
     ], { w: 2048, h: 320 });
     const gate = new THREE.Mesh(new THREE.PlaneGeometry(16, 2.5), new THREE.MeshStandardMaterial({ map: t, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 0.7 }));
     gate.position.set(0, 7.2, FIRST_Z + 6);
@@ -573,6 +611,30 @@ function buildStreet(results, query) {
     }
   }
   spawnPeople();
+}
+
+async function loadMore() {
+  if (feed.loading || feed.done || !feed.q) return;
+  feed.loading = true;
+  try {
+    const { results, nextOffset } = await search(feed.q, feed.offset);
+    const fresh = results.filter((r) => !feed.seen.has(r.url));
+    fresh.forEach((r) => feed.seen.add(r.url));
+    feed.offset = nextOffset ?? feed.offset + 20;
+    if (!fresh.length || nextOffset == null) feed.done = true;
+    addLots(fresh);
+    if (feed.done) addLots([null, null, null, null]);
+  } catch (e) {
+    console.error(e);
+  }
+  feed.loading = false;
+}
+
+// Weit entfernte Grundstücke nicht zeichnen (spart Leistung bei sehr langen Straßen)
+function cullLots() {
+  const cz = camera.position.z;
+  for (const lot of lots) lot.visible = Math.abs(lot.userData.z - cz) < 280;
+  for (const s of slots) s.css.visible = Math.abs(s.homePos.z - cz) < 120;
 }
 
 // ---------- Webseiten auf den Bildschirmen ----------
@@ -617,7 +679,7 @@ function makeCard(result, rank) {
     for (const [i, col] of ['#ff5f57', '#febc2e', '#28c840'].entries()) { g.fillStyle = col; g.beginPath(); g.arc(30 + i * 28, 32, 8, 0, 7); g.fill(); }
     const textW = img ? 700 : W - 120;
     g.fillStyle = result.sponsored ? '#a16207' : '#c2410c'; g.font = '700 22px Inter, system-ui, sans-serif';
-    g.fillText(result.sponsored ? `ANZEIGE  ·  ${host.toUpperCase()}` : `${result.kind === 'video' ? 'VIDEO' : 'ERGEBNIS'} ${rank}  ·  ${host.toUpperCase()}`, 60, 122);
+    g.fillText(result.sponsored ? `${T.SPONSORED}  ·  ${host.toUpperCase()}` : `${result.kind === 'video' ? T.VIDEO : T.RESULT} ${rank}  ·  ${host.toUpperCase()}`, 60, 122);
     g.fillStyle = '#111418'; g.font = '700 60px Georgia, "Times New Roman", serif';
     const tl = wrapLines(g, result.title, textW, 2);
     tl.forEach((l, i) => g.fillText(l, 60, 196 + i * 70));
@@ -715,7 +777,7 @@ function spawnPeople() {
     const obj = SkeletonUtils.clone(m.object);
     const lane = (rand(i, 7) * 2 - 1) * (SIDEWALK_X - 0.8);
     const dir = rand(i, 8) > 0.5 ? 1 : -1;
-    obj.position.set(lane, 0, 26 - rand(i, 9) * (26 - streetEnd));
+    obj.position.set(lane, 0, 26 - rand(i, 9) * 160);
     peopleGroup.add(obj);
     let mixer = null;
     if (m.animations.length) {
@@ -733,8 +795,10 @@ function updatePeople(dt) {
     p.mixer?.update(dt);
     if (!p.mixer) continue;
     p.obj.position.z += p.dir * p.speed * dt;
-    if (p.obj.position.z > 30) p.dir = -1;
-    if (p.obj.position.z < streetEnd + 4) p.dir = 1;
+    // Passanten bleiben in der Nähe des Betrachters, egal wie weit man läuft
+    const cz = camera.position.z;
+    if (p.obj.position.z < cz - 140) p.obj.position.z = cz + 25;
+    else if (p.obj.position.z > cz + 30) p.obj.position.z = cz - 135;
     // Modelle schauen in +Z; Richtung weich drehen
     const target = p.dir > 0 ? 0 : Math.PI;
     p.obj.rotation.y += (target - p.obj.rotation.y) * Math.min(1, dt * 4);
@@ -742,31 +806,39 @@ function updatePeople(dt) {
 }
 
 // ---------- Suche ----------
-async function search(q) {
+async function search(q, offset = 0) {
   if (hasServer) {
     try {
-      const r = await fetch(`/api/search?q=${encodeURIComponent(q)}&lang=de&type=${searchMode()}`);
-      if (r.ok) return (await r.json()).results;
+      const r = await fetch(`/api/search?q=${encodeURIComponent(q)}&lang=${LANG}&type=${feed.mode}&offset=${offset}`);
+      if (r.ok) { const j = await r.json(); return { results: j.results, nextOffset: j.nextOffset ?? null }; }
       if (r.status === 404) hasServer = false;
     } catch { hasServer = false; }
   }
-  const r = await fetch('https://de.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search' +
-    `&gsrsearch=${encodeURIComponent(q)}&gsrlimit=20&prop=pageimages|extracts&exintro=1&explaintext=1&exsentences=4&exlimit=20&piprop=thumbnail&pithumbsize=800`);
+  // Ohne Server: direkt Wikipedia in der Sprache des Besuchers
+  const wl = /^[a-z]{2,3}$/.test(LANG) ? LANG : 'en';
+  const r = await fetch(`https://${wl}.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search` +
+    `&gsrsearch=${encodeURIComponent(q)}&gsrlimit=20&gsroffset=${offset}&prop=pageimages|extracts&exintro=1&explaintext=1&exsentences=4&exlimit=20&piprop=thumbnail&pithumbsize=800`);
   const j = await r.json();
-  return Object.values(j.query?.pages || {}).sort((a, b) => a.index - b.index).map((x) => ({
+  const results = Object.values(j.query?.pages || {}).sort((a, b) => a.index - b.index).map((x) => ({
     title: x.title,
-    url: `https://de.wikipedia.org/wiki/${encodeURIComponent(x.title.replace(/ /g, '_'))}`,
+    url: `https://${wl}.wikipedia.org/wiki/${encodeURIComponent(x.title.replace(/ /g, '_'))}`,
     snippet: x.extract || '',
     image: x.thumbnail?.source || null,
   }));
+  return { results, nextOffset: j.continue?.gsroffset ?? null };
 }
 function setStatus(text) { statusEl.hidden = !text; statusEl.textContent = text || ''; }
 
 async function runSearch(q) {
-  setStatus('Suche läuft …');
+  setStatus(T.searching);
   try {
-    const results = await search(q);
-    if (!results.length) { setStatus(searchMode() === 'video' ? 'Keine Videos gefunden. Versuch einen anderen Begriff.' : 'Keine Ergebnisse gefunden. Versuch einen anderen Begriff.'); return; }
+    Object.assign(feed, { q, mode: searchMode(), offset: 0, loading: true, done: false, seen: new Set(), count: 0 });
+    const { results, nextOffset } = await search(q, 0);
+    feed.loading = false;
+    if (!results.length) { setStatus(feed.mode === 'video' ? T.noVideos : T.noResults); feed.q = ''; return; }
+    results.forEach((r) => feed.seen.add(r.url));
+    feed.offset = nextOffset ?? 20;
+    feed.done = nextOffset == null;
     setStatus('');
     buildStreet(results, q);
     searchbar.classList.remove('intro');
@@ -778,7 +850,8 @@ async function runSearch(q) {
     setTimeout(() => { help.hidden = true; }, 9000);
   } catch (err) {
     console.error(err);
-    setStatus('Die Suche hat nicht geklappt. Bitte gleich noch einmal versuchen.');
+    feed.loading = false;
+    setStatus(T.failed);
   }
 }
 
@@ -894,7 +967,8 @@ function updateInfo(slot) {
   currentSlot = slot;
   info.hidden = !slot;
   if (!slot) return;
-  info.querySelector('.rank').textContent = slot.result.sponsored ? `Anzeige · ${safeHost(slot.result.url)}` : `${slot.result.kind === 'video' ? 'Video' : 'Ergebnis'} ${slot.rank} · ${safeHost(slot.result.url)}`;
+  info.querySelector('.rank').textContent = slot.result.sponsored ? `${T.sponsored} · ${safeHost(slot.result.url)}` : `${slot.result.kind === 'video' ? T.video : T.result} ${slot.rank} · ${safeHost(slot.result.url)}`;
+  $('#btn-enter').textContent = slot.result.kind === 'video' ? T.enterVideo : T.enter;
   info.classList.toggle('sponsored', !!slot.result.sponsored);
   const pe = info.querySelector('.promo'); pe.hidden = !slot.result.promo; pe.textContent = slot.result.promo ? '🏷 ' + slot.result.promo : '';
   info.querySelector('h2').textContent = slot.result.title;
@@ -1009,7 +1083,7 @@ const fwd = new THREE.Vector3();
 const rightV = new THREE.Vector3();
 const mv = new THREE.Vector3();
 const euler = new THREE.Euler(0, 0, 0, 'YXZ');
-let bob = 0, liveCheckT = 0;
+let bob = 0, liveCheckT = 0, cullT = 0;
 const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 
 function tick() {
@@ -1071,6 +1145,11 @@ function tick() {
     lampLights.forEach((l, i) => { if (near[i]) l.position.copy(near[i][0]).y -= 0.4; });
   }
 
+  if (!intro) {
+    if (camera.position.z < streetEnd + 170) loadMore();
+    cullT -= dt;
+    if (cullT <= 0) { cullT = 0.4; cullLots(); }
+  }
   if (!intro && slots.length) {
     let best = null, bestD = Infinity;
     for (const s of slots) {
@@ -1112,5 +1191,5 @@ try {
   const q0 = new URLSearchParams(location.search).get('q');
   if (q0) { input.value = q0; runSearch(q0.trim()); }
 } catch { /* ignorieren */ }
-window.__chainpepu = { get slots() { return slots; }, camera, pick, get flyTo() { return flyTo; } };
+window.__chainpepu = { get slots() { return slots; }, camera, pick, get flyTo() { return flyTo; }, feed, get streetEnd() { return streetEnd; } };
 tick();

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Admin · ser7</title>
+  <meta name="robots" content="noindex" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="stylesheet" href="/world/pages.css?v=2" />
+  <script src="/world/pages-i18n.js?v=1"></script>
+</head>
+<body>
+<div class="wrap wide">
+  <header class="top">
+    <a class="brand" href="/">ser<span>7</span></a>
+    <nav class="links"><a href="/" data-t="nav.search">Back to search</a><a href="/admin/" aria-current="page" data-t="nav.admin">Admin</a></nav>
+  </header>
+  <section class="panel" id="login">
+    <h1 data-t="nav.admin">Admin</h1>
+    <p class="lead" data-t="ad.lead">Approve submitted websites, videos and booked sponsored placements here.</p>
+    <form id="lf" style="margin-top:16px;max-width:420px">
+      <label><span data-t="ad.pw">Password</span> <input id="pw" type="password" autocomplete="current-password" required /></label>
+      <div id="lmsg" class="msg bad" hidden></div>
+      <div><button type="submit" data-t="ad.login">Sign in</button></div>
+    </form>
+  </section>
+  <div id="app" hidden style="display:grid;gap:18px">
+    <section class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <h1 style="margin:0" data-t="nav.admin">Admin</h1>
+        <div class="seg" role="radiogroup" aria-label="Filter">
+          <label><input type="radio" name="flt" value="open" checked /><span data-t="ad.open">To review</span></label>
+          <label><input type="radio" name="flt" value="all" /><span data-t="ad.all">All</span></label>
+        </div>
+      </div>
+      <div class="stats" style="margin-top:16px">
+        <div class="stat"><b id="st-pending">0</b><span data-t="ad.s1">Listings to review</span></div>
+        <div class="stat"><b id="st-review">0</b><span data-t="ad.s2">Ads to review</span></div>
+        <div class="stat"><b id="st-approved">0</b><span data-t="ad.s3">Listings live</span></div>
+        <div class="stat"><b id="st-active">0</b><span data-t="ad.s4">Ads live</span></div>
+        <div class="stat"><b id="st-revenue">0</b><span data-t="ad.s5">Revenue paid</span></div>
+      </div>
+    </section>
+    <section class="panel"><h2 data-t="ad.camps">Sponsored placements</h2><div class="list" id="campaigns"></div></section>
+    <section class="panel"><h2 data-t="ad.lists">Submitted websites and videos</h2><div class="list" id="listings"></div></section>
+  </div>
+  <footer class="legal-links"><a href="/imprint/" data-t="l.imprint">Imprint</a><a href="/terms/" data-t="l.terms">Terms</a><a href="/privacy/" data-t="l.privacy">Privacy</a></footer>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const L = window.SER7_LANG || 'en';
+let pw = '';
+try { pw = sessionStorage.getItem('ser7-admin') || ''; } catch {}
+const money = (c) => (c / 100).toLocaleString(L, { style: 'currency', currency: 'EUR' });
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const PILL = { pending: ['warn', t('st.pending', 'To review')], approved: ['ok', t('st.approved', 'Live')], rejected: ['bad', t('st.rejected', 'Rejected')], unpaid: ['warn', t('ad.unpaid', 'Unpaid')], review: ['warn', t('ad.paid.review', 'Paid · to review')], active: ['ok', t('st.active', 'Active')] };
+const pill = (s) => { const [k, x] = PILL[s] || ['warn', s]; return `<span class="pill ${k}">${x}</span>`; };
+function checkText(raw) {
+  try { const c = JSON.parse(raw); if (!c.reasons?.length) return `<span class="pill ok">${t('ad.check.ok', 'Pre-check clean')}</span>`;
+    return `<span class="pill ${c.verdict === 'reject' ? 'bad' : 'warn'}">${t('ad.check', 'Pre-check')}: ${esc(c.reasons.join(', '))}</span>`; } catch { return ''; }
+}
+async function api(path, opts = {}) {
+  const r = await fetch(path, { ...opts, headers: { 'content-type': 'application/json', 'x-admin-password': pw, ...(opts.headers || {}) } });
+  if (r.status === 401) { logout(t('ad.badpw', 'Wrong password, or no password set up yet.')); throw new Error('401'); }
+  return r.json();
+}
+function logout(text) { pw = ''; try { sessionStorage.removeItem('ser7-admin'); } catch {} $('app').hidden = true; $('login').hidden = false; if (text) { $('lmsg').hidden = false; $('lmsg').textContent = text; } }
+async function load() {
+  const filter = document.querySelector('input[name=flt]:checked').value;
+  const j = await api('/api/admin/list?filter=' + filter);
+  $('login').hidden = true; $('app').hidden = false;
+  const s = j.stats || {};
+  $('st-pending').textContent = s.pending ?? 0; $('st-review').textContent = s.review ?? 0;
+  $('st-approved').textContent = s.approved ?? 0; $('st-active').textContent = s.active ?? 0; $('st-revenue').textContent = money(s.revenue ?? 0);
+  const nothing = `<p class="muted">${t('ad.nothing', 'Nothing to do.')}</p>`;
+  $('campaigns').innerHTML = j.campaigns.length ? j.campaigns.map((c) => `
+    <div class="item">
+      <div>${pill(c.status)} ${checkText(c.check_result)}</div>
+      <b>${esc(c.headline)}</b>
+      <div class="meta"><a href="${esc(c.url)}" target="_blank" rel="noopener" style="color:inherit">${esc(c.url)}</a></div>
+      <div>${esc(c.description)}</div>
+      <div class="meta">${t('ad.kw', 'Keywords')}: ${esc(c.keywords)}${c.promo ? ' · ' + t('ad.promo', 'Offer') + ': ' + esc(c.promo) : ''} · ${c.days} ${t('days', 'days')} · ${money(c.price_cents)} · ${esc(c.email)}</div>
+      <div class="meta">${c.impressions} ${t('ad.imp', 'impressions')} · ${c.clicks} ${t('ad.visits', 'visits')}${c.ends_at ? ' · ' + t('ad.runs', 'runs until') + ' ' + new Date(c.ends_at).toLocaleDateString(L) : ''}</div>
+      <div class="actions">
+        ${c.status === 'review' ? `<button data-t2="campaign" data-id="${c.id}" data-a="approve">${t('ad.start', 'Approve and start')}</button>` : ''}
+        ${c.status !== 'rejected' ? `<button class="danger" data-t2="campaign" data-id="${c.id}" data-a="reject">${t('ad.reject', 'Reject')}</button>` : ''}
+      </div>
+    </div>`).join('') : nothing;
+  $('listings').innerHTML = j.listings.length ? j.listings.map((l) => `
+    <div class="item">
+      <div>${pill(l.status)} <span class="pill ok">${l.kind === 'video' ? t('kind.video', 'Video') : t('kind.web', 'Website')}</span> ${checkText(l.check_result)}</div>
+      <b>${esc(l.title)}</b>
+      <div class="meta"><a href="${esc(l.url)}" target="_blank" rel="noopener" style="color:inherit">${esc(l.url)}</a></div>
+      <div>${esc(l.description)}</div>
+      <div class="meta">${t('ad.kw', 'Keywords')}: ${esc(l.keywords) || '–'}${l.promo ? ' · ' + t('ad.promo', 'Offer') + ': ' + esc(l.promo) + (l.promo_until ? ' ' + t('ad.until', 'until') + ' ' + esc(l.promo_until) : '') : ''}${l.email ? ' · ' + esc(l.email) : ''} · ${esc(l.created_at)}</div>
+      <div class="actions">
+        ${l.status !== 'approved' ? `<button data-t2="listing" data-id="${l.id}" data-a="approve">${t('ad.approve', 'Approve')}</button>` : ''}
+        ${l.status !== 'rejected' ? `<button class="danger" data-t2="listing" data-id="${l.id}" data-a="reject">${t('ad.reject', 'Reject')}</button>` : ''}
+      </div>
+    </div>`).join('') : nothing;
+}
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('button[data-a]');
+  if (!b) return;
+  b.disabled = true;
+  try {
+    const j = await api('/api/admin/review', { method: 'POST', body: JSON.stringify({ type: b.dataset.t2, id: Number(b.dataset.id), action: b.dataset.a }) });
+    const note = j.error || j.note;
+    await load();
+    if (note) { const n = document.createElement('div'); n.className = 'msg info'; n.textContent = note; $('app').prepend(n); }
+  } catch {}
+});
+document.addEventListener('change', (e) => { if (e.target.name === 'flt') load().catch(() => {}); });
+$('lf').addEventListener('submit', (e) => { e.preventDefault(); pw = $('pw').value; try { sessionStorage.setItem('ser7-admin', pw); } catch {} $('lmsg').hidden = true; load().catch(() => {}); });
+if (pw) load().catch(() => {});
+</script>
+</body>
+</html>

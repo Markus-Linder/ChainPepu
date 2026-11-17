@@ -159,3 +159,4 @@ html, body { background: #0d0f14 url(assets/sky.jpg) center 52% / cover no-repea
   #searchbar:not(.intro) .modes { order: 3; }
   #menu-btn { right: calc(70px + env(safe-area-inset-right, 0px)); }
 }
+#menu hr { border: 0; border-top: 1px solid var(--glass-border); margin: 4px 6px; width: auto; }

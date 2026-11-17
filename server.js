@@ -41,20 +41,21 @@ async function searchBrave(q, lang) {
   }));
 }
 
-async function searchWikipedia(q, lang) {
+async function searchWikipedia(q, lang, offset = 0) {
   const url = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&generator=search` +
-    `&gsrsearch=${encodeURIComponent(q)}&gsrlimit=20&prop=pageimages|extracts&exintro=1&explaintext=1` +
+    `&gsrsearch=${encodeURIComponent(q)}&gsrlimit=20&gsroffset=${offset}&prop=pageimages|extracts&exintro=1&explaintext=1` +
     `&exsentences=4&exlimit=20&piprop=thumbnail&pithumbsize=800`;
   const r = await fetch(url, { headers: { 'user-agent': 'ChainPepu/0.1 (3D search prototype)' } });
   if (!r.ok) throw new Error(`Wikipedia ${r.status}`);
   const j = await r.json();
-  return Object.values(j.query?.pages || {}).sort((a, b) => a.index - b.index).map((x) => ({
+  const results = Object.values(j.query?.pages || {}).sort((a, b) => a.index - b.index).map((x) => ({
     title: x.title,
     url: `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(x.title.replace(/ /g, '_'))}`,
     snippet: x.extract || '',
     image: x.thumbnail?.source || null,
     source: `${lang}.wikipedia.org`,
   }));
+  return { results, nextOffset: j.continue?.gsroffset ?? null };
 }
 
 // Darf die Seite in einem iframe eingebettet werden? (X-Frame-Options / CSP frame-ancestors)
@@ -84,15 +85,11 @@ const server = http.createServer(async (req, res) => {
   try {
     if (u.pathname === '/api/search') {
       const q = (u.searchParams.get('q') || '').trim();
-      const lang = /^[a-z]{2}$/.test(u.searchParams.get('lang') || '') ? u.searchParams.get('lang') : 'de';
+      const lang = /^[a-z]{2,3}$/.test(u.searchParams.get('lang') || '') ? u.searchParams.get('lang') : 'en';
+      const offset = Number(u.searchParams.get('offset')) || 0;
       if (!q) return sendJson(res, 400, { error: 'q fehlt' });
-      let results = [];
-      let engine = 'wikipedia';
-      if (BRAVE_KEY) {
-        try { results = await searchBrave(q, lang); engine = 'brave'; } catch (e) { console.warn(e.message); }
-      }
-      if (!results.length) results = await searchWikipedia(q, lang);
-      return sendJson(res, 200, { engine, results });
+      const page = await searchWikipedia(q, lang, offset);
+      return sendJson(res, 200, { engine: 'wikipedia', ...page });
     }
     if (u.pathname === '/api/frameable') {
       const target = u.searchParams.get('url') || '';

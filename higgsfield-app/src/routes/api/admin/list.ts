@@ -5,9 +5,9 @@ export const Route = createFileRoute("/api/admin/list")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        if (!isAdmin(request)) return json({ error: "Falsches Passwort" }, 401);
+        if (!isAdmin(request)) return json({ error: "Wrong password" }, 401);
         const d = db();
-        if (!d) return json({ error: "Datenbank nicht verfügbar" }, 503);
+        if (!d) return json({ error: "Database unavailable" }, 503);
         const filter = new URL(request.url).searchParams.get("filter") ?? "open";
         const listingWhere = filter === "all" ? "1=1" : "status = 'pending'";
         const campaignWhere = filter === "all" ? "1=1" : "status = 'review'";

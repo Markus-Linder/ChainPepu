@@ -97,16 +97,16 @@ export function isEmail(v: string): boolean {
 // ---------- Automatische Vorprüfung (regelbasiert, ohne KI) ----------
 // Endgültig entscheidet immer der Betreiber im Verwaltungsbereich.
 const REJECT_PATTERNS: [RegExp, string][] = [
-  [/\b(porn\w*|xxx|hardcore|sexcam\w*|camgirl\w*|nude[sz]?|nackt\w*|erotik\w*|escort\w*|onlyfans|hentai|fetisch\w*|bordell\w*)\b/i, "sexuelle Inhalte"],
-  [/\b(sieg heil|heil hitler|white power|rassenkrieg|untermensch\w*|judensau|kanake\w*|neger\w*|holocaust (?:lüge|luege|hoax)|14 ?words)\b/i, "rassistische oder volksverhetzende Inhalte"],
-  [/\b(drogen kaufen|koks kaufen|kokain kaufen|crystal meth|mdma kaufen|waffen ohne schein|waffe kaufen ohne|falsch(?:e|en) (?:ausweis|pass|führerschein)|fake ?id|geldwäsche|kinderporn\w*|darknet ?markt)\b/i, "illegale Angebote"],
-  [/\b(warez|crack(?:ed)? download|keygen|raubkopie\w*|kostenlos streamen illegal)\b/i, "Urheberrechtsverletzung"],
+  [/\b(porn\w*|xxx|hardcore|sexcam\w*|camgirl\w*|nude[sz]?|nackt\w*|erotik\w*|escort\w*|onlyfans|hentai|fetisch\w*|bordell\w*)\b/i, "sexual content"],
+  [/\b(sieg heil|heil hitler|white power|rassenkrieg|untermensch\w*|judensau|kanake\w*|neger\w*|holocaust (?:lüge|luege|hoax)|14 ?words)\b/i, "racist or hateful content"],
+  [/\b(drogen kaufen|koks kaufen|kokain kaufen|crystal meth|mdma kaufen|waffen ohne schein|waffe kaufen ohne|falsch(?:e|en) (?:ausweis|pass|führerschein)|fake ?id|geldwäsche|kinderporn\w*|darknet ?markt)\b/i, "illegal offers"],
+  [/\b(warez|crack(?:ed)? download|keygen|raubkopie\w*|kostenlos streamen illegal)\b/i, "copyright infringement"],
 ];
 const REVIEW_PATTERNS: [RegExp, string][] = [
-  [/\b(casino\w*|sportwetten|glücksspiel\w*|gluecksspiel\w*|poker)\b/i, "Glücksspiel (Lizenz prüfen)"],
-  [/\b(krypto\w*|bitcoin|trading signal\w*|schnell reich|garantierte? rendite)\b/i, "Finanzversprechen prüfen"],
-  [/\b(diät\w*|abnehmen|wundermittel|heilt|potenz\w*)\b/i, "Gesundheitsversprechen prüfen"],
-  [/\b(waffe\w*|messer\w*|munition)\b/i, "Waffen prüfen"],
+  [/\b(casino\w*|sportwetten|glücksspiel\w*|gluecksspiel\w*|poker)\b/i, "gambling (check licence)"],
+  [/\b(krypto\w*|bitcoin|trading signal\w*|schnell reich|garantierte? rendite)\b/i, "financial promises (check)"],
+  [/\b(diät\w*|abnehmen|wundermittel|heilt|potenz\w*)\b/i, "health claims (check)"],
+  [/\b(waffe\w*|messer\w*|munition)\b/i, "weapons (check)"],
 ];
 
 export type CheckResult = { verdict: "ok" | "review" | "reject"; reasons: string[]; pageTitle?: string };
@@ -124,13 +124,13 @@ export async function checkContent(url: string, texts: string[]): Promise<CheckR
     });
     const ct = r.headers.get("content-type") ?? "";
     if (!r.ok) {
-      reasons.push(`Seite nicht erreichbar (HTTP ${r.status})`);
+      reasons.push(`page not reachable (HTTP ${r.status})`);
       verdict = "review";
     } else if (ct.includes("text/html")) {
       const html = (await r.text()).slice(0, 200_000);
       pageTitle = /<title[^>]*>([^<]{1,200})<\/title>/i.exec(html)?.[1]?.trim();
       if (/<meta[^>]+name=["']rating["'][^>]+content=["'](adult|mature|RTA-5042)/i.test(html) || /RTA-5042-1996-1400-1577-RTA/.test(html)) {
-        reasons.push("Seite ist als „nur für Erwachsene“ gekennzeichnet");
+        reasons.push("page is labelled adults-only");
         verdict = "reject";
       }
       pageText = html
@@ -142,7 +142,7 @@ export async function checkContent(url: string, texts: string[]): Promise<CheckR
       await r.body?.cancel();
     }
   } catch {
-    reasons.push("Seite konnte nicht geladen werden");
+    reasons.push("page could not be loaded");
     verdict = verdict === "reject" ? "reject" : "review";
   }
   const all = [...texts, pageTitle ?? "", pageText].join(" \n ");
@@ -277,15 +277,17 @@ export async function promosForHosts(hosts: string[]): Promise<Map<string, strin
 
 type WikiPage = { title: string; index: number; extract?: string; thumbnail?: { source: string } };
 
-export async function wikipediaResults(q: string, lang: string): Promise<SearchResult[]> {
+export type Page = { results: SearchResult[]; nextOffset: number | null };
+
+export async function wikipediaResults(q: string, lang: string, offset = 0): Promise<Page> {
   const url =
     `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&generator=search` +
-    `&gsrsearch=${encodeURIComponent(q)}&gsrlimit=20&prop=pageimages|extracts&exintro=1` +
+    `&gsrsearch=${encodeURIComponent(q)}&gsrlimit=20&gsroffset=${offset}&prop=pageimages|extracts&exintro=1` +
     `&explaintext=1&exsentences=4&exlimit=20&piprop=thumbnail&pithumbsize=800`;
   const r = await fetch(url, { headers: { "user-agent": "ser7/1.0 (3D search)" } });
   if (!r.ok) throw new Error(`Wikipedia ${r.status}`);
-  const j = (await r.json()) as { query?: { pages?: Record<string, WikiPage> } };
-  return Object.values(j.query?.pages ?? {})
+  const j = (await r.json()) as { query?: { pages?: Record<string, WikiPage> }; continue?: { gsroffset?: number } };
+  const results = Object.values(j.query?.pages ?? {})
     .sort((a, b) => a.index - b.index)
     .map((x) => ({
       title: x.title,
@@ -295,6 +297,7 @@ export async function wikipediaResults(q: string, lang: string): Promise<SearchR
       source: `${lang}.wikipedia.org`,
       kind: "web" as const,
     }));
+  return { results, nextOffset: j.continue?.gsroffset ?? null };
 }
 
 type CommonsPage = {
@@ -304,15 +307,15 @@ type CommonsPage = {
 };
 
 // Videos von Wikimedia Commons (frei, ohne Schlüssel)
-export async function commonsVideos(q: string): Promise<SearchResult[]> {
+export async function commonsVideos(q: string, offset = 0): Promise<Page> {
   const url =
     "https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6" +
-    `&gsrsearch=${encodeURIComponent(`filetype:video ${q}`)}&gsrlimit=20&prop=imageinfo` +
+    `&gsrsearch=${encodeURIComponent(`filetype:video ${q}`)}&gsrlimit=20&gsroffset=${offset}&prop=imageinfo` +
     "&iiprop=url|mime|extmetadata&iiurlwidth=1280&iiextmetadatafilter=ImageDescription|ObjectName";
   const r = await fetch(url, { headers: { "user-agent": "ser7/1.0 (3D search)" } });
   if (!r.ok) throw new Error(`Commons ${r.status}`);
-  const j = (await r.json()) as { query?: { pages?: Record<string, CommonsPage> } };
-  return Object.values(j.query?.pages ?? {})
+  const j = (await r.json()) as { query?: { pages?: Record<string, CommonsPage> }; continue?: { gsroffset?: number } };
+  const results = Object.values(j.query?.pages ?? {})
     .sort((a, b) => a.index - b.index)
     .filter((p) => p.imageinfo?.[0]?.mime?.startsWith("video/"))
     .map((p) => {
@@ -322,11 +325,12 @@ export async function commonsVideos(q: string): Promise<SearchResult[]> {
       return {
         title: name,
         url: ii.descriptionurl,
-        snippet: desc.slice(0, 400) || "Video auf Wikimedia Commons",
+        snippet: desc.slice(0, 400) || "Video on Wikimedia Commons",
         image: ii.thumburl ?? null,
         source: "commons.wikimedia.org",
         kind: "video" as const,
         video: ii.url,
       };
     });
+  return { results, nextOffset: j.continue?.gsroffset ?? null };
 }

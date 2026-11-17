@@ -7,11 +7,11 @@ export const Route = createFileRoute("/api/ads/status")({
     handlers: {
       GET: async ({ request }) => {
         const d = db();
-        if (!d) return json({ error: "Datenbank nicht verfügbar" }, 503);
+        if (!d) return json({ error: "Database unavailable" }, 503);
         const token = new URL(request.url).searchParams.get("k") ?? "";
-        if (!/^[a-f0-9]{36}$/.test(token)) return json({ error: "Ungültiger Link" }, 400);
+        if (!/^[a-f0-9]{36}$/.test(token)) return json({ error: "Invalid link" }, 400);
         let c = await d.prepare("SELECT * FROM campaigns WHERE token = ?").bind(token).first<CampaignRow>();
-        if (!c) return json({ error: "Buchung nicht gefunden" }, 404);
+        if (!c) return json({ error: "Booking not found" }, 404);
         // Zahlung bei Stripe prüfen, solange noch offen
         if (c.status === "unpaid" && c.stripe_session) {
           try {

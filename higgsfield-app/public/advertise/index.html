@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Ad manager · ser7</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="stylesheet" href="/world/pages.css?v=2" />
+  <script src="/world/pages-i18n.js?v=1"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/">ser<span>7</span></a>
+    <nav class="links">
+      <a href="/" data-t="nav.search">Back to search</a>
+      <a href="/submit/" data-t="nav.submit">Add your site</a>
+      <a href="/advertise/" aria-current="page" data-t="nav.advertise">Advertise</a>
+    </nav>
+  </header>
+
+  <section class="panel" id="dash" hidden>
+    <h1 data-t="a.dash">Your ad</h1>
+    <p class="lead" id="dash-lead"></p>
+    <div id="dash-msg" class="msg" hidden style="margin-top:14px"></div>
+    <div class="stats" style="margin-top:16px">
+      <div class="stat"><b id="s-status">–</b><span data-t="a.status">Status</span></div>
+      <div class="stat"><b id="s-imp">0</b><span data-t="a.imp">Impressions</span></div>
+      <div class="stat"><b id="s-clicks">0</b><span data-t="a.clicks">Visits</span></div>
+      <div class="stat"><b id="s-ctr">0%</b><span data-t="a.ctr">Click rate</span></div>
+      <div class="stat"><b id="s-end">–</b><span data-t="a.until">Runs until</span></div>
+    </div>
+    <p class="muted" style="margin:16px 0 0;font-size:14px" data-t="a.bookmark">Bookmark this page – this private link always shows your numbers.</p>
+  </section>
+
+  <section class="panel">
+    <h1 data-t="a.title">Book a sponsored placement</h1>
+    <p class="lead" data-t="a.lead">Your page stands at the very front of the street for matching searches, highlighted in gold and labelled as sponsored. Offers like “15% off everything” appear as a red banner above your page.</p>
+  </section>
+
+  <section class="panel">
+    <form id="f" novalidate>
+      <label><span data-t="a.url">Target address</span>
+        <input id="url" type="url" inputmode="url" required placeholder="https://myshop.com" />
+      </label>
+      <label><span data-t="a.head">Headline</span> <small data-t="a.head.hint">up to 80 characters</small>
+        <input id="headline" maxlength="80" required placeholder="My Shop – sneakers at the best price" data-tp="a.head.ph" />
+      </label>
+      <label><span data-t="f.desc">Description</span> <small data-t="a.desc.hint">up to 300 characters</small>
+        <textarea id="description" maxlength="300" placeholder="What do you offer?" data-tp="a.desc.ph"></textarea>
+      </label>
+      <label><span data-t="f.kw">Keywords</span> <small data-t="a.kw.hint">comma-separated – your ad appears for these searches</small>
+        <input id="keywords" maxlength="200" required placeholder="sneakers, shoes, running shoes" />
+      </label>
+      <label><span data-t="a.promo">Offer</span> <small data-t="a.promo.hint">optional, e.g. “15% off all sneakers”</small>
+        <input id="promo" maxlength="80" />
+      </label>
+      <div class="row">
+        <label><span data-t="a.days">Duration</span>
+          <select id="days"></select>
+        </label>
+        <label><span data-t="a.email">Email for invoice and questions</span>
+          <input id="email" type="email" autocomplete="email" required />
+        </label>
+      </div>
+      <div>
+        <div class="muted" style="font-size:13px;margin-bottom:6px" data-t="a.preview">Preview of your ad</div>
+        <div class="preview" aria-live="polite">
+          <div class="ribbon" id="p-promo" hidden></div>
+          <div class="head" data-t="a.sponsored">SPONSORED</div>
+          <div class="body">
+            <h3 id="p-title">Your headline</h3>
+            <div class="url" id="p-url">myshop.com</div>
+            <div id="p-desc">Your description appears here.</div>
+          </div>
+        </div>
+      </div>
+      <div><div class="muted" style="font-size:13px" data-t="a.price">Price incl. all fees</div><div class="price" id="price">–</div></div>
+      <label class="check"><input id="accept" type="checkbox" /> <span data-t="a.accept">I book as a business (§ 14 BGB) and accept the <a href="/terms/" target="_blank" style="color:inherit">terms</a>. I confirm that the advertised content is legal and contains no sexual, racist, violent or misleading content. The ad is reviewed before it starts; if it is rejected, the amount is refunded.</span></label>
+      <div id="msg" class="msg" hidden></div>
+      <div><button id="send" type="submit" data-t="a.send">Continue to payment</button></div>
+    </form>
+  </section>
+  <footer class="legal-links"><a href="/imprint/" data-t="l.imprint">Imprint</a><a href="/terms/" data-t="l.terms">Terms</a><a href="/privacy/" data-t="l.privacy">Privacy</a></footer>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const f = $('f'), msg = $('msg'), send = $('send');
+const L = window.SER7_LANG || 'en';
+let cfg = { pricePerDayCents: 500, durations: [7, 14, 30, 90], paymentReady: false, currency: 'EUR' };
+const money = (c) => (c / 100).toLocaleString(L, { style: 'currency', currency: cfg.currency || 'EUR' });
+function show(el, text, kind) { el.hidden = false; el.className = 'msg ' + kind; el.textContent = text; }
+function host(u) { try { return new URL(/^https?:/.test(u) ? u : 'https://' + u).hostname.replace(/^www\./, ''); } catch { return u; } }
+function updatePreview() {
+  $('p-title').textContent = $('headline').value || t('a.ph.title', 'Your headline');
+  $('p-url').textContent = host($('url').value) || 'myshop.com';
+  $('p-desc').textContent = $('description').value || t('a.ph.desc', 'Your description appears here.');
+  const pr = $('promo').value.trim();
+  $('p-promo').hidden = !pr; $('p-promo').textContent = pr ? '🏷 ' + pr : '';
+  $('price').textContent = money(Number($('days').value || 7) * cfg.pricePerDayCents);
+}
+f.addEventListener('input', updatePreview);
+fetch('/api/ads/config').then((r) => r.json()).then((c) => {
+  cfg = c;
+  $('days').innerHTML = c.durations.map((d) => `<option value="${d}">${d} ${t('days', 'days')} · ${money(d * c.pricePerDayCents)}</option>`).join('');
+  updatePreview();
+  if (!c.paymentReady) show(msg, t('a.nopay', 'Note: online payment is being set up. You can still book – we will contact you by email.'), 'info');
+}).catch(() => {});
+f.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  send.disabled = true; show(msg, t('a.checking', 'Checking your ad …'), 'info');
+  try {
+    const r = await fetch('/api/ads/create', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({
+      url: $('url').value, headline: $('headline').value, description: $('description').value, keywords: $('keywords').value,
+      promo: $('promo').value, days: Number($('days').value), email: $('email').value, accept: $('accept').checked }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { show(msg, j.error || t('err.generic', 'That did not work.'), 'bad'); send.disabled = false; return; }
+    if (j.checkoutUrl) { location.href = j.checkoutUrl; return; }
+    location.href = '/advertise/?k=' + j.token + '&new=1';
+  } catch { show(msg, t('err.net', 'No connection. Please try again later.'), 'bad'); send.disabled = false; }
+});
+const params = new URLSearchParams(location.search);
+const token = params.get('k');
+const LABEL = { unpaid: t('st.unpaid', 'Open'), review: t('st.review', 'In review'), active: t('st.active', 'Active'), rejected: t('st.rejected', 'Rejected') };
+async function loadDash(tries = 0) {
+  const r = await fetch('/api/ads/status?k=' + encodeURIComponent(token));
+  const j = await r.json().catch(() => ({}));
+  $('dash').hidden = false;
+  if (!r.ok) { show($('dash-msg'), j.error || t('a.notfound', 'Booking not found.'), 'bad'); return; }
+  const c = j.campaign;
+  $('dash-lead').textContent = `“${c.headline}” · ${c.days} ${t('days', 'days')} · ${money(c.price_cents)} · ${c.keywords}`;
+  $('s-status').textContent = LABEL[c.status] || c.status;
+  $('s-imp').textContent = c.impressions.toLocaleString(L);
+  $('s-clicks').textContent = c.clicks.toLocaleString(L);
+  $('s-ctr').textContent = c.impressions ? (100 * c.clicks / c.impressions).toLocaleString(L, { maximumFractionDigits: 1 }) + '%' : '0%';
+  $('s-end').textContent = c.ends_at ? new Date(c.ends_at).toLocaleDateString(L) : '–';
+  const m = $('dash-msg');
+  if (params.get('abgebrochen') || params.get('cancelled')) show(m, t('a.cancelled', 'Payment was cancelled. You can book again below.'), 'bad');
+  else if (c.status === 'unpaid' && params.get('session_id') && tries < 5) { show(m, t('a.confirming', 'Confirming payment …'), 'info'); setTimeout(() => loadDash(tries + 1), 2500); }
+  else if (c.status === 'unpaid') show(m, t('a.unpaid', 'Your booking is saved but not paid yet.'), 'info');
+  else if (c.status === 'review') show(m, t('a.review', 'Thanks for your payment! Your ad is being reviewed and starts once approved.'), 'ok');
+  else if (c.status === 'active') show(m, t('a.active', 'Your ad is live.'), 'ok');
+  else if (c.status === 'rejected') show(m, t('a.rejected', 'Your ad was rejected. The amount will be refunded.'), 'bad');
+}
+if (token) loadDash();
+</script>
+</body>
+</html>

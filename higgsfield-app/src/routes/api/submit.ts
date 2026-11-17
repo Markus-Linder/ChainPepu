@@ -8,12 +8,12 @@ export const Route = createFileRoute("/api/submit")({
     handlers: {
       POST: async ({ request }) => {
         const d = db();
-        if (!d) return json({ error: "Datenbank nicht verfügbar" }, 503);
+        if (!d) return json({ error: "Database unavailable" }, 503);
         let body: Record<string, unknown>;
         try {
           body = (await request.json()) as Record<string, unknown>;
         } catch {
-          return json({ error: "Ungültige Anfrage" }, 400);
+          return json({ error: "Invalid request" }, 400);
         }
         const kind = body.kind === "video" ? "video" : "web";
         const url = normalizeUrl(body.url);
@@ -23,13 +23,13 @@ export const Route = createFileRoute("/api/submit")({
         const promo = clean(body.promo, 80);
         const promoUntil = /^\d{4}-\d{2}-\d{2}$/.test(String(body.promo_until ?? "")) ? String(body.promo_until) : null;
         const email = clean(body.email, 200);
-        if (!url) return json({ error: "Bitte eine gültige Adresse angeben, z. B. https://meinshop.de" }, 400);
-        if (title.length < 3) return json({ error: "Bitte einen Titel mit mindestens 3 Zeichen angeben." }, 400);
-        if (email && !isEmail(email)) return json({ error: "Die E-Mail-Adresse sieht nicht gültig aus." }, 400);
-        if (body.accept !== true) return json({ error: "Bitte bestätige, dass die Inhalte legal sind." }, 400);
+        if (!url) return json({ error: "Please enter a valid address, e.g. https://myshop.com" }, 400);
+        if (title.length < 3) return json({ error: "Please enter a title with at least 3 characters." }, 400);
+        if (email && !isEmail(email)) return json({ error: "That email address doesn't look valid." }, 400);
+        if (body.accept !== true) return json({ error: "Please confirm that the content is legal." }, 400);
 
         const dup = await d.prepare("SELECT id FROM listings WHERE url = ? AND status != 'rejected'").bind(url).first();
-        if (dup) return json({ error: "Diese Adresse ist bereits eingetragen oder wartet auf Prüfung." }, 409);
+        if (dup) return json({ error: "This address is already listed or waiting for review." }, 409);
 
         const check = await checkContent(url, [title, description, keywords, promo]);
         const status = check.verdict === "reject" ? "rejected" : "pending";
@@ -38,9 +38,9 @@ export const Route = createFileRoute("/api/submit")({
           .bind(kind, url, title, description, keywords, promo, promoUntil, email || null, status, JSON.stringify(check))
           .run();
         if (status === "rejected") {
-          return json({ ok: false, status, message: `Die Einreichung wurde abgelehnt: ${check.reasons.join(", ")}.` });
+          return json({ ok: false, status, message: `Your submission was rejected: ${check.reasons.join(", ")}.` });
         }
-        return json({ ok: true, status, message: "Danke! Deine Einreichung wird geprüft und erscheint nach der Freigabe in der Suche." });
+        return json({ ok: true, status, message: "Thanks! Your submission will be reviewed and appears in search once approved." });
       },
     },
   },

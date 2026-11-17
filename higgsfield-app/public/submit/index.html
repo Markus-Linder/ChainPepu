@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Add your site · ser7</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="stylesheet" href="/world/pages.css?v=2" />
+  <script src="/world/pages-i18n.js?v=1"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/">ser<span>7</span></a>
+    <nav class="links">
+      <a href="/" data-t="nav.search">Back to search</a>
+      <a href="/submit/" aria-current="page" data-t="nav.submit">Add your site</a>
+      <a href="/advertise/" data-t="nav.advertise">Advertise</a>
+    </nav>
+  </header>
+  <section class="panel">
+    <h1 data-t="s.title">Add a website or video</h1>
+    <p class="lead" data-t="s.lead">Free. Every submission is checked automatically and then approved by us. Illegal, sexual, racist or hateful content is not accepted.</p>
+  </section>
+  <section class="panel">
+    <form id="f" novalidate>
+      <div class="seg" role="radiogroup" aria-label="Type">
+        <label><input type="radio" name="kind" value="web" checked /><span data-t="kind.web">Website</span></label>
+        <label><input type="radio" name="kind" value="video" /><span data-t="kind.video">Video</span></label>
+      </div>
+      <label><span data-t="f.url">Address</span> <small id="url-hint" data-t="hint.web">e.g. https://myshop.com</small>
+        <input id="url" name="url" type="url" inputmode="url" required placeholder="https://" autocomplete="url" />
+      </label>
+      <label><span data-t="f.title">Title</span>
+        <input id="title" name="title" maxlength="120" required placeholder="What your listing should be called" data-tp="f.title.ph" />
+      </label>
+      <label><span data-t="f.desc">Description</span> <small data-t="f.desc.hint">up to 600 characters</small>
+        <textarea id="description" name="description" maxlength="600" placeholder="What is the page about?" data-tp="f.desc.ph"></textarea>
+      </label>
+      <label><span data-t="f.kw">Keywords</span> <small data-t="f.kw.hint">comma-separated – your listing appears for these searches</small>
+        <input id="keywords" name="keywords" maxlength="200" placeholder="sneakers, shoes, running shoes" />
+      </label>
+      <div class="row">
+        <label><span data-t="f.promo">Current offer</span> <small data-t="f.promo.hint">optional, shown above your page</small>
+          <input id="promo" name="promo" maxlength="80" placeholder="15% off all sneakers" data-tp="f.promo.ph" />
+        </label>
+        <label><span data-t="f.until">Offer valid until</span> <small data-t="opt">optional</small>
+          <input id="promo_until" name="promo_until" type="date" />
+        </label>
+      </div>
+      <label><span data-t="f.email">Email</span> <small data-t="f.email.hint">optional, for questions – never published</small>
+        <input id="email" name="email" type="email" autocomplete="email" />
+      </label>
+      <label class="check"><input id="accept" type="checkbox" /> <span data-t="s.accept">I confirm that the content is legal, that I am entitled to submit it, and that it contains no sexual, racist or otherwise unlawful content.</span></label>
+      <div id="msg" class="msg" hidden></div>
+      <div><button id="send" type="submit" data-t="s.send">Submit</button></div>
+    </form>
+  </section>
+  <footer class="legal-links"><a href="/imprint/" data-t="l.imprint">Imprint</a><a href="/terms/" data-t="l.terms">Terms</a><a href="/privacy/" data-t="l.privacy">Privacy</a></footer>
+</div>
+<script>
+const f = document.getElementById('f'), msg = document.getElementById('msg'), send = document.getElementById('send');
+f.addEventListener('change', () => {
+  const video = f.kind.value === 'video';
+  document.getElementById('url-hint').textContent = video ? t('hint.video', 'e.g. https://youtube.com/watch?v=… or a link to an .mp4 file') : t('hint.web', 'e.g. https://myshop.com');
+});
+function show(text, kind) { msg.hidden = false; msg.className = 'msg ' + kind; msg.textContent = text; }
+f.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  send.disabled = true; show(t('checking', 'Checking …'), 'info');
+  try {
+    const r = await fetch('/api/submit', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({
+      kind: f.kind.value, url: f.url.value, title: f.title.value, description: f.description.value, keywords: f.keywords.value,
+      promo: f.promo.value, promo_until: f.promo_until.value, email: f.email.value, accept: document.getElementById('accept').checked }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) show(j.error || t('err.generic', 'That did not work. Please try again later.'), 'bad');
+    else { show(j.message, j.ok ? 'ok' : 'bad'); if (j.ok) f.reset(); }
+  } catch { show(t('err.net', 'No connection. Please try again later.'), 'bad'); }
+  send.disabled = false;
+});
+</script>
+</body>
+</html>

@@ -12,10 +12,10 @@ unter `app/`. Die 3D-Welt selbst liegt in `../public/world/` und wird dort nach 
 | `src/routes/api/admin/*` | Verwaltung: Liste, Freigeben/Ablehnen |
 | `src/routes/api/click.ts` | Klickzählung für Sponsorplätze |
 | `migrations/0002_ser7.sql` | Tabellen `listings` und `campaigns` (D1) |
-| `public/eintragen`, `public/werbung`, `public/verwaltung` | Unterseiten |
+| `public/submit`, `public/advertise`, `public/admin`, `public/imprint`, `public/terms`, `public/privacy` | Unterseiten |
 
 ## Geheimnisse (in den Higgsfield-Website-Einstellungen setzen)
 
-- `ADMIN_PASSWORD` – Passwort für `/verwaltung/`
+- `ADMIN_PASSWORD` – Passwort für `/admin/`
 - `STRIPE_SECRET_KEY` – geheimer Stripe-Schlüssel (`sk_live_…` bzw. zum Testen `sk_test_…`)
 - optional `SPONSOR_PRICE_PER_DAY_CENTS` – Preis pro Tag in Cent (Standard 500 = 5 €)
