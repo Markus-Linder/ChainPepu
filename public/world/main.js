@@ -28,7 +28,13 @@ const MAX_LIVE = 4;
 const INFO_DIST = 16;
 
 // ---------- Oberfläche ----------
-const root = document.getElementById('chainpepu') || document.body;
+// Eigener Container direkt im <body>, außerhalb fremder Frameworks (z. B. React-Hydration)
+let root = document.getElementById('chainpepu');
+if (!root || root.tagName === 'MAIN') {
+  root = document.createElement('div');
+  root.id = 'chainpepu';
+  document.body.appendChild(root);
+}
 root.innerHTML = `
   <div id="css-layer"></div>
   <div id="gl-layer"></div>
@@ -99,7 +105,8 @@ const scene = new THREE.Scene();
 const cssScene = new THREE.Scene();
 scene.fog = new THREE.Fog(0xd9b48f, 70, 340);
 
-const camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.1, 2000);
+const fovFor = (a) => (a < 1 ? 78 : 66);
+const camera = new THREE.PerspectiveCamera(fovFor(innerWidth / innerHeight), innerWidth / innerHeight, 0.1, 2000);
 camera.position.set(0, EYE, 12);
 
 // ---------- Licht ----------
@@ -423,19 +430,28 @@ function buildStreet(results, query) {
 
     if (!result) continue;
 
-    // Bildschirm an der Fassade
+    // Bildschirm: schräg zur Straße gedreht wie eine große Werbetafel,
+    // damit man die Seite schon beim Heranlaufen sieht (auch im Hochformat)
     const faceX = side * STREET_HALF;
-    const rotY = side < 0 ? Math.PI / 2 : -Math.PI / 2;
+    const tilt = 0.44; // ~25°
+    const n = new THREE.Vector3(-side * Math.cos(tilt), 0, Math.sin(tilt));
+    const rotY = Math.atan2(n.x, n.z);
     const screenY = 2.2 + SCREEN_M.h / 2;
+    const d = ((SCREEN_M.w / 2) * Math.sin(tilt) + 0.4) / Math.cos(tilt);
+    const center = new THREE.Vector3(faceX, screenY, z).addScaledVector(n, d);
 
     const bezel = new THREE.Mesh(new THREE.BoxGeometry(SCREEN_M.w + 0.45, SCREEN_M.h + 0.45, 0.3), bezelMat);
-    bezel.position.set(faceX - side * 0.1, screenY, z);
+    bezel.position.copy(center).addScaledVector(n, -0.17);
     bezel.rotation.y = rotY;
     bezel.castShadow = true;
     street.add(bezel);
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.25, screenY - SCREEN_M.h / 2, 0.25), bezelMat);
+    post.position.copy(center).addScaledVector(n, -0.3);
+    post.position.y = (screenY - SCREEN_M.h / 2) / 2;
+    street.add(post);
 
     const hole = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN_M.w, SCREEN_M.h), holeMat);
-    hole.position.set(faceX - side * 0.27, screenY, z);
+    hole.position.copy(center);
     hole.rotation.y = rotY;
     hole.renderOrder = 10;
     street.add(hole);
@@ -449,7 +465,8 @@ function buildStreet(results, query) {
       new THREE.PlaneGeometry(SCREEN_M.w + 0.45, (SCREEN_M.w + 0.45) / 4),
       new THREE.MeshStandardMaterial({ map: signTex, emissive: 0xffffff, emissiveMap: signTex, emissiveIntensity: 0.85, roughness: 0.4 })
     );
-    sign.position.set(faceX - side * 0.3, screenY + SCREEN_M.h / 2 + 1.45, z);
+    sign.position.copy(center).addScaledVector(n, -0.02);
+    sign.position.y = screenY + SCREEN_M.h / 2 + 1.45;
     sign.rotation.y = rotY;
     street.add(sign);
 
@@ -461,7 +478,7 @@ function buildStreet(results, query) {
     css.scale.setScalar(PX_TO_M);
     cssScene.add(css);
 
-    const slot = { result, rank: i + 1, side, screenPos: hole.position.clone(), css, el, bezel, live: false, frameable: null };
+    const slot = { result, rank: i + 1, side, normal: n.clone(), screenPos: hole.position.clone(), css, el, bezel, live: false, frameable: null };
     for (const m of [hole, bezel, sign]) { m.userData.slot = slot; clickables.push(m); }
     showPreview(slot);
     slots.push(slot);
@@ -724,9 +741,10 @@ function enterSite(slot) {
   }
   walkTarget = null;
   const from = camera.position.clone();
-  const to = slot.screenPos.clone().add(new THREE.Vector3(-slot.side * 5.2, 0, 0));
+  const dist = camera.aspect < 1 ? 9 : 5.4;   // Hochformat: weiter weg, damit die Seite passt
+  const to = slot.screenPos.clone().addScaledVector(slot.normal, dist);
   to.y = slot.screenPos.y;
-  const yawTo = slot.side < 0 ? Math.PI / 2 : -Math.PI / 2;
+  const yawTo = Math.atan2(slot.normal.x, slot.normal.z);
   flyTo = { t: 0, start: performance.now(), from, to, yawFrom: yaw, yawTo: nearestAngle(yaw, yawTo), pitchFrom: pitch, url };
 }
 function nearestAngle(from, to) {
@@ -835,6 +853,7 @@ function tick() {
 
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
+  camera.fov = fovFor(camera.aspect);
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
   cssRenderer.setSize(innerWidth, innerHeight);
