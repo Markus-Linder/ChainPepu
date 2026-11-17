@@ -1,0 +1,12 @@
+{
+  "name": "chainpepu",
+  "version": "0.1.0",
+  "description": "ChainPepu – eine begehbare 3D-Suchmaschine: Suchergebnisse als lebendige Straße",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": { "node": ">=18" },
+  "license": "MIT"
+}
