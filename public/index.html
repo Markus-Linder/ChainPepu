@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>ChainPepu – Die begehbare Suche</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>ChainPepu</title>
+  <meta name="description" content="Die begehbare Suchmaschine: Geh durch deine Suchergebnisse wie durch eine echte Straße." />
+  <link rel="stylesheet" href="world/style.css" />
   <script type="importmap">
     { "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
@@ -13,58 +14,7 @@
   </script>
 </head>
 <body>
-  <!-- Ebene 1: echte Webseiten (iframes / Vorschaubilder) im 3D-Raum -->
-  <div id="css-layer"></div>
-  <!-- Ebene 2: fotorealistische WebGL-Welt, mit „Löchern“ an den Bildschirmen -->
-  <div id="gl-layer"></div>
-
-  <header id="searchbar" class="intro">
-    <div class="brand">Chain<span>Pepu</span></div>
-    <form id="search-form" autocomplete="off">
-      <input id="q" name="q" type="search" placeholder="Wonach suchst du?" aria-label="Suchbegriff" />
-      <button type="submit" aria-label="Suchen">Suchen</button>
-    </form>
-    <p class="tagline">Geh durch deine Suchergebnisse.</p>
-  </header>
-
-  <div id="crosshair" hidden></div>
-
-  <aside id="info" hidden>
-    <div class="rank"></div>
-    <h2></h2>
-    <div class="url"></div>
-    <p></p>
-    <div class="actions">
-      <button id="btn-enter">Betreten <kbd>E</kbd></button>
-      <a id="btn-open" target="_blank" rel="noopener">Neuer Tab ↗</a>
-    </div>
-  </aside>
-
-  <div id="help" hidden>
-    <b>W A S D</b> laufen · <b>Maus</b> umsehen · <b>Shift</b> schneller · <b>E</b> Webseite betreten · <b>Esc</b> Maus freigeben
-  </div>
-
-  <div id="touch" hidden>
-    <button data-move="fwd" aria-label="Vorwärts">▲</button>
-    <button data-move="back" aria-label="Zurück">▼</button>
-  </div>
-
-  <div id="status" hidden></div>
-
-  <!-- Vollbild-Ansicht einer Webseite -->
-  <div id="viewer" hidden>
-    <div class="bar">
-      <span class="vurl"></span>
-      <a class="vopen" target="_blank" rel="noopener">Im neuen Tab öffnen ↗</a>
-      <button class="vclose" aria-label="Schließen">✕ Zurück auf die Straße</button>
-    </div>
-    <iframe title="Webseite" referrerpolicy="no-referrer"></iframe>
-    <div class="blocked" hidden>
-      <p>Diese Seite erlaubt keine Einbettung.</p>
-      <a class="vopen2" target="_blank" rel="noopener">Seite im neuen Tab öffnen ↗</a>
-    </div>
-  </div>
-
-  <script type="module" src="src/main.js"></script>
+  <div id="chainpepu"></div>
+  <script type="module" src="world/main.js"></script>
 </body>
 </html>
