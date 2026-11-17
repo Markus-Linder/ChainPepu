@@ -1,0 +1,47 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { checkContent, clean, db, isEmail, json, normalizeUrl } from "../../lib/ser7.server";
+
+// Besucher tragen eine Webseite oder ein Video ein. Automatische Vorprüfung,
+// danach Freigabe durch den Betreiber.
+export const Route = createFileRoute("/api/submit")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        const d = db();
+        if (!d) return json({ error: "Datenbank nicht verfügbar" }, 503);
+        let body: Record<string, unknown>;
+        try {
+          body = (await request.json()) as Record<string, unknown>;
+        } catch {
+          return json({ error: "Ungültige Anfrage" }, 400);
+        }
+        const kind = body.kind === "video" ? "video" : "web";
+        const url = normalizeUrl(body.url);
+        const title = clean(body.title, 120);
+        const description = clean(body.description, 600);
+        const keywords = clean(body.keywords, 200);
+        const promo = clean(body.promo, 80);
+        const promoUntil = /^\d{4}-\d{2}-\d{2}$/.test(String(body.promo_until ?? "")) ? String(body.promo_until) : null;
+        const email = clean(body.email, 200);
+        if (!url) return json({ error: "Bitte eine gültige Adresse angeben, z. B. https://meinshop.de" }, 400);
+        if (title.length < 3) return json({ error: "Bitte einen Titel mit mindestens 3 Zeichen angeben." }, 400);
+        if (email && !isEmail(email)) return json({ error: "Die E-Mail-Adresse sieht nicht gültig aus." }, 400);
+        if (body.accept !== true) return json({ error: "Bitte bestätige, dass die Inhalte legal sind." }, 400);
+
+        const dup = await d.prepare("SELECT id FROM listings WHERE url = ? AND status != 'rejected'").bind(url).first();
+        if (dup) return json({ error: "Diese Adresse ist bereits eingetragen oder wartet auf Prüfung." }, 409);
+
+        const check = await checkContent(url, [title, description, keywords, promo]);
+        const status = check.verdict === "reject" ? "rejected" : "pending";
+        await d
+          .prepare("INSERT INTO listings (kind, url, title, description, keywords, promo, promo_until, email, status, check_result) VALUES (?,?,?,?,?,?,?,?,?,?)")
+          .bind(kind, url, title, description, keywords, promo, promoUntil, email || null, status, JSON.stringify(check))
+          .run();
+        if (status === "rejected") {
+          return json({ ok: false, status, message: `Die Einreichung wurde abgelehnt: ${check.reasons.join(", ")}.` });
+        }
+        return json({ ok: true, status, message: "Danke! Deine Einreichung wird geprüft und erscheint nach der Freigabe in der Suche." });
+      },
+    },
+  },
+});

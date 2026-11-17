@@ -121,3 +121,41 @@ html, body { background: #0d0f14 url(assets/sky.jpg) center 52% / cover no-repea
   #viewer .vurl { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { #searchbar, #viewer { transition: none; animation: none; } }
+
+/* Suchart Web / Videos */
+.modes { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(255,255,255,0.07); border: 1px solid var(--glass-border); }
+.modes label { display: block; cursor: pointer; }
+.modes input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.modes span { display: block; padding: 6px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.modes input:checked + span { background: var(--accent); color: var(--ink); }
+.modes input:focus-visible + span { outline: 2px solid #fff; }
+#searchbar:not(.intro) .modes { flex-shrink: 0; }
+.intro-links { display: none; gap: 16px; font-size: 14px; }
+#searchbar.intro .intro-links { display: flex; flex-wrap: wrap; justify-content: center; }
+.intro-links a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,.4); }
+
+/* Menü */
+#menu-btn {
+  position: fixed; z-index: 5; right: calc(72px + env(safe-area-inset-right, 0px)); top: calc(16px + env(safe-area-inset-top, 0px));
+  width: 46px; height: 46px; padding: 0 !important; font-size: 18px !important;
+  background: var(--glass) !important; color: var(--text) !important; border: 1px solid var(--glass-border) !important; backdrop-filter: blur(14px);
+}
+#menu {
+  position: fixed; z-index: 6; right: calc(16px + env(safe-area-inset-right, 0px)); top: calc(70px + env(safe-area-inset-top, 0px));
+  display: grid; gap: 4px; padding: 8px; border-radius: 16px; background: var(--glass-strong); border: 1px solid var(--glass-border); backdrop-filter: blur(18px);
+}
+#menu a { color: var(--text); text-decoration: none; padding: 10px 14px; border-radius: 10px; font-size: 15px; }
+#menu a:hover, #menu a:focus-visible { background: rgba(255,255,255,.1); }
+
+/* Infokarte: Anzeige und Aktion */
+#info.sponsored { border-color: #f5c542; box-shadow: 0 0 0 1px #f5c542, 0 0 40px rgba(245,197,66,.25); }
+#info.sponsored .rank { color: #f5c542; }
+#info .promo { display: inline-block; margin-top: 8px; background: #d7261e; color: #fff; font-weight: 800; font-size: 14px; padding: 5px 10px; border-radius: 8px; }
+.site-screen video { width: 100%; height: 100%; object-fit: cover; background: #000; display: block; }
+#viewer .vvideo { flex: 1; width: 100%; min-height: 0; background: #000; }
+
+@media (max-width: 640px) {
+  #searchbar:not(.intro) { width: calc(100% - 140px); flex-wrap: wrap; border-radius: 22px; }
+  #searchbar:not(.intro) .modes { order: 3; }
+  #menu-btn { right: calc(70px + env(safe-area-inset-right, 0px)); }
+}

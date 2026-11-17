@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Eintragen · ser7</title>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="stylesheet" href="/world/pages.css?v=1" />
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/">ser<span>7</span></a>
+    <nav class="links">
+      <a href="/">Zur Suche</a>
+      <a href="/eintragen/" aria-current="page">Eintragen</a>
+      <a href="/werbung/">Werbung schalten</a>
+    </nav>
+  </header>
+  <section class="panel">
+    <h1>Webseite oder Video eintragen</h1>
+    <p class="lead">Kostenlos. Jede Einreichung wird automatisch vorgeprüft und danach von uns freigegeben. Illegale, sexuelle, rassistische oder volksverhetzende Inhalte werden nicht aufgenommen.</p>
+  </section>
+  <section class="panel">
+    <form id="f" novalidate>
+      <div class="seg" role="radiogroup" aria-label="Art">
+        <label><input type="radio" name="kind" value="web" checked /><span>Webseite</span></label>
+        <label><input type="radio" name="kind" value="video" /><span>Video</span></label>
+      </div>
+      <label>Adresse <small id="url-hint">z. B. https://meinshop.de</small>
+        <input id="url" name="url" type="url" inputmode="url" required placeholder="https://" autocomplete="url" />
+      </label>
+      <label>Titel
+        <input id="title" name="title" maxlength="120" required placeholder="So soll dein Eintrag heißen" />
+      </label>
+      <label>Beschreibung <small>bis 600 Zeichen</small>
+        <textarea id="description" name="description" maxlength="600" placeholder="Worum geht es auf der Seite?"></textarea>
+      </label>
+      <label>Suchwörter <small>durch Komma getrennt – bei diesen Suchen erscheint dein Eintrag</small>
+        <input id="keywords" name="keywords" maxlength="200" placeholder="schuhe, sneaker, laufschuhe" />
+      </label>
+      <div class="row">
+        <label>Aktuelle Aktion <small>optional, erscheint über deiner Seite</small>
+          <input id="promo" name="promo" maxlength="80" placeholder="15 % auf alle Sneaker" />
+        </label>
+        <label>Aktion gültig bis <small>optional</small>
+          <input id="promo_until" name="promo_until" type="date" />
+        </label>
+      </div>
+      <label>E-Mail <small>optional, für Rückfragen – wird nicht veröffentlicht</small>
+        <input id="email" name="email" type="email" autocomplete="email" />
+      </label>
+      <label class="check"><input id="accept" type="checkbox" /> Ich bestätige, dass die Inhalte legal sind, ich zur Eintragung berechtigt bin und keine sexuellen, rassistischen oder anderweitig rechtswidrigen Inhalte enthalten sind.</label>
+      <div id="msg" class="msg" hidden></div>
+      <div><button id="send" type="submit">Eintragen</button></div>
+    </form>
+  </section>
+</div>
+<script>
+const f = document.getElementById('f'), msg = document.getElementById('msg'), send = document.getElementById('send');
+f.addEventListener('change', () => {
+  const video = f.kind.value === 'video';
+  document.getElementById('url-hint').textContent = video ? 'z. B. https://youtube.com/watch?v=… oder ein Link zu einer .mp4-Datei' : 'z. B. https://meinshop.de';
+});
+function show(text, kind) { msg.hidden = false; msg.className = 'msg ' + kind; msg.textContent = text; }
+f.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  send.disabled = true; show('Wird geprüft …', 'info');
+  try {
+    const r = await fetch('/api/submit', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({
+      kind: f.kind.value, url: f.url.value, title: f.title.value, description: f.description.value, keywords: f.keywords.value,
+      promo: f.promo.value, promo_until: f.promo_until.value, email: f.email.value, accept: document.getElementById('accept').checked }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) show(j.error || 'Das hat nicht geklappt. Bitte später erneut versuchen.', 'bad');
+    else { show(j.message, j.ok ? 'ok' : 'bad'); if (j.ok) f.reset(); }
+  } catch { show('Keine Verbindung. Bitte später erneut versuchen.', 'bad'); }
+  send.disabled = false;
+});
+</script>
+</body>
+</html>

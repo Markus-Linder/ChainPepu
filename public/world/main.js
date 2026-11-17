@@ -45,11 +45,22 @@ root.innerHTML = `
       <input id="q" name="q" type="search" placeholder="Wonach suchst du?" aria-label="Suchbegriff" enterkeyhint="search" />
       <button type="submit">Suchen</button>
     </form>
+    <div class="modes" role="radiogroup" aria-label="Suchart">
+      <label><input type="radio" name="mode" value="web" checked /><span>Web</span></label>
+      <label><input type="radio" name="mode" value="video" /><span>Videos</span></label>
+    </div>
     <p class="tagline">Geh durch deine Suchergebnisse.</p>
+    <nav class="intro-links"><a href="/eintragen/">Webseite eintragen</a><a href="/werbung/">Werbung schalten</a></nav>
   </header>
   <button id="daynight" type="button" aria-label="Tag oder Nacht">☾</button>
+  <button id="menu-btn" type="button" aria-label="Menü" aria-expanded="false">☰</button>
+  <nav id="menu" hidden>
+    <a href="/eintragen/">Webseite oder Video eintragen</a>
+    <a href="/werbung/">Werbung schalten</a>
+  </nav>
   <aside id="info" hidden>
     <div class="rank"></div>
+    <div class="promo" hidden></div>
     <h2></h2>
     <div class="url"></div>
     <p></p>
@@ -68,6 +79,7 @@ root.innerHTML = `
       <a class="vopen" target="_blank" rel="noopener">Im neuen Tab ↗</a>
     </div>
     <iframe title="Webseite" referrerpolicy="no-referrer"></iframe>
+    <video class="vvideo" controls playsinline hidden></video>
   </div>`;
 
 const $ = (s) => root.querySelector(s);
@@ -84,6 +96,10 @@ const viewer = $('#viewer');
 const loaderEl = $('#loader');
 const dayNightBtn = $('#daynight');
 const isTouch = matchMedia('(pointer: coarse)').matches;
+const menuBtn = $('#menu-btn'), menuEl = $('#menu');
+menuBtn.addEventListener('click', () => { menuEl.hidden = !menuEl.hidden; menuBtn.setAttribute('aria-expanded', String(!menuEl.hidden)); });
+const searchMode = () => form.closest('header').querySelector('input[name=mode]:checked')?.value || 'web';
+root.querySelectorAll('input[name=mode]').forEach((r) => r.addEventListener('change', () => { if (input.value.trim() && !intro) form.requestSubmit(); }));
 
 // Suche sofort anschließen – auch während die Welt noch lädt.
 // (Sonst würde der Browser das Formular normal abschicken und eine leere Seite laden.)
@@ -330,10 +346,20 @@ const shopEmissive = (() => { const t = shopTex.clone(); t.needsUpdate = true; r
 
 const holeMat = new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0, transparent: true, blending: THREE.NoBlending, side: THREE.DoubleSide });
 const bezelMat = new THREE.MeshStandardMaterial({ color: 0x15171c, roughness: 0.3, metalness: 0.85 });
+const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4a017, roughness: 0.25, metalness: 1, emissive: 0x7a5200, emissiveIntensity: 0.5 });
+const sponsorGlowMat = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(64, 64, 10, 64, 64, 64);
+  grd.addColorStop(0, 'rgba(255,210,90,0.55)'); grd.addColorStop(1, 'rgba(255,190,60,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 128, 128);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return new THREE.SpriteMaterial({ map: t, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true });
+})();
 const bezelHover = new THREE.MeshStandardMaterial({ color: 0x15171c, roughness: 0.3, metalness: 0.85, emissive: 0xffb35c, emissiveIntensity: 0.9 });
 const corniceMat = new THREE.MeshStandardMaterial({ color: 0xcfc6b8, roughness: 0.7 });
 const plinthMat = new THREE.MeshStandardMaterial({ color: 0x3b3833, roughness: 0.6 });
-const sharedMats = new Set([holeMat, bezelMat, bezelHover, corniceMat, plinthMat]);
+const sharedMats = new Set([holeMat, bezelMat, bezelHover, corniceMat, plinthMat, goldMat]);
 const facadeMats = [];
 const shopMats = [];
 
@@ -462,7 +488,9 @@ function buildStreet(results, query) {
     screen.rotation.y = rotY;
     street.add(screen);
 
-    const bezel = new THREE.Mesh(new THREE.BoxGeometry(SCREEN_M.w + 0.45, SCREEN_M.h + 0.45, 0.3), bezelMat);
+    const sponsored = !!result.sponsored;
+    const baseBezel = sponsored ? goldMat : bezelMat;
+    const bezel = new THREE.Mesh(new THREE.BoxGeometry(SCREEN_M.w + (sponsored ? 0.7 : 0.45), SCREEN_M.h + (sponsored ? 0.7 : 0.45), 0.3), baseBezel);
     bezel.position.z = -0.17;
     bezel.castShadow = true;
     screen.add(bezel);
@@ -477,16 +505,39 @@ function buildStreet(results, query) {
     screen.add(hole);
 
     const host = safeHost(result.url);
-    const signTex = makeLabelTexture([
-      { text: `#${i + 1}  ·  ${host}`, size: 44, color: '#ffb35c', weight: 700 },
-      { text: result.title, size: 72, weight: 700, offset: 18 },
-    ]);
+    const signTex = sponsored
+      ? makeLabelTexture([
+          { text: `ANZEIGE  ·  ${host}`, size: 44, color: '#1b1206', weight: 800 },
+          { text: result.title, size: 72, weight: 800, offset: 18, color: '#1b1206' },
+        ], { bg: '#f5c542' })
+      : makeLabelTexture([
+          { text: `#${i + 1}  ·  ${host}${result.kind === 'video' ? '  ·  VIDEO' : ''}`, size: 44, color: '#ffb35c', weight: 700 },
+          { text: result.title, size: 72, weight: 700, offset: 18 },
+        ]);
     const sign = new THREE.Mesh(
       new THREE.PlaneGeometry(SCREEN_M.w + 0.45, (SCREEN_M.w + 0.45) / 4),
       new THREE.MeshStandardMaterial({ map: signTex, emissive: 0xffffff, emissiveMap: signTex, emissiveIntensity: 0.85, roughness: 0.4 })
     );
     sign.position.set(0, SCREEN_M.h / 2 + 1.45, -0.02);
     screen.add(sign);
+    const extra = [];
+    // Aktion des Shops („15 % auf …“) als rotes Banner über der Seite
+    if (result.promo) {
+      const pt = makeLabelTexture([{ text: `🏷  ${result.promo}`, size: 76, weight: 800, offset: 12 }], { w: 1024, h: 150, bg: '#d7261e' });
+      const promo = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN_M.w + 0.45, (SCREEN_M.w + 0.45) * 150 / 1024),
+        new THREE.MeshStandardMaterial({ map: pt, emissive: 0xffffff, emissiveMap: pt, emissiveIntensity: 0.9, roughness: 0.4 }));
+      promo.position.set(0, SCREEN_M.h / 2 + 1.45 + (SCREEN_M.w + 0.45) / 8 + 0.75, 0);
+      promo.rotation.z = 0.025;
+      screen.add(promo);
+      extra.push(promo);
+    }
+    // Sponsorplätze leuchten golden
+    if (sponsored) {
+      const g1 = new THREE.Sprite(sponsorGlowMat);
+      g1.scale.set(SCREEN_M.w * 1.9, SCREEN_M.h * 1.9, 1);
+      g1.position.set(0, 0, -0.4);
+      screen.add(g1);
+    }
 
     const el = document.createElement('div');
     el.className = 'site-screen';
@@ -498,10 +549,12 @@ function buildStreet(results, query) {
 
     const slot = { result, rank: i + 1, side, normal: n.clone(), screenPos: center.clone(), css, el, bezel, hole, screen,
       homePos: center.clone(), homeRot: rotY, f: 0, cardMat, live: false, frameable: null };
-    for (const m of [hole, bezel, sign]) { m.userData.slot = slot; clickables.push(m); }
+    slot.baseBezel = baseBezel;
+    for (const m of [hole, bezel, sign, ...extra]) { m.userData.slot = slot; clickables.push(m); }
     showPreview(slot);
     slots.push(slot);
-    checkFrameable(result.url).then((ok) => { slot.frameable = ok; });
+    if (result.kind === 'video' && result.video) slot.frameable = true;
+    else checkFrameable(result.url).then((ok) => { slot.frameable = ok; });
   }
 
   if (query) {
@@ -563,8 +616,8 @@ function makeCard(result, rank) {
     g.fillText('🔒 ' + host, 172, 39);
     for (const [i, col] of ['#ff5f57', '#febc2e', '#28c840'].entries()) { g.fillStyle = col; g.beginPath(); g.arc(30 + i * 28, 32, 8, 0, 7); g.fill(); }
     const textW = img ? 700 : W - 120;
-    g.fillStyle = '#c2410c'; g.font = '700 22px Inter, system-ui, sans-serif';
-    g.fillText(`ERGEBNIS ${rank}  ·  ${host.toUpperCase()}`, 60, 122);
+    g.fillStyle = result.sponsored ? '#a16207' : '#c2410c'; g.font = '700 22px Inter, system-ui, sans-serif';
+    g.fillText(result.sponsored ? `ANZEIGE  ·  ${host.toUpperCase()}` : `${result.kind === 'video' ? 'VIDEO' : 'ERGEBNIS'} ${rank}  ·  ${host.toUpperCase()}`, 60, 122);
     g.fillStyle = '#111418'; g.font = '700 60px Georgia, "Times New Roman", serif';
     const tl = wrapLines(g, result.title, textW, 2);
     tl.forEach((l, i) => g.fillText(l, 60, 196 + i * 70));
@@ -579,7 +632,18 @@ function makeCard(result, rank) {
       g.save(); g.beginPath(); g.rect(W - bw - 50, 100, bw, bh); g.clip();
       g.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, W - bw - 50, 100, bw, bh);
       g.restore();
+      if (result.kind === 'video') {   // Play-Symbol
+        const cx = W - bw / 2 - 50, cy = 100 + bh / 2;
+        g.fillStyle = 'rgba(0,0,0,0.55)'; g.beginPath(); g.arc(cx, cy, 70, 0, 7); g.fill();
+        g.fillStyle = '#fff'; g.beginPath(); g.moveTo(cx - 24, cy - 38); g.lineTo(cx + 42, cy); g.lineTo(cx - 24, cy + 38); g.fill();
+      }
     }
+    if (result.promo) {
+      g.fillStyle = '#d7261e'; g.fillRect(0, H - 86, W, 86);
+      g.fillStyle = '#fff'; g.font = '800 40px Inter, system-ui, sans-serif';
+      g.fillText('🏷  ' + result.promo, 60, H - 30);
+    }
+    if (result.sponsored) { g.strokeStyle = '#f5c542'; g.lineWidth = 14; g.strokeRect(7, 7, W - 14, H - 14); }
     tex.needsUpdate = true;
   };
   draw(null);
@@ -598,13 +662,25 @@ function showPreview(slot) {
 }
 function showLive(slot) {
   slot.live = true;
+  const v = slot.result.video;
+  if (slot.result.kind === 'video' && v && !/youtube/.test(v)) {
+    const vid = document.createElement('video');
+    Object.assign(vid, { muted: true, loop: true, autoplay: true, playsInline: true, preload: 'auto' });
+    vid.setAttribute('muted', ''); vid.setAttribute('playsinline', '');
+    vid.addEventListener('playing', () => { if (slot.live) slot.hole.material = holeMat; });
+    vid.src = v;
+    slot.el.replaceChildren(vid);
+    vid.play?.().catch(() => {});
+    return;
+  }
   const f = document.createElement('iframe');
   f.referrerPolicy = 'no-referrer';
   f.tabIndex = -1;
   f.setAttribute('sandbox', 'allow-scripts allow-same-origin');
   // erst wenn die echte Seite geladen ist, wird sie sichtbar
   f.addEventListener('load', () => { if (slot.live && f.isConnected) setTimeout(() => { if (slot.live) slot.hole.material = holeMat; }, 400); });
-  f.src = slot.result.url;
+  f.allow = 'autoplay; encrypted-media';
+  f.src = slot.result.kind === 'video' && slot.result.video ? `${slot.result.video}?autoplay=1&mute=1&controls=0&loop=1` : slot.result.url;
   slot.el.replaceChildren(f);
 }
 
@@ -669,7 +745,7 @@ function updatePeople(dt) {
 async function search(q) {
   if (hasServer) {
     try {
-      const r = await fetch(`/api/search?q=${encodeURIComponent(q)}&lang=de`);
+      const r = await fetch(`/api/search?q=${encodeURIComponent(q)}&lang=de&type=${searchMode()}`);
       if (r.ok) return (await r.json()).results;
       if (r.status === 404) hasServer = false;
     } catch { hasServer = false; }
@@ -690,7 +766,7 @@ async function runSearch(q) {
   setStatus('Suche läuft …');
   try {
     const results = await search(q);
-    if (!results.length) { setStatus('Keine Ergebnisse gefunden. Versuch einen anderen Begriff.'); return; }
+    if (!results.length) { setStatus(searchMode() === 'video' ? 'Keine Videos gefunden. Versuch einen anderen Begriff.' : 'Keine Ergebnisse gefunden. Versuch einen anderen Begriff.'); return; }
     setStatus('');
     buildStreet(results, q);
     searchbar.classList.remove('intro');
@@ -793,7 +869,7 @@ let glide = 0, turnVel = 0;
 
 function setHover(slot) {
   if (slot === hoverSlot) return;
-  if (hoverSlot) hoverSlot.bezel.material = bezelMat;
+  if (hoverSlot) hoverSlot.bezel.material = hoverSlot.baseBezel || bezelMat;
   hoverSlot = slot;
   if (slot) slot.bezel.material = bezelHover;
 }
@@ -818,7 +894,9 @@ function updateInfo(slot) {
   currentSlot = slot;
   info.hidden = !slot;
   if (!slot) return;
-  info.querySelector('.rank').textContent = `Ergebnis ${slot.rank} · ${safeHost(slot.result.url)}`;
+  info.querySelector('.rank').textContent = slot.result.sponsored ? `Anzeige · ${safeHost(slot.result.url)}` : `${slot.result.kind === 'video' ? 'Video' : 'Ergebnis'} ${slot.rank} · ${safeHost(slot.result.url)}`;
+  info.classList.toggle('sponsored', !!slot.result.sponsored);
+  const pe = info.querySelector('.promo'); pe.hidden = !slot.result.promo; pe.textContent = slot.result.promo ? '🏷 ' + slot.result.promo : '';
   info.querySelector('h2').textContent = slot.result.title;
   info.querySelector('.url').textContent = slot.result.url;
   info.querySelector('p').textContent = slot.result.snippet || '';
@@ -828,6 +906,9 @@ $('#btn-enter').addEventListener('click', () => currentSlot && enterSite(current
 let flyTo = null;   // kurze Kamerafahrt auf den Bildschirm zu
 function enterSite(slot) {
   const url = slot.result.url;
+  if (slot.result.sponsored && slot.result.campaignId) {
+    try { navigator.sendBeacon?.(`/api/click?id=${slot.result.campaignId}`) || fetch(`/api/click?id=${slot.result.campaignId}`, { method: 'POST', keepalive: true }); } catch { /* egal */ }
+  }
   // Seiten, die keine Einbettung erlauben, sofort (noch im Klick) im neuen Tab öffnen
   if (slot.frameable === false) {
     window.open(url, '_blank', 'noopener');
@@ -847,16 +928,27 @@ function nearestAngle(from, to) {
   if (d < -Math.PI) d += Math.PI * 2;
   return from + d;
 }
-function openViewer(url) {
+function openViewer(url, slot) {
   keys.clear();
   viewer.hidden = false;
   viewer.querySelector('.vurl').textContent = url;
   viewer.querySelector('.vopen').href = url;
-  viewer.querySelector('iframe').src = url;
+  const frame = viewer.querySelector('iframe');
+  const vid = viewer.querySelector('.vvideo');
+  const r = slot?.result;
+  if (r?.kind === 'video' && r.video && !/youtube/.test(r.video)) {
+    frame.hidden = true; frame.src = 'about:blank';
+    vid.hidden = false; vid.src = r.video; vid.play?.().catch(() => {});
+  } else {
+    vid.hidden = true; vid.removeAttribute('src');
+    frame.hidden = false;
+    frame.src = r?.kind === 'video' && r.video ? `${r.video}?autoplay=1` : url;
+  }
 }
 function closeViewer() {
   viewer.hidden = true;
   viewer.querySelector('iframe').src = 'about:blank';
+  const vid = viewer.querySelector('.vvideo'); vid.pause?.(); vid.removeAttribute('src');
   camera.position.y = EYE;
   pitch = 0;
 }
@@ -935,7 +1027,7 @@ function tick() {
     camera.position.lerpVectors(flyTo.from, flyTo.to, k);
     yaw = flyTo.yawFrom + (flyTo.yawTo - flyTo.yawFrom) * k;
     pitch = flyTo.pitchFrom * (1 - k);
-    if (flyTo.t >= 1) { const u = flyTo.url; flyTo = null; openViewer(u); }
+    if (flyTo.t >= 1) { const u = flyTo.url, sl = flyTo.slot; flyTo = null; openViewer(u, sl); }
   } else if (viewer.hidden) {
     const speed = (keys.has('ShiftLeft') || keys.has('ShiftRight') ? 11 : 5) * dt;
     fwd.set(-Math.sin(yaw), 0, -Math.cos(yaw));
