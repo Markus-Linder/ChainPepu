@@ -1,5 +1,7 @@
 # ChainPepu – die begehbare Suchmaschine
 
+**Live:** https://chainpepu.higgsfield.app
+
 Statt einer Ergebnisliste läufst du durch eine fotorealistische 3D-Straße.
 Jedes Suchergebnis ist ein Gebäude mit einem großen Bildschirm. Darauf läuft
 die echte Webseite, und zwar live, sobald du in die Nähe kommst.
@@ -25,10 +27,11 @@ BRAVE_API_KEY=dein_schluessel npm start
 
 | Desktop | Handy |
 |---|---|
-| Ins Bild klicken: Maus fangen | Wischen: umsehen |
-| W A S D / Pfeiltasten: laufen | ▲ ▼: laufen |
-| Shift: schneller | Antippen: Webseite öffnen |
-| E oder Klick: Webseite betreten | |
+| Klick auf eine Webseite: hineingehen | Antippen einer Webseite: hineingehen |
+| Klick auf den Boden: dorthin laufen | Antippen des Bodens: dorthin laufen |
+| Ziehen: umsehen | Wischen: umsehen |
+| Mausrad, W A S D, Pfeiltasten: laufen | ▲ ▼: laufen |
+| ☾ / ☀ oben rechts: Nacht oder Tag | ☾ / ☀ oben rechts: Nacht oder Tag |
 
 ## Wie es funktioniert
 
@@ -40,8 +43,13 @@ BRAVE_API_KEY=dein_schluessel npm start
 - **Live oder Vorschau:** Weit entfernte Seiten erscheinen als Screenshot. Die vier
   nächsten werden live geladen, sofern die Seite Einbettung erlaubt (Prüfung über
   `/api/frameable`).
-- **Texturen:** Himmel-Panorama (4K), Pflaster und Fassade wurden mit Higgsfield
-  (GPT Image 2.6) erzeugt und liegen in `public/assets/`.
+- **Mit Higgsfield erzeugt** (liegt in `public/world/assets/`):
+  - zwei 360°-Panoramen (Sonnenuntergang und Nacht), Pflaster, vier Fassaden (GPT Image 2.6)
+  - 3D-Modelle: Platane, Pariser Laterne, Parkbank, zwei Passanten mit Laufanimation (Meshy 6),
+    mit glTF-Transform auf je ca. 1 MB komprimiert
+- **Tag und Nacht** richten sich nach der Uhrzeit des Besuchers.
+- **Hosting:** Die Live-Seite läuft als Higgsfield-Website (Cloudflare Worker).
+  Dort übernehmen die Server-Routen `/api/search` und `/api/frameable` die Aufgaben von `server.js`.
 
 ## Grenzen
 
