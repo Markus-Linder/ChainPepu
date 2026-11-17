@@ -304,7 +304,6 @@ function makeLabelTexture(lines, { w = 1024, h = 256, bg = 'rgba(14,16,22,0.94)'
   return t;
 }
 const safeHost = (u) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
-const shotUrl = (u) => `https://s.wordpress.com/mshots/v1/${encodeURIComponent(u)}?w=${SCREEN_PX.w}&h=${SCREEN_PX.h}`;
 const rand = (i, n = 1) => { const x = Math.sin(i * 127.1 + n * 311.7) * 43758.5453; return x - Math.floor(x); };
 
 // Erdgeschoss: Steinpfeiler mit beleuchteten Schaufenstern (prozedural)
@@ -472,7 +471,8 @@ function buildStreet(results, query) {
     post.position.y = (screenY - SCREEN_M.h / 2) / 2;
     street.add(post);
 
-    const hole = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN_M.w, SCREEN_M.h), holeMat);
+    const cardMat = new THREE.MeshBasicMaterial({ map: makeCard(result, i + 1), toneMapped: false });
+    const hole = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN_M.w, SCREEN_M.h), cardMat);
     hole.renderOrder = 10;
     screen.add(hole);
 
@@ -497,7 +497,7 @@ function buildStreet(results, query) {
     cssScene.add(css);
 
     const slot = { result, rank: i + 1, side, normal: n.clone(), screenPos: center.clone(), css, el, bezel, hole, screen,
-      homePos: center.clone(), homeRot: rotY, f: 0, live: false, frameable: null };
+      homePos: center.clone(), homeRot: rotY, f: 0, cardMat, live: false, frameable: null };
     for (const m of [hole, bezel, sign]) { m.userData.slot = slot; clickables.push(m); }
     showPreview(slot);
     slots.push(slot);
@@ -523,29 +523,88 @@ function buildStreet(results, query) {
 }
 
 // ---------- Webseiten auf den Bildschirmen ----------
+// Jeder Bildschirm zeigt sofort eine selbst gezeichnete Ergebnisseite (Titel, Adresse,
+// Text, Bild) – unabhängig von fremden Diensten. Kommt man näher, wird die echte
+// Webseite darübergelegt, aber erst wenn sie wirklich geladen ist.
+function wrapLines(g, text, maxW, maxLines) {
+  const words = String(text || '').split(/\s+/);
+  const lines = [];
+  let line = '';
+  for (const w of words) {
+    const t = line ? line + ' ' + w : w;
+    if (g.measureText(t).width > maxW && line) {
+      lines.push(line);
+      line = w;
+      if (lines.length === maxLines) break;
+    } else line = t;
+  }
+  if (lines.length < maxLines && line) lines.push(line);
+  if (lines.length === maxLines && words.join(' ').length > lines.join(' ').length) {
+    lines[maxLines - 1] = lines[maxLines - 1].replace(/\s*\S*$/, '') + ' …';
+  }
+  return lines;
+}
+function makeCard(result, rank) {
+  const W = 1280, H = 800;
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = maxAniso;
+  const host = safeHost(result.url);
+  const draw = (img) => {
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, W, H);
+    // Browserleiste
+    g.fillStyle = '#eef0f3'; g.fillRect(0, 0, W, 64);
+    g.fillStyle = '#ffffff';
+    g.beginPath(); g.roundRect ? g.roundRect(150, 14, W - 300, 36, 18) : g.rect(150, 14, W - 300, 36); g.fill();
+    g.fillStyle = '#5f6368'; g.font = '500 20px Inter, system-ui, sans-serif';
+    g.fillText('🔒 ' + host, 172, 39);
+    for (const [i, col] of ['#ff5f57', '#febc2e', '#28c840'].entries()) { g.fillStyle = col; g.beginPath(); g.arc(30 + i * 28, 32, 8, 0, 7); g.fill(); }
+    const textW = img ? 700 : W - 120;
+    g.fillStyle = '#c2410c'; g.font = '700 22px Inter, system-ui, sans-serif';
+    g.fillText(`ERGEBNIS ${rank}  ·  ${host.toUpperCase()}`, 60, 122);
+    g.fillStyle = '#111418'; g.font = '700 60px Georgia, "Times New Roman", serif';
+    const tl = wrapLines(g, result.title, textW, 2);
+    tl.forEach((l, i) => g.fillText(l, 60, 196 + i * 70));
+    let y = 196 + tl.length * 70 + 10;
+    g.fillStyle = '#dfe3e8'; g.fillRect(60, y - 30, textW, 2);
+    g.fillStyle = '#2b2f36'; g.font = '400 30px Inter, system-ui, sans-serif';
+    wrapLines(g, result.snippet, textW, Math.max(3, Math.floor((H - y - 40) / 44))).forEach((l, i) => g.fillText(l, 60, y + 20 + i * 44));
+    if (img) {
+      const bw = 440, bh = H - 140;
+      const s2 = Math.max(bw / img.width, bh / img.height);
+      const sw = bw / s2, sh = bh / s2;
+      g.save(); g.beginPath(); g.rect(W - bw - 50, 100, bw, bh); g.clip();
+      g.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, W - bw - 50, 100, bw, bh);
+      g.restore();
+    }
+    tex.needsUpdate = true;
+  };
+  draw(null);
+  if (result.image) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => draw(img);
+    img.src = result.image;
+  }
+  return tex;
+}
 function showPreview(slot) {
   slot.live = false;
   slot.el.replaceChildren();
-  const img = new Image();
-  img.alt = slot.result.title;
-  img.referrerPolicy = 'no-referrer';
-  img.src = shotUrl(slot.result.url);
-  let tries = 0;
-  const retry = () => {
-    if (slot.live || !img.isConnected || ++tries > 3) return;
-    img.src = shotUrl(slot.result.url) + `&r=${Date.now()}`;
-    setTimeout(retry, 8000);
-  };
-  setTimeout(retry, 6000);
-  slot.el.appendChild(img);
+  slot.hole.material = slot.cardMat;
 }
 function showLive(slot) {
   slot.live = true;
   const f = document.createElement('iframe');
-  f.src = slot.result.url;
   f.referrerPolicy = 'no-referrer';
   f.tabIndex = -1;
   f.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+  // erst wenn die echte Seite geladen ist, wird sie sichtbar
+  f.addEventListener('load', () => { if (slot.live && f.isConnected) setTimeout(() => { if (slot.live) slot.hole.material = holeMat; }, 400); });
+  f.src = slot.result.url;
   slot.el.replaceChildren(f);
 }
 
@@ -615,12 +674,14 @@ async function search(q) {
       if (r.status === 404) hasServer = false;
     } catch { hasServer = false; }
   }
-  const r = await fetch(`https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&srlimit=20&format=json&origin=*`);
+  const r = await fetch('https://de.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search' +
+    `&gsrsearch=${encodeURIComponent(q)}&gsrlimit=20&prop=pageimages|extracts&exintro=1&explaintext=1&exsentences=4&exlimit=20&piprop=thumbnail&pithumbsize=800`);
   const j = await r.json();
-  return (j.query?.search || []).map((x) => ({
+  return Object.values(j.query?.pages || {}).sort((a, b) => a.index - b.index).map((x) => ({
     title: x.title,
     url: `https://de.wikipedia.org/wiki/${encodeURIComponent(x.title.replace(/ /g, '_'))}`,
-    snippet: x.snippet.replace(/<[^>]+>/g, ''),
+    snippet: x.extract || '',
+    image: x.thumbnail?.source || null,
   }));
 }
 function setStatus(text) { statusEl.hidden = !text; statusEl.textContent = text || ''; }

@@ -42,14 +42,17 @@ async function searchBrave(q, lang) {
 }
 
 async function searchWikipedia(q, lang) {
-  const url = `https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&srlimit=20&format=json`;
+  const url = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&generator=search` +
+    `&gsrsearch=${encodeURIComponent(q)}&gsrlimit=20&prop=pageimages|extracts&exintro=1&explaintext=1` +
+    `&exsentences=4&exlimit=20&piprop=thumbnail&pithumbsize=800`;
   const r = await fetch(url, { headers: { 'user-agent': 'ChainPepu/0.1 (3D search prototype)' } });
   if (!r.ok) throw new Error(`Wikipedia ${r.status}`);
   const j = await r.json();
-  return (j.query?.search || []).map((x) => ({
+  return Object.values(j.query?.pages || {}).sort((a, b) => a.index - b.index).map((x) => ({
     title: x.title,
     url: `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(x.title.replace(/ /g, '_'))}`,
-    snippet: x.snippet.replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&'),
+    snippet: x.extract || '',
+    image: x.thumbnail?.source || null,
     source: `${lang}.wikipedia.org`,
   }));
 }

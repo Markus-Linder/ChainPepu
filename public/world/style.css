@@ -80,7 +80,7 @@ html, body { background: #0d0f14 url(assets/sky.jpg) center 52% / cover no-repea
 #info .rank { color: var(--accent); font-weight: 700; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
 #info h2 { margin: 6px 0 4px; font-size: 20px; line-height: 1.25; text-wrap: balance; }
 #info .url { color: var(--muted); font-size: 13px; word-break: break-all; }
-#info p { margin: 10px 0 14px; color: #ddd7cf; font-size: 14px; line-height: 1.5; }
+#info p { margin: 10px 0 14px; color: #ddd7cf; font-size: 14px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 
 #help {
   position: fixed; z-index: 5; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
