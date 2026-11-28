@@ -66,7 +66,7 @@ h2{font-size:1rem;font-weight:600}
 .stat b{font-family:var(--mono);font-size:1rem;font-weight:600}
 .stat span{font-size:.7rem;color:var(--muted)}
 .banner{border-radius:14px;padding:10px 12px;font-size:.86rem;font-weight:600}
-.banner.win{background:var(--win-soft);color:var(--win)} .banner.loss{background:var(--loss-soft);color:var(--loss)}
+.banner.win{background:var(--win-soft);color:var(--win)} .banner.gold{background:var(--gold-soft);color:var(--gold)} .banner.loss{background:var(--loss-soft);color:var(--loss)}
 
 /* entry */
 .amount{display:flex;align-items:center;gap:8px;background:var(--sunk);border-radius:16px;padding:6px 16px;border:2px solid transparent}
@@ -163,11 +163,12 @@ tr.done td{color:var(--muted)}
     <div class="stats">
       <div class="stat"><b id="perTrade">70 €</b><span>pro Trade</span></div>
       <div class="stat"><b id="left">15</b><span>Trades übrig</span></div>
-      <div class="stat"><b id="lots">0,35</b><span>Lots</span></div>
+      <div class="stat"><b id="lots">0,35</b><span id="lotsSub">Lots</span></div>
       <div class="stat"><b id="losses">0 / 3</b><span>Verluste</span></div>
       <div class="stat"><b id="dayStop">−995 €</b><span>Tagesstopp</span></div>
       <div class="stat"><b id="hardStop">78 $</b><span>Notstopp</span></div>
     </div>
+    <div class="banner gold" id="bannerLots" hidden></div>
     <div class="banner win" id="bannerWin" hidden>Tagesziel erreicht. Für heute Schluss.</div>
     <div class="banner loss" id="bannerLoss" hidden>Tagesstopp erreicht. Für heute Schluss.</div>
   </section>
@@ -262,10 +263,13 @@ function st(){
   const daySum=todays.reduce((a,t)=>a+t.pnl,0);
   const mpl=price*100/lev,lots=Math.max(0.01,Math.floor(equity*FX/mpl*100)/100);
   const stopOut=(equity*FX-0.5*lots*mpl)/(lots*100);
+  const startEqL=equity-trades.filter(t=>t.date===td).reduce((x,t)=>x+t.pnl,0);
+  const lotsStart=Math.max(0.01,Math.floor(startEqL*FX/mpl*100)/100);
+  const nextEq=(Math.round(lots*100)+1)/100*mpl/FX;
   const target=planEnd(day),need=Math.max(0,target-equity);
   const planned=TRADES[day-1],left=Math.max(0,planned-todays.length);
   const dayGoal=planEnd(day)-planEnd(day-1);
-  return {dates,day,equity,todays,daySum,lots,target,need,planned,left,dayGoal,
+  return {lotsStart,nextEq,dates,day,equity,todays,daySum,lots,target,need,planned,left,dayGoal,
     per:need/Math.max(1,left),losses:todays.filter(t=>t.pnl<0).length,hardStop:Math.min(78,0.85*stopOut)};
 }
 function render(){
@@ -283,7 +287,11 @@ function render(){
   $('todaySum').textContent=eurS(s.daySum);$('todaySum').className='num '+(s.daySum>0?'pos':s.daySum<0?'neg':'');
   $('dayBar').style.width=Math.min(100,Math.max(0,s.daySum/s.dayGoal*100))+'%';
   $('perTrade').textContent=eur(s.per);$('left').textContent=s.left;$('lots').textContent=fmt(s.lots,2);
-  $('losses').textContent=s.losses+' / 3';$('dayStop').textContent='−'+eur(s.dayGoal);$('hardStop').textContent=fmt(s.hardStop)+' $';
+  $('losses').textContent=s.losses+' / 3';
+  $('lotsSub').textContent='Lots · +0,01 ab '+eur(s.nextEq);
+  const up=Math.round((s.lots-s.lotsStart)*100)/100;
+  $('bannerLots').hidden=!(up>0);
+  if(up>0)$('bannerLots').textContent='Margin erhöhen: jetzt '+fmt(s.lots,2)+' Lot statt '+fmt(s.lotsStart,2)+' zum Tagesstart.';$('dayStop').textContent='−'+eur(s.dayGoal);$('hardStop').textContent=fmt(s.hardStop)+' $';
   const stopHit=s.losses>=3||s.daySum<=-s.dayGoal;
   $('bannerWin').hidden=!(s.need===0);
   $('bannerLoss').hidden=!(stopHit&&s.need>0);
