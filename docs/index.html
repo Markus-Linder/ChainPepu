@@ -190,6 +190,7 @@ tr.done td{color:var(--muted)}
   <section class="card" aria-labelledby="mH">
     <div class="head"><h2 id="mH">Markt</h2><span class="muted" id="mTime">Stand Fr., 27.11.</span></div>
     <div class="bias"><span class="price" id="mPrice">– $</span><span class="pill" id="mLive">live</span><span class="pill gold" id="mBias">Erholung im Abwärtstrend</span></div>
+    <img id="mChart" src="chart.png" alt="H1-Chart mit Support- und Resistance-Zonen, Trendrichtung und Take-Profit" style="width:100%;border-radius:14px;display:block;background:var(--sunk)" onerror="this.hidden=true">
     <div class="idea"><div class="label">Nächste Stunde</div><div id="mNext">Hält 3.640, ist Long Richtung 3.691 bevorzugt. Fällt Gold unter 3.590, erst abwarten.</div></div>
     <div class="lv">
       <div><div class="label">Widerstand</div><ul id="mRes"><li>3.683–3.691</li><li>3.720–3.760</li><li>3.840–3.900</li></ul></div>
@@ -360,6 +361,7 @@ async function livePrice(){
   catch(e){$('mPrice').textContent=fmt(price,1)+' $';$('mLive').textContent='offline';$('mLive').className='pill';}
 }
 async function analysis(){
+  const im=$('mChart');if(im){im.hidden=false;im.src='chart.png?'+Date.now();}
   try{const r=await fetch('analysis.json?'+Date.now(),{cache:'no-store'});const a=await r.json();
     if(a.updatedAt){const d=new Date(a.updatedAt);if(!isNaN(d))$('mTime').textContent='Analyse '+d.toLocaleString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
     if(a.bias)$('mBias').textContent=String(a.bias);if(a.next)$('mNext').textContent=String(a.next);if(a.summary)$('mSum').textContent=String(a.summary);
