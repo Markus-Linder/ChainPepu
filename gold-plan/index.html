@@ -1,0 +1,432 @@
+<title>Gold Sprint 60k</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one narrow phone column; status first, then trade entry, analysis, plan, history */
+:root{
+  --bg:#f3f4f6; --card:#ffffff; --fg:#1b1f27; --muted:#626a78; --line:#dfe2e8;
+  --gold:#a8790f; --gold-soft:#f5ead2; --win:#127a4a; --win-soft:#dff3e8; --loss:#b3261e; --loss-soft:#fbe3e1;
+  --display:"Space Grotesk",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1218; --card:#181c24; --fg:#e8eaee; --muted:#9aa2b1; --line:#2a303b;
+  --gold:#e0b44a; --gold-soft:#3a2f17; --win:#4cc98a; --win-soft:#16301f; --loss:#f07a72; --loss-soft:#3a1c1a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1218; --card:#181c24; --fg:#e8eaee; --muted:#9aa2b1; --line:#2a303b;
+  --gold:#e0b44a; --gold-soft:#3a2f17; --win:#4cc98a; --win-soft:#16301f; --loss:#f07a72; --loss-soft:#3a1c1a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45}
+.wrap{max-width:560px;margin:0 auto;padding-block:16px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+h1,h2{font-family:var(--display);margin:0;text-wrap:balance}
+h1{font-size:1.35rem;letter-spacing:-.01em}
+h2{font-size:1.02rem}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.hero{border-color:var(--gold)}
+.big{font-family:var(--mono);font-size:2rem;font-weight:600;letter-spacing:-.02em}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kv{display:flex;flex-direction:column;gap:2px;min-width:0}
+.kv b{font-family:var(--mono);font-size:1.05rem;font-weight:600}
+.kv span{font-size:.74rem;color:var(--muted)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gold);border-radius:99px;transition:width .4s}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;padding:3px 10px;border-radius:99px;background:var(--gold-soft);color:var(--gold)}
+.pill.win{background:var(--win-soft);color:var(--win)} .pill.loss{background:var(--loss-soft);color:var(--loss)}
+label{font-size:.78rem;color:var(--muted);display:flex;flex-direction:column;gap:4px;min-width:0}
+input,select,textarea{font:inherit;font-family:var(--mono);font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);width:100%;min-width:0}
+textarea{font-family:var(--body);resize:vertical;min-height:44px}
+input:focus-visible,select:focus-visible,button:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+button{font:inherit;font-weight:600;border-radius:10px;padding:11px 14px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+button.primary{background:var(--gold);border-color:var(--gold);color:#fff}
+:root[data-theme="dark"] button.primary{color:#15120a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.primary{color:#15120a}}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.seg button[aria-pressed="true"].long{background:var(--win-soft);border-color:var(--win);color:var(--win)}
+.seg button[aria-pressed="true"].short{background:var(--loss-soft);border-color:var(--loss);color:var(--loss)}
+.muted{color:var(--muted);font-size:.84rem}
+.tablebox{overflow-x:auto;margin:0 -4px}
+table{border-collapse:collapse;width:100%;font-size:.82rem}
+th,td{padding:7px 6px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:600;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em}
+th:first-child,td:first-child{text-align:left}
+tr.now td{background:var(--gold-soft)}
+tr.done td{color:var(--muted)}
+.trade{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.trade:last-child{border-bottom:0}
+.trade .meta{font-size:.78rem;color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.del{padding:6px 10px;font-size:.78rem}
+.pnl-pos{color:var(--win)} .pnl-neg{color:var(--loss)}
+.analysis p{margin:0}
+.levels{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.levels ul{margin:4px 0 0;padding-left:18px;font-family:var(--mono);font-size:.86rem}
+.ai-out{white-space:pre-wrap;font-size:.9rem;background:var(--bg);border-radius:10px;padding:12px;border:1px solid var(--line)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:.86rem;font-weight:600;z-index:20}
+.warn{border-left:3px solid var(--loss);padding-left:10px}
+details summary{cursor:pointer;font-weight:600}
+@media (max-width:380px){.grid3{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">XAUUSD · 15-Tage-Plan</div>
+      <h1>Gold Sprint 60k</h1>
+    </div>
+    <span class="pill" id="syncPill">Lädt …</span>
+  </header>
+
+  <section class="card hero" aria-labelledby="statusH">
+    <div class="top">
+      <h2 id="statusH">Tag <span id="dayNo" class="num">1</span> von 15</h2>
+      <span class="pill" id="planPill">im Plan</span>
+    </div>
+    <div>
+      <div class="eyebrow">Kontostand</div>
+      <div class="big" id="equity">6.000 €</div>
+      <div class="muted">Ziel 60.000 € · Plan heute Abend: <span class="num" id="planEnd">6.995 €</span></div>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="progress" style="width:0%"></i></div>
+    <div class="grid3">
+      <div class="kv"><b id="needToday">995 €</b><span>heute noch nötig</span></div>
+      <div class="kv"><b id="tradesLeft">15</b><span>Trades übrig (Plan)</span></div>
+      <div class="kv"><b id="perTrade">70 €</b><span>pro Trade</span></div>
+      <div class="kv"><b id="lots">0,35</b><span>Lots (volle Margin)</span></div>
+      <div class="kv"><b id="movePerTrade">2,2 $</b><span>Bewegung pro Trade</span></div>
+      <div class="kv"><b id="lossesToday">0 / 3</b><span>Verluste heute</span></div>
+    </div>
+    <div class="grid2">
+      <div class="kv"><b id="dayStop">31 $</b><span>Tagesstopp (Summe Verluste)</span></div>
+      <div class="kv"><b id="hardStop">78 $</b><span>Notstopp · Stop-out bei <span id="stopOut" class="num">96 $</span></span></div>
+    </div>
+    <p class="warn muted" id="lossWarn" hidden>3 Verluste heute erreicht. Laut Plan ist für heute Schluss.</p>
+    <p class="muted" id="doneMsg" hidden></p>
+  </section>
+
+  <section class="card" aria-labelledby="newH">
+    <h2 id="newH">Trade eintragen</h2>
+    <form id="tradeForm" class="row" style="flex-direction:column;gap:10px" novalidate>
+      <div class="seg" role="group" aria-label="Richtung">
+        <button type="button" id="dirLong" class="long" aria-pressed="true">Long</button>
+        <button type="button" id="dirShort" class="short" aria-pressed="false">Short</button>
+      </div>
+      <div class="grid3">
+        <label>Lots<input id="fLots" inputmode="decimal" placeholder="0,35"></label>
+        <label>Einstieg<input id="fEntry" inputmode="decimal" placeholder="3668,5"></label>
+        <label>Ausstieg<input id="fExit" inputmode="decimal" placeholder="3671,0"></label>
+      </div>
+      <div class="grid2">
+        <label>Ergebnis in €<input id="fPnl" inputmode="decimal" placeholder="wird berechnet"></label>
+        <label>Notiz<input id="fNote" style="font-family:var(--body)" placeholder="z. B. Retest 3.540"></label>
+      </div>
+      <p class="muted" id="calcHint">Ergebnis = Punkte × Lots × 100 ÷ EUR/USD. Du kannst es mit dem Wert aus NAGA überschreiben.</p>
+      <button class="primary" type="submit" id="saveBtn">Trade speichern</button>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="todayH">
+    <div class="top"><h2 id="todayH">Heute</h2><span class="num muted" id="todaySum">0 €</span></div>
+    <div id="todayList"><p class="muted">Noch kein Trade heute. Dein erster Eintrag erscheint hier.</p></div>
+  </section>
+
+  <section class="card analysis" aria-labelledby="anaH">
+    <div class="top"><h2 id="anaH">Marktanalyse</h2><span class="muted num" id="anaTime">Stand 20.11.</span></div>
+    <div class="row" style="align-items:center"><span class="pill" id="anaBias">Abwärtstrend · überverkauft</span><span class="num muted" id="anaPrice"></span></div>
+    <p id="anaSummary">Übergeordnet bärisch (unter SMA20/50/200, Dollar stark). Die Zone 3.500–3.540 wurde nach dem Sweep auf 3.502,9 verteidigt (Doppelboden). Long erst bestätigt mit 4h-Schluss über 3.540; über 3.600–3.640 Ziel 3.720–3.760. Unter 3.500 (Tagesschluss) Richtung 3.488–3.454.</p>
+    <div class="levels">
+      <div><div class="eyebrow">Widerstände</div><ul id="anaRes"><li>3.560–3.600</li><li>3.620–3.640</li><li>3.720–3.760</li><li>3.840–3.900</li></ul></div>
+      <div><div class="eyebrow">Unterstützungen</div><ul id="anaSup"><li>3.500–3.540</li><li>3.454–3.488 (Gap)</li><li>3.400</li><li>3.330</li></ul></div>
+    </div>
+    <p class="muted" id="anaNext">Die stündliche Erinnerung aktualisiert diese Analyse automatisch.</p>
+    <details>
+      <summary>Claude jetzt fragen</summary>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+        <label>Aktueller Kurs (aus NAGA)<input id="askPrice" inputmode="decimal" placeholder="3668,5"></label>
+        <button type="button" id="askBtn">Einschätzung holen</button>
+        <div class="ai-out" id="askOut" hidden></div>
+      </div>
+    </details>
+  </section>
+
+  <section class="card" aria-labelledby="planH">
+    <h2 id="planH">Tagesplan</h2>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Tag</th><th>Start</th><th>Lots</th><th>Trades</th><th>€/Trade</th><th>$/Trade</th><th>Tagesstopp</th><th>Notstopp</th><th>Ziel</th><th>Ist</th></tr></thead>
+        <tbody id="planBody"></tbody>
+      </table>
+    </div>
+    <p class="muted">Lots = volle Margin bei Hebel und Kurs aus den Einstellungen. $/Trade = nötige Kursbewegung pro Trade. Tagesstopp = Summe der Verluste, die einen Tagesgewinn kostet. Notstopp = harter Stopp kurz vor dem Stop-out. Oben im Status stehen die Werte für deinen echten Kontostand.</p>
+  </section>
+
+  <section class="card" aria-labelledby="setH">
+    <h2 id="setH">Einstellungen</h2>
+    <div class="grid3">
+      <label>Goldkurs $<input id="sPrice" inputmode="decimal"></label>
+      <label>EUR/USD<input id="sFx" inputmode="decimal"></label>
+      <label>Hebel 1:<input id="sLev" inputmode="numeric"></label>
+    </div>
+    <p class="muted">Daraus rechnet die App Lots, Bewegung und Stopps. Kurs ab und zu anpassen.</p>
+    <button type="button" id="saveSet">Einstellungen speichern</button>
+  </section>
+
+  <section class="card" aria-labelledby="histH">
+    <h2 id="histH">Verlauf</h2>
+    <div id="history"><p class="muted">Abgeschlossene Tage erscheinen hier mit Tagesergebnis.</p></div>
+  </section>
+
+  <p class="muted" style="text-align:center">Erinnerungen kommen stündlich als Push der Claude-App. Keine Anlageberatung.</p>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+const START=6000, GOAL=60000, DAYS=15, F=Math.pow(GOAL/START,1/DAYS);
+const TRADES=[15,14,13,12,12,11,10,10,9,9,9,8,8,8,8];
+const $=id=>document.getElementById(id);
+const eur=v=>new Intl.NumberFormat('de-DE',{maximumFractionDigits:0}).format(Math.round(v))+' €';
+const eurS=v=>(v>0?'+':'')+eur(v);
+const num=(v,d)=>new Intl.NumberFormat('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d}).format(v);
+const parse=s=>{if(s==null)return NaN;s=String(s).trim().replace(/\s/g,'');if(s.includes(',')){s=s.replace(/\./g,'').replace(',','.');}return parseFloat(s);};
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const planEnd=d=>START*Math.pow(F,d);
+
+let trades=[]; let settings={price:3668.5,fx:1.094,lev:20}; let dir='long';
+let db=null, uid=null, coll=null, useLocal=false;
+
+function toast(t){const el=$('toast');el.textContent=t;el.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>el.hidden=true,2200);}
+function lsGet(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def;}catch(e){return def;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+
+function state(){
+  const dates=[...new Set(trades.map(t=>t.date))].sort();
+  const td=today();
+  let dayIdx=dates.includes(td)?dates.indexOf(td)+1:dates.filter(d=>d<td).length+1;
+  dayIdx=Math.min(Math.max(dayIdx,1),DAYS);
+  const equity=START+trades.reduce((s,t)=>s+(t.pnl||0),0);
+  const todays=trades.filter(t=>t.date===td).sort((a,b)=>a.ts-b.ts);
+  const fx=settings.fx, price=settings.price, lev=settings.lev||20;
+  const marginPerLot=price*100/lev;
+  const lots=Math.max(0.01,Math.floor(equity*fx/marginPerLot*100)/100);
+  const margin=lots*marginPerLot;
+  const stopOut=(equity*fx-0.5*margin)/(lots*100);
+  const target=planEnd(dayIdx);
+  const need=Math.max(0,target-equity);
+  const planned=TRADES[dayIdx-1];
+  const left=Math.max(1,planned-todays.length);
+  const per=need/left;
+  const dayTarget=planEnd(dayIdx)-planEnd(dayIdx-1);
+  return {dates,dayIdx,equity,todays,lots,stopOut,target,need,planned,left,per,
+    move:per*fx/(lots*100), dayStop:dayTarget*fx/(lots*100), hardStop:Math.min(78,0.85*stopOut),
+    losses:todays.filter(t=>t.pnl<0).length};
+}
+
+function render(){
+  const s=state();
+  $('dayNo').textContent=s.dayIdx;
+  $('equity').textContent=eur(s.equity);
+  $('planEnd').textContent=eur(s.target);
+  $('progress').style.width=Math.min(100,Math.max(0,(Math.log(s.equity/START)/Math.log(GOAL/START))*100))+'%';
+  $('needToday').textContent=eur(s.need);
+  $('tradesLeft').textContent=Math.max(0,s.planned-s.todays.length);
+  $('perTrade').textContent=eur(s.per);
+  $('lots').textContent=num(s.lots,2);
+  $('movePerTrade').textContent=num(s.move,1)+' $';
+  $('lossesToday').textContent=s.losses+' / 3';
+  $('dayStop').textContent=num(s.dayStop,0)+' $';
+  $('hardStop').textContent=num(s.hardStop,0)+' $';
+  $('stopOut').textContent=num(s.stopOut,0)+' $';
+  $('lossWarn').hidden=s.losses<3;
+  const startOfDay=planEnd(s.dayIdx-1);
+  const pill=$('planPill');
+  const dm=$('doneMsg');
+  if(s.equity>=GOAL){pill.textContent='Ziel erreicht';pill.className='pill win';dm.hidden=false;dm.textContent='60.000 € erreicht. Gewinne sichern.';}
+  else if(s.need===0){pill.textContent='Tagesziel erreicht';pill.className='pill win';dm.hidden=false;dm.textContent='Tagesziel erreicht. Laut Plan ist für heute Schluss.';}
+  else if(s.equity>=startOfDay){pill.textContent='im Plan';pill.className='pill';dm.hidden=true;}
+  else{pill.textContent='hinter Plan '+eur(s.equity-startOfDay);pill.className='pill loss';dm.hidden=true;}
+  if(!$('fLots').value)$('fLots').placeholder=num(s.lots,2);
+  // today list
+  const tl=$('todayList');tl.textContent='';
+  if(!s.todays.length){const p=document.createElement('p');p.className='muted';p.textContent='Noch kein Trade heute. Dein erster Eintrag erscheint hier.';tl.appendChild(p);}
+  s.todays.forEach((t,i)=>tl.appendChild(tradeRow(t,i+1)));
+  const sum=s.todays.reduce((a,t)=>a+t.pnl,0);
+  $('todaySum').textContent=eurS(sum);$('todaySum').className='num '+(sum>0?'pnl-pos':sum<0?'pnl-neg':'muted');
+  renderPlan(s);renderHistory(s);
+}
+
+function tradeRow(t,n){
+  const r=document.createElement('div');r.className='trade';
+  const pill=document.createElement('span');pill.className='pill '+(t.dir==='long'?'win':'loss');pill.textContent=(t.dir==='long'?'L':'S')+' '+n;
+  const mid=document.createElement('div');mid.style.minWidth='0';
+  const p=document.createElement('div');p.className='num '+(t.pnl>=0?'pnl-pos':'pnl-neg');p.style.fontWeight='600';p.textContent=eurS(t.pnl);
+  const m=document.createElement('div');m.className='meta num';
+  const pts=(isFinite(t.entry)&&isFinite(t.exit))?(' · '+num(t.entry,1)+' → '+num(t.exit,1)):'';
+  const time=new Date(t.ts).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  m.textContent=time+' · '+num(t.lots||0,2)+' Lot'+pts+(t.note?' · '+t.note:'');
+  mid.append(p,m);
+  const del=document.createElement('button');del.type='button';del.className='del';del.textContent='Löschen';
+  del.addEventListener('click',()=>{
+    if(del.dataset.armed){removeTrade(t);return;}
+    del.dataset.armed='1';del.textContent='Sicher?';setTimeout(()=>{del.dataset.armed='';del.textContent='Löschen';},3000);
+  });
+  r.append(pill,mid,del);return r;
+}
+
+function renderPlan(s){
+  const body=$('planBody');body.textContent='';
+  const byDate={};trades.forEach(t=>{byDate[t.date]=(byDate[t.date]||0)+t.pnl;});
+  let eq=START;
+  for(let d=1;d<=DAYS;d++){
+    const st=planEnd(d-1), en=planEnd(d), per=Math.ceil((en-st)/TRADES[d-1]/10)*10;
+    const mpl=settings.price*100/(settings.lev||20);
+    const pl=Math.max(0.01,Math.floor(st*settings.fx/mpl*100)/100);
+    const so=(st*settings.fx-0.5*pl*mpl)/(pl*100);
+    const mv=per*settings.fx/(pl*100), ds=(en-st)*settings.fx/(pl*100), hs=Math.min(78,0.85*so);
+    const tr=document.createElement('tr');
+    if(d===s.dayIdx)tr.className='now';else if(d<s.dayIdx)tr.className='done';
+    let ist='–';
+    if(d<=s.dates.length){eq+=byDate[s.dates[d-1]]||0;ist=eur(eq);}
+    [d,eur(st),num(pl,2),TRADES[d-1],eur(per),num(mv,1)+' $',num(ds,0)+' $',num(hs,0)+' $',eur(en),ist].forEach((v,i)=>{const td=document.createElement('td');td.textContent=v;if(i)td.className='num';tr.appendChild(td);});
+    body.appendChild(tr);
+  }
+}
+
+function renderHistory(s){
+  const h=$('history');h.textContent='';
+  const past=s.dates.filter(d=>d!==today()).reverse();
+  if(!past.length){const p=document.createElement('p');p.className='muted';p.textContent='Abgeschlossene Tage erscheinen hier mit Tagesergebnis.';h.appendChild(p);return;}
+  past.forEach(d=>{
+    const ts=trades.filter(t=>t.date===d);const sum=ts.reduce((a,t)=>a+t.pnl,0);
+    const idx=s.dates.indexOf(d)+1;
+    const det=document.createElement('details');
+    const su=document.createElement('summary');
+    su.textContent='Tag '+idx+' · '+new Date(d+'T12:00').toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit'})+' · '+ts.length+' Trades · '+eurS(sum);
+    det.appendChild(su);
+    ts.sort((a,b)=>a.ts-b.ts).forEach((t,i)=>det.appendChild(tradeRow(t,i+1)));
+    h.appendChild(det);
+  });
+}
+
+// --- form ---
+function setDir(d){dir=d;$('dirLong').setAttribute('aria-pressed',d==='long');$('dirShort').setAttribute('aria-pressed',d==='short');calc();}
+$('dirLong').addEventListener('click',()=>setDir('long'));
+$('dirShort').addEventListener('click',()=>setDir('short'));
+let pnlManual=false;
+$('fPnl').addEventListener('input',()=>{pnlManual=$('fPnl').value.trim()!=='';});
+function calc(){
+  if(pnlManual)return;
+  const lots=parse($('fLots').value)||state().lots, en=parse($('fEntry').value), ex=parse($('fExit').value);
+  if(isFinite(en)&&isFinite(ex)){
+    const pts=(ex-en)*(dir==='long'?1:-1);
+    $('fPnl').value=num(pts*lots*100/settings.fx,2);
+  }
+}
+['fLots','fEntry','fExit'].forEach(id=>$(id).addEventListener('input',calc));
+$('tradeForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const s=state();
+  const lots=parse($('fLots').value)||s.lots;
+  const entry=parse($('fEntry').value), exit=parse($('fExit').value);
+  let pnl=parse($('fPnl').value);
+  if(!isFinite(pnl)&&isFinite(entry)&&isFinite(exit))pnl=(exit-entry)*(dir==='long'?1:-1)*lots*100/settings.fx;
+  if(!isFinite(pnl)){toast('Trag Einstieg und Ausstieg oder das Ergebnis in € ein.');return;}
+  const t={kind:'trade',dir,lots,entry:isFinite(entry)?entry:null,exit:isFinite(exit)?exit:null,pnl:Math.round(pnl*100)/100,note:$('fNote').value.trim().slice(0,120),date:today(),ts:Date.now()};
+  $('saveBtn').disabled=true;
+  try{await addTrade(t);['fEntry','fExit','fPnl','fNote'].forEach(id=>$(id).value='');pnlManual=false;toast(pnl>=0?'Gewinn gespeichert':'Verlust gespeichert');}
+  catch(err){toast('Speichern fehlgeschlagen. Bitte erneut versuchen.');}
+  finally{$('saveBtn').disabled=false;}
+});
+
+// --- settings ---
+function fillSettings(){$('sPrice').value=num(settings.price,1);$('sFx').value=num(settings.fx,4);$('sLev').value=settings.lev;}
+$('saveSet').addEventListener('click',async()=>{
+  const p=parse($('sPrice').value),f=parse($('sFx').value),l=parse($('sLev').value);
+  if(!(p>100&&f>0.5&&l>=1)){toast('Bitte gültige Werte eintragen.');return;}
+  settings={price:p,fx:f,lev:Math.round(l)};
+  lsSet('gs_settings',settings);
+  if(coll){try{await coll.doc('settings').set({kind:'settings',...settings});}catch(e){}}
+  render();toast('Einstellungen gespeichert');
+});
+
+// --- storage ---
+async function addTrade(t){
+  if(coll){await coll.doc('t'+t.ts).set(t);}
+  else{trades.push({...t,id:'t'+t.ts});lsSet('gs_trades',trades);render();}
+}
+async function removeTrade(t){
+  try{
+    if(coll){await coll.doc(t.id).delete();}
+    else{trades=trades.filter(x=>x.id!==t.id);lsSet('gs_trades',trades);render();}
+    toast('Trade gelöscht');
+  }catch(e){toast('Löschen fehlgeschlagen.');}
+}
+function startLocal(msg){
+  useLocal=true;trades=lsGet('gs_trades',[]);settings=lsGet('gs_settings',settings);
+  $('syncPill').textContent=msg;$('syncPill').className='pill loss';fillSettings();render();
+}
+
+// --- analysis ---
+function showAnalysis(a){
+  if(!a)return;
+  if(a.updatedAt){const d=new Date(a.updatedAt);if(!isNaN(d))$('anaTime').textContent='Stand '+d.toLocaleString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
+  if(a.bias)$('anaBias').textContent=String(a.bias);
+  if(typeof a.price==='number'){$('anaPrice').textContent='Kurs '+num(a.price,1)+' $';}
+  if(a.summary)$('anaSummary').textContent=String(a.summary);
+  if(a.next)$('anaNext').textContent=String(a.next);
+  const fill=(id,arr)=>{if(!Array.isArray(arr)||!arr.length)return;const ul=$(id);ul.textContent='';arr.slice(0,6).forEach(v=>{const li=document.createElement('li');li.textContent=String(v);ul.appendChild(li);});};
+  fill('anaRes',a.resistance);fill('anaSup',a.support);
+  if(typeof a.price==='number'&&a.price>100&&!$('askPrice').value)$('askPrice').placeholder=num(a.price,1);
+}
+
+async function boot(){
+  fillSettings();render();
+  if(!window.claude||!claude.use){startLocal('Nur auf diesem Gerät');return;}
+  const timer=setTimeout(()=>{if(!coll&&!useLocal)startLocal('Nur auf diesem Gerät');},10000);
+  try{
+    const [d,u]=await Promise.all([claude.use('db'),claude.use('user')]);
+    if(!d||!u){clearTimeout(timer);startLocal('Nur auf diesem Gerät');return;}
+    uid=await u.id();
+    if(!uid){clearTimeout(timer);startLocal('Nur auf diesem Gerät');return;}
+    db=d;coll=db.collection('data/users/'+uid);
+    coll.onSnapshot(snap=>{
+      clearTimeout(timer);
+      if(useLocal){useLocal=false;}
+      const list=[];
+      snap.docs.forEach(doc=>{const v=doc.data();if(!v)return;if(v.kind==='trade')list.push({...v,id:doc.id});else if(v.kind==='settings'){settings={price:+v.price||settings.price,fx:+v.fx||settings.fx,lev:+v.lev||settings.lev};fillSettings();}});
+      trades=list;
+      $('syncPill').textContent='Synchronisiert';$('syncPill').className='pill win';
+      render();
+    },()=>{clearTimeout(timer);startLocal('Offline · nur lokal');});
+    db.doc('analysis/latest').onSnapshot(s=>{if(s.exists)showAnalysis(s.data());},()=>{});
+  }catch(e){clearTimeout(timer);startLocal('Nur auf diesem Gerät');}
+  initAsk();
+}
+
+async function initAsk(){
+  let sample=null;
+  try{sample=await claude.use('sample');}catch(e){}
+  if(!sample){$('askBtn').disabled=true;$('askBtn').textContent='Auf diesem Gerät nicht verfügbar';return;}
+  let ctrl=null;
+  $('askBtn').addEventListener('click',async()=>{
+    const s=state();
+    const price=parse($('askPrice').value)||parse($('askPrice').placeholder)||settings.price;
+    const out=$('askOut');out.hidden=false;out.textContent='Claude denkt nach …';
+    if(ctrl)ctrl.abort();ctrl=new AbortController();
+    const levels='Widerstände: '+[...$('anaRes').children].map(l=>l.textContent).join(', ')+'. Unterstützungen: '+[...$('anaSup').children].map(l=>l.textContent).join(', ')+'.';
+    const prompt='Du bist ein knapper Trading-Assistent für XAUUSD (Gold). Antworte auf Deutsch, höchstens 8 kurze Zeilen, ohne Disclaimer-Floskeln.\n'+
+      'Aktueller Kurs laut Nutzer: '+price+' $. Letzte Analyse: '+$('anaSummary').textContent+' '+levels+'\n'+
+      'Nutzer-Plan: Tag '+s.dayIdx+' von 15, Konto '+Math.round(s.equity)+' €, heute noch '+Math.round(s.need)+' € nötig, '+s.left+' Trades übrig, Ziel pro Trade ca. '+s.move.toFixed(1)+' $ Bewegung bei '+s.lots.toFixed(2)+' Lot. Verluste heute: '+s.losses+'.\n'+
+      'Gib: 1) Bias jetzt (Long/Short/abwarten) relativ zu den Zonen, 2) konkrete Einstiegszone, 3) Ziel und Stopp in $, 4) woran die Idee ungültig wird. Du hast keine Live-Daten außer dem genannten Kurs; sag das in einem halben Satz.';
+    try{const r=await sample(prompt,{signal:ctrl.signal,modelTier:'default',onText:({text})=>{out.textContent=text;}});out.textContent=r.text;}
+    catch(e){out.textContent=e&&e.code==='rate_limited'?'Gerade zu viele Anfragen. Versuch es in ein paar Minuten erneut.':e&&e.code==='not_granted'?'Zugriff auf Claude wurde nicht erlaubt.':'Keine Antwort erhalten. Versuch es erneut.';}
+  });
+}
+
+boot();
+})();
+</script>
