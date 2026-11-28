@@ -111,6 +111,18 @@ tr.done td{color:var(--muted)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:99px;font-size:.88rem;font-weight:600;z-index:20;white-space:nowrap}
 @media (max-width:360px){.hero{grid-template-columns:1fr}.ring{margin:0 auto}}
 @media (prefers-reduced-motion:reduce){.goalbar i,.daybar i{transition:none}}
+
+.fb{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(20px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.fb-card{background:var(--card);border-radius:24px;padding:24px 22px;max-width:380px;width:100%;display:flex;flex-direction:column;gap:12px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.25);animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
+.fb-card.warn{border:2px solid var(--loss)}
+.fb-card.win{border:2px solid var(--win)}
+.fb-icon{font-size:2.6rem;line-height:1}
+.fb-title{font-family:var(--display);font-size:1.3rem;font-weight:700;margin:0;text-wrap:balance}
+.fb-text{margin:0;color:var(--muted);font-size:.95rem}
+.fb-btn{font:inherit;font-family:var(--display);font-weight:600;font-size:1rem;padding:14px;border:0;border-radius:14px;cursor:pointer;background:var(--fg);color:var(--bg)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:31}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.fb-card{animation:none}}
 </style>
 
 <div class="wrap">
@@ -210,6 +222,16 @@ tr.done td{color:var(--muted)}
   <p class="muted" style="text-align:center;margin:0">Stündliche Erinnerung kommt per Push der Claude-App. Keine Anlageberatung.</p>
 </div>
 <div class="toast" id="toast" hidden></div>
+<canvas id="confetti" hidden></canvas>
+<div class="fb" id="fb" hidden role="dialog" aria-modal="true" aria-labelledby="fbTitle">
+  <div class="fb-card" id="fbCard">
+    <div class="fb-icon" id="fbIcon" aria-hidden="true"></div>
+    <p class="fb-title" id="fbTitle"></p>
+    <p class="fb-text" id="fbText"></p>
+    <button class="fb-btn" type="button" id="fbOk">Weiter</button>
+  </div>
+</div>
+
 
 <script>
 (function(){
@@ -336,13 +358,64 @@ async function add(sign){
   try{
     if(coll)await coll.doc('t'+t.ts).set(t);
     else{trades.push({...t,id:'t'+t.ts});lsSet('gs_trades',trades);render();}
-    $('amt').value='';toast(sign>0?'Gewinn '+eur(v)+' gespeichert':'Verlust '+eur(v)+' gespeichert');
+    $('amt').value='';feedback(t);
   }catch(e){toast('Speichern fehlgeschlagen. Nochmal versuchen.');}
   finally{$('btnWin').disabled=$('btnLoss').disabled=false;}
 }
 async function del(t){
   try{if(coll)await coll.doc(t.id).delete();else{trades=trades.filter(x=>x.id!==t.id);lsSet('gs_trades',trades);render();}toast('Gelöscht');}
   catch(e){toast('Löschen fehlgeschlagen.');}
+}
+
+// --- Motivation & Overtrading ---
+const WIN_MSG=[
+ ['Sauber getradet!','Plan eingehalten, Gewinn mitgenommen. Genau so.'],
+ ['Stark!','Ein Trade nach dem anderen. Du baust das Konto Stein für Stein.'],
+ ['Treffer!','Disziplin zahlt sich aus. Bleib bei deinem Setup.'],
+ ['Läuft!','Kleine Gewinne, konsequent mitgenommen, ergeben große Zahlen.'],
+ ['Gut gemacht!','Nicht gierig werden. Der nächste Trade kommt, wenn das Setup kommt.'],
+ ['Weiter so!','Du hältst dich an den Plan. Das ist der eigentliche Gewinn.']
+];
+function showFb(kind,icon,title,text,btn){
+  $('fbCard').className='fb-card '+kind;$('fbIcon').textContent=icon;$('fbTitle').textContent=title;$('fbText').textContent=text;$('fbOk').textContent=btn||'Weiter';
+  $('fb').hidden=false;setTimeout(()=>$('fbOk').focus(),50);
+}
+$('fbOk').addEventListener('click',()=>{$('fb').hidden=true;});
+$('fb').addEventListener('click',e=>{if(e.target.id==='fb')$('fb').hidden=true;});
+function confetti(){
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const c=$('confetti'),x=c.getContext('2d');c.hidden=false;
+  const W=c.width=innerWidth*devicePixelRatio,H=c.height=innerHeight*devicePixelRatio;
+  const cs=getComputedStyle(document.documentElement),cols=[cs.getPropertyValue('--gold').trim()||'#e8b94c',cs.getPropertyValue('--win').trim()||'#46d18f','#f5d27e','#ffffff'];
+  const ps=Array.from({length:120},()=>({x:W/2+(Math.random()-.5)*W*.3,y:H*.45,vx:(Math.random()-.5)*W*.022,vy:-Math.random()*H*.022-H*.006,r:(4+Math.random()*6)*devicePixelRatio,c:cols[Math.random()*cols.length|0],a:Math.random()*6,va:(Math.random()-.5)*.3}));
+  let f=0;(function tick(){x.clearRect(0,0,W,H);ps.forEach(p=>{p.vy+=H*.0009;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore();});
+    if(++f<110)requestAnimationFrame(tick);else{x.clearRect(0,0,W,H);c.hidden=true;}})();
+}
+function feedback(t){
+  const all=trades.some(x=>x.ts===t.ts)?trades.slice():trades.concat([t]);
+  const td=today(),tt=all.filter(x=>x.date===td).sort((a,b)=>a.ts-b.ts);
+  const s=st(),planned=TRADES[s.day-1];
+  const prev=tt.length>1?tt[tt.length-2]:null;
+  const gapMin=prev?(t.ts-prev.ts)/60000:999;
+  const last15=tt.filter(x=>t.ts-x.ts<=15*60000).length;
+  const lossesInRow=(()=>{let n=0;for(let i=tt.length-1;i>=0&&tt[i].pnl<0;i--)n++;return n;})();
+  const losses=tt.filter(x=>x.pnl<0).length;
+  const daySum=tt.reduce((a,x)=>a+x.pnl,0);
+  const goal=planEnd(s.day)-planEnd(s.day-1);
+  // warnings first: they matter more than praise
+  if(t.pnl<0&&lossesInRow>=2){showFb('warn','✋',lossesInRow+' Verluste in Folge','Mach jetzt 15 Minuten Pause. Nicht versuchen, das sofort zurückzuholen. Der Markt läuft dir nicht weg.','Ok, ich mache Pause');return;}
+  if(losses>=3){showFb('warn','🛑','3 Verluste heute','Laut Plan ist für heute Schluss. Morgen ist ein neuer Tag mit frischem Kopf.','Verstanden');return;}
+  if(last15>=4){showFb('warn','⚠️','Overtrading-Gefahr',last15+' Trades in 15 Minuten. Das ist zu schnell. Atme durch und warte auf ein sauberes Setup.','Ok, langsamer');return;}
+  if(tt.length>planned){showFb('warn','📊','Mehr Trades als geplant','Heute sind '+planned+' Trades geplant, du bist bei '+tt.length+'. Mehr Trades heißt nicht mehr Gewinn. Lieber aufhören, solange es gut ist.','Verstanden');return;}
+  if(gapMin<3&&tt.length>1){showFb('warn','⏱️','Kurz durchatmen','Nur '+Math.max(1,Math.round(gapMin))+' Minute'+(gapMin>=1.5?'n':'')+' seit dem letzten Trade. Prüf das Setup, bevor du wieder einsteigst.','Ok');return;}
+  if(t.pnl<0){if(navigator.vibrate)navigator.vibrate([20,40,20]);return;}
+  // wins
+  if(navigator.vibrate)navigator.vibrate([15,30,15]);
+  confetti();
+  if(daySum>=goal){showFb('win','🏆','Tagesziel geschafft!','+'+eur(daySum)+' heute. Für heute ist Schluss. Gewinn sichern, Plattform zu, morgen geht es weiter.','Feierabend');return;}
+  const m=WIN_MSG[Math.random()*WIN_MSG.length|0];
+  const rest=Math.max(0,goal-daySum);
+  showFb('win','💰',m[0],m[1]+' Noch '+eur(rest)+' bis zum Tagesziel.','Weiter');
 }
 $('btnWin').addEventListener('click',()=>add(1));
 $('btnLoss').addEventListener('click',()=>add(-1));
