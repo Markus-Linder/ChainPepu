@@ -124,6 +124,17 @@ tr.done td{color:var(--muted)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:99px;font-size:.88rem;font-weight:600;z-index:20;white-space:nowrap}
 @media (max-width:360px){.hero{grid-template-columns:1fr}.ring{margin:0 auto}}
 @media (prefers-reduced-motion:reduce){.goalbar i,.daybar i{transition:none}}
+
+.checks{display:flex;flex-direction:column;gap:8px}
+.ck{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;padding:11px 12px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.ck i{flex:none;width:24px;height:24px;border-radius:8px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;font-size:.9rem;color:transparent}
+.ck[aria-pressed="true"]{border-color:var(--win);background:var(--win-soft)}
+.ck[aria-pressed="true"] i{background:var(--win);border-color:var(--win);color:var(--card)}
+.ck b{font-weight:600;font-size:.9rem;display:block}
+.ck small{color:var(--muted);font-size:.76rem;display:block}
+.aset{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.linkbtn{font:inherit;font-size:.8rem;background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;padding:4px;align-self:center}
+.rate{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 </style>
 </head>
 <body>
@@ -168,6 +179,12 @@ tr.done td{color:var(--muted)}
       <div class="stat"><b id="dayStop">−995 €</b><span>Tagesstopp</span></div>
       <div class="stat"><b id="hardStop">78 $</b><span>Notstopp</span></div>
     </div>
+    <div class="rate">
+      <div class="stat"><b id="rToday">–</b><span>Treffer heute</span></div>
+      <div class="stat"><b id="rAll">–</b><span>Treffer gesamt</span></div>
+      <div class="stat"><b id="rA">–</b><span>Treffer A-Setups</span></div>
+    </div>
+    <p class="muted" id="rNote" style="margin:0">Für den Plan nötig: etwa 85 % Treffer.</p>
     <div class="banner gold" id="bannerLots" hidden></div>
     <div class="banner win" id="bannerWin" hidden>Tagesziel erreicht. Für heute Schluss.</div>
     <div class="banner loss" id="bannerLoss" hidden>Tagesstopp erreicht. Für heute Schluss.</div>
@@ -175,12 +192,22 @@ tr.done td{color:var(--muted)}
 
   <section class="card" aria-labelledby="entryH">
     <h2 id="entryH">Trade eintragen</h2>
-    <label class="amount" for="amt"><input id="amt" inputmode="decimal" placeholder="70" autocomplete="off" aria-label="Betrag in Euro"><span>€</span></label>
+    <div class="aset"><span class="label">A-Setup-Check</span><span class="pill" id="sessPill">Session</span></div>
+    <div class="checks" id="checks">
+      <button type="button" class="ck" aria-pressed="false" data-k="trend"><i>✓</i><span><b>4h-Trend klar</b><small>Nur in diese Richtung handeln</small></span></button>
+      <button type="button" class="ck" aria-pressed="false" data-k="zone"><i>✓</i><span><b>Kurs in einer Zone</b><small>Support / Resistance aus der Analyse, Limit-Order</small></span></button>
+      <button type="button" class="ck" aria-pressed="false" data-k="trigger"><i>✓</i><span><b>Bestätigung im 5-Minuten-Chart</b><small>Ablehnungsdocht oder Engulfing in Trendrichtung</small></span></button>
+      <button type="button" class="ck" aria-pressed="false" data-k="time"><i>✓</i><span><b>Gute Zeit, keine News</b><small>London 9–11 · New York 14:30–17 · nicht ±15 min um US-Daten</small></span></button>
+    </div>
+    <p class="muted" style="margin:0">Im Trade: bei +1 $ Stopp auf Einstand ziehen.</p>
+        <label class="amount" for="amt"><input id="amt" inputmode="decimal" placeholder="70" autocomplete="off" aria-label="Betrag in Euro"><span>€</span></label>
     <div class="chips" id="chips"></div>
     <div class="btns">
       <button class="big win" type="button" id="btnWin">+ Gewinn</button>
       <button class="big loss" type="button" id="btnLoss">− Verlust</button>
     </div>
+    <button type="button" class="linkbtn" id="btnNoA">Trade ohne A-Setup eintragen</button>
+    <div class="btns" id="noA" hidden><button class="chip" type="button" id="noAWin">+ Gewinn (ohne A)</button><button class="chip" type="button" id="noALoss">− Verlust (ohne A)</button></div>
   </section>
 
   <section class="card" aria-labelledby="listH">
@@ -288,6 +315,7 @@ function render(){
   $('dayBar').style.width=Math.min(100,Math.max(0,s.daySum/s.dayGoal*100))+'%';
   $('perTrade').textContent=eur(s.per);$('left').textContent=s.left;$('lots').textContent=fmt(s.lots,2);
   $('losses').textContent=s.losses+' / 3';
+  rates();
   $('lotsSub').textContent='Lots · +0,01 ab '+eur(s.nextEq);
   const up=Math.round((s.lots-s.lotsStart)*100)/100;
   $('bannerLots').hidden=!(up>0);
@@ -339,12 +367,44 @@ function hist(s){
 function add(sign){
   const v=parse($('amt').value)||parse($('amt').placeholder);
   if(!(v>0)){toast('Bitte einen Betrag eingeben.');return;}
-  const ts=Date.now();trades.push({id:'t'+ts,kind:'trade',pnl:Math.round(sign*v*100)/100,date:today(),ts});save();
+  const ts=Date.now();trades.push({id:'t'+ts,kind:'trade',a:ASET,pnl:Math.round(sign*v*100)/100,date:today(),ts});save();
   $('amt').value='';render();toast(sign>0?'Gewinn '+eur(v)+' gespeichert':'Verlust '+eur(v)+' gespeichert');
   if(navigator.vibrate)navigator.vibrate(15);
 }
-$('btnWin').addEventListener('click',()=>add(1));
-$('btnLoss').addEventListener('click',()=>add(-1));
+$('btnWin').addEventListener('click',()=>tryAdd(1,false));
+$('btnLoss').addEventListener('click',()=>tryAdd(-1,false));
+$('btnNoA').addEventListener('click',()=>{$('noA').hidden=!$('noA').hidden;});
+$('noAWin').addEventListener('click',()=>{tryAdd(1,true);$('noA').hidden=true;});
+$('noALoss').addEventListener('click',()=>{tryAdd(-1,true);$('noA').hidden=true;});
+// --- A-Setup check ---
+const ckBtns=[...document.querySelectorAll('#checks .ck')];
+ckBtns.forEach(b=>b.addEventListener('click',()=>{b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');gate();}));
+const allChecked=()=>ckBtns.every(b=>b.getAttribute('aria-pressed')==='true');
+function gate(){const ok=allChecked();$('btnWin').style.opacity=ok?'':'0.45';$('btnLoss').style.opacity=ok?'':'0.45';}
+function resetChecks(){ckBtns.forEach(b=>b.setAttribute('aria-pressed','false'));gate();}
+function session(){
+  const d=new Date(),m=d.getHours()*60+d.getMinutes(),wd=d.getDay(),p=$('sessPill');
+  let t='Außerhalb der Hauptzeiten',c='pill';
+  if(wd===0||wd===6){t='Wochenende · Markt zu';}
+  else if(m>=540&&m<660){t='London-Session';c='pill win';}
+  else if(m>=870&&m<1020){t='New-York-Session';c='pill win';}
+  p.textContent=t;p.className=c;
+}
+session();setInterval(session,60000);gate();
+let ASET=false;
+function tryAdd(sign,force){
+  if(!force&&!allChecked()){toast('Erst alle 4 Punkte abhaken oder unten „ohne A-Setup“ wählen.');return;}
+  ASET=!force;add(sign);resetChecks();
+}
+function rates(){
+  const pct=a=>a.length?Math.round(a.filter(t=>t.pnl>0).length/a.length*100):null;
+  const td=today(),tt=trades.filter(t=>t.date===td),aa=trades.filter(t=>t.a===true);
+  const set=(id,v)=>{const e=$(id);e.textContent=v==null?'–':v+' %';e.className=v==null?'':(v>=85?'pos':v>=64?'':'neg');};
+  set('rToday',pct(tt));set('rAll',pct(trades));set('rA',pct(aa));
+  const all=pct(trades),n=$('rNote');
+  n.textContent=all==null?'Für den Plan nötig: etwa 85 % Treffer.':all>=85?'Du liegst über den nötigen 85 %.':all>=64?'Über der Gewinnschwelle (64 %), aber unter den 85 % für den Plan.':'Unter der Gewinnschwelle von 64 %. Weniger, aber nur A-Setups handeln.';
+}
+
 $('saveLev').addEventListener('click',()=>{const l=Math.round(parse($('lev').value));if(!(l>=1&&l<=1000)){toast('Hebel zwischen 1 und 1000.');return;}lev=l;lsSet('gs_lev',lev);render();toast('Hebel gespeichert');});
 
 // backup
@@ -356,7 +416,7 @@ $('bkCopy').addEventListener('click',async()=>{
 $('bkShow').addEventListener('click',()=>{$('bkBox').hidden=false;$('bkText').value='';$('bkText').focus();});
 $('bkLoad').addEventListener('click',()=>{
   try{const o=JSON.parse($('bkText').value);if(!o||!Array.isArray(o.trades))throw 0;
-    trades=o.trades.filter(t=>typeof t.pnl==='number'&&typeof t.date==='string').map(t=>({id:t.id||'t'+t.ts,kind:'trade',pnl:t.pnl,date:t.date,ts:+t.ts||Date.now()}));
+    trades=o.trades.filter(t=>typeof t.pnl==='number'&&typeof t.date==='string').map(t=>({id:t.id||'t'+t.ts,kind:'trade',a:ASET,pnl:t.pnl,date:t.date,ts:+t.ts||Date.now()}));
     if(+o.lev>0){lev=+o.lev;lsSet('gs_lev',lev);$('lev').value=lev;}
     save();render();$('bkBox').hidden=true;toast('Sicherung geladen');}
   catch(e){toast('Das ist keine gültige Sicherung.');}
