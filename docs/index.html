@@ -206,7 +206,7 @@ tr.done td{color:var(--muted)}
       <summary>15-Tage-Plan</summary>
       <div class="tablebox">
         <table>
-          <thead><tr><th>Tag</th><th>Lots</th><th>Trades</th><th>€/Trade</th><th>Ziel</th><th>Ist</th></tr></thead>
+          <thead><tr><th>Tag</th><th>Lots Start → Ende</th><th>Trades</th><th>€/Trade</th><th>$/Trade</th><th>Ziel</th><th>Ist</th></tr></thead>
           <tbody id="planBody"></tbody>
         </table>
       </div>
@@ -319,10 +319,10 @@ function plan(s){
   const b=$('planBody');b.textContent='';const by={};trades.forEach(t=>by[t.date]=(by[t.date]||0)+t.pnl);
   let eq=START;const mpl=price*100/lev;
   for(let d=1;d<=DAYS;d++){
-    const a=planEnd(d-1),e=planEnd(d),per=Math.ceil((e-a)/TRADES[d-1]/10)*10,pl=Math.floor(a*FX/mpl*100)/100;
+    const a=planEnd(d-1),e=planEnd(d),per=Math.ceil((e-a)/TRADES[d-1]/10)*10,lf=q=>Math.max(0.01,Math.floor(q*FX/mpl*100)/100),pl=lf(a),pe=lf(a+per*(TRADES[d-1]-1));
     let ist='–';if(d<=s.dates.length){eq+=by[s.dates[d-1]]||0;ist=eur(eq);}
     const tr=document.createElement('tr');if(d===s.day)tr.className='now';else if(d<s.day)tr.className='done';
-    [d,fmt(pl,2),TRADES[d-1],eur(per),eur(e),ist].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td);});
+    [d,fmt(pl,2)+' → '+fmt(pe,2),TRADES[d-1],eur(per),fmt(per*FX/(pl*100),1)+' → '+fmt(per*FX/(pe*100),1),eur(e),ist].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td);});
     b.appendChild(tr);
   }
 }
